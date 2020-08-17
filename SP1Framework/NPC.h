@@ -10,7 +10,5 @@ public:
     NPC();
     ~NPC();
     bool isHostile();
-
-
 };
 

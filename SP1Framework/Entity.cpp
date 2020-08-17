@@ -46,23 +46,23 @@ void Entity::set_pos()
 	switch (direction)
 	{
 	case UP:
-		pos.set_y(pos.get_y() + 0.1);
+		pos.set_y(pos.get_y() + 0.01);
 		break;
 	case DOWN:
-		pos.set_y(pos.get_y() - 0.1);
+		pos.set_y(pos.get_y() - 0.01);
 		break;
 	case LEFT:
-		pos.set_x(pos.get_x() - 0.1);
+		pos.set_x(pos.get_x() - 0.01);
 		break;
 	case RIGHT:
-		pos.set_x(pos.get_x() + 0.1);
+		pos.set_x(pos.get_x() + 0.01);
 		break;
 	default:
 		break;
 	}
 }
 
-void Entity::set_pos(int xx, int yy)
+void Entity::set_pos(float xx, float yy)
 {
 	pos.set_x(xx);
 	pos.set_y(yy);

@@ -1,3 +1,4 @@
+
 #ifndef _GAME_H
 #define _GAME_H
 
@@ -34,7 +35,6 @@ enum EKEYS
     K_SPACE,
     K_COUNT
 };
-
 // Enumeration for the different screen states
 enum EGAMESTATES
 {
@@ -72,6 +72,10 @@ void renderInputEvents();   // renders the status of input events
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent);      // define this function for the console to call when there are mouse events
+void buttonHoldPress(EKEYS key);
+void buttonHoldRelease(EKEYS key); 
+int getButtonHold();
+
 
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 

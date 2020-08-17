@@ -161,8 +161,35 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     if (key != K_COUNT)
     {
         g_skKeyEvent[key].keyDown = keyboardEvent.bKeyDown;
+        if (g_skKeyEvent[key].keyDown)
+            buttonHoldPress(key);
         g_skKeyEvent[key].keyReleased = !keyboardEvent.bKeyDown;
+        if (g_skKeyEvent[key].keyReleased)
+            buttonHoldRelease(key);
     }    
+}
+bool heldKey[6] = {false, false, false, false, false, false};
+void buttonHoldPress(EKEYS key)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        heldKey[i] = (i == key) ? true : false;
+    }
+}
+void buttonHoldRelease(EKEYS key)
+{
+    heldKey[key] = false;
+}
+int getButtonHold()
+{
+    for (int i = 0; i < 6; i++)
+    {
+        if (heldKey[i] == true)
+        {
+            return i;
+        }
+    }
+    return 7;
 }
 
 //--------------------------------------------------------------
@@ -231,22 +258,22 @@ void moveCharacter()
 {    
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyReleased && g_sChar.m_cLocation.Y > 0)
+    if (getButtonHold() == K_UP && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y--;       
     }
-    if (g_skKeyEvent[K_LEFT].keyReleased && g_sChar.m_cLocation.X > 0)
+    if (getButtonHold() == K_LEFT && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X--;        
     }
-    if (g_skKeyEvent[K_DOWN].keyReleased && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (getButtonHold() == K_DOWN && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y++;        
     }
-    if (g_skKeyEvent[K_RIGHT].keyReleased && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (getButtonHold() == K_RIGHT && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X++;        
@@ -440,9 +467,5 @@ void renderInputEvents()
         break;
     default:        
         break;
-    }
-    
+    }   
 }
-
-
-

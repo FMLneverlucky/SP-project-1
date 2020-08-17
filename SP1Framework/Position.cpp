@@ -5,22 +5,22 @@ Position::Position():x(0), y(0)
 
 }
 
-int Position::get_x()
+float Position::get_x()
 {
 	return x;
 }
 
-int Position::get_y()
+float Position::get_y()
 {
 	return y;
 }
 
-void Position::set_x(int newx)
+void Position::set_x(float newx)
 {
 	x = newx;
 }
 
-void Position::set_y(int newy)
+void Position::set_y(float newy)
 {
 	y = newy;
 }

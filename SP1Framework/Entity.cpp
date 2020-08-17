@@ -46,16 +46,16 @@ void Entity::set_pos()
 	switch (direction)
 	{
 	case UP:
-		pos.set_y(pos.get_y() + 1);
+		pos.set_y(pos.get_y() + 0.1);
 		break;
 	case DOWN:
-		pos.set_y(pos.get_y() - 1);
+		pos.set_y(pos.get_y() - 0.1);
 		break;
 	case LEFT:
-		pos.set_x(pos.get_x() - 1);
+		pos.set_x(pos.get_x() - 0.1);
 		break;
 	case RIGHT:
-		pos.set_x(pos.get_x() + 1);
+		pos.set_x(pos.get_x() + 0.1);
 		break;
 	default:
 		break;

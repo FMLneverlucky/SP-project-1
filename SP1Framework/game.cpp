@@ -23,6 +23,7 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 Entity* ptr[10] = { new Player, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
+
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
 
@@ -51,6 +52,8 @@ void init( void )
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
+
+    spawnNPC(false, 2);
 
 }
 
@@ -267,9 +270,11 @@ void splashScreenWait()    // waits for time to pass in splash screen
 
 void updateGame()       // gameplay logic
 {
+    
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     moveCharacter();    // moves the character, collision detection, physics, etc
                         // sound can be played here too.
+    
 }
 
 void moveCharacter()
@@ -313,6 +318,8 @@ void moveCharacter()
     ptr[0]->set_pos();
     g_sChar.m_cLocation.Y = ptr[0]->getposy();
     g_sChar.m_cLocation.X = ptr[0]->getposx();
+
+    moveall();
     
 
 }
@@ -394,7 +401,20 @@ void renderMap()
         c.Y = i + 1;
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
+        
     }
+
+    for (int i = 1; i < 10; i++)
+    {
+        if (ptr[i] != nullptr)
+        {
+            COORD c;
+            c.X = ptr[i]->getposx();
+            c.Y = ptr[i]->getposy();
+            renderNPC(c);
+        }
+    }
+    
 }
 
 void renderCharacter()
@@ -502,6 +522,11 @@ void renderInputEvents()
     }   
 }
 
+void renderNPC(COORD c)
+{
+    g_Console.writeToBuffer(c, " ", 0xF6);
+}
+
 void spawnNPC(bool isPolice, int no)
 {
     for (int i = 0; i < no; i++)
@@ -514,7 +539,7 @@ void spawnNPC(bool isPolice, int no)
             xxx = rand() % 80;
             yyy = rand() % 24;
 
-        } while (false);
+        } while (false); //while pos is not avail
 
         for (int i = 0; i < 10; i++)
         {
@@ -532,30 +557,33 @@ void spawnNPC(bool isPolice, int no)
                 break;
             }
         }
+        COORD c;
+        c.X = xxx;
+        c.Y = yyy;
+        //renderNPC(c);
+        
     }
 }
 
 void moveall()
 {
-    COORD c;
+    
     
     for (int i = 1; i < 10; i++)
     {
         if (ptr[i] != nullptr)
         {
-            c.X = ptr[i]->getposx();
-            c.Y = ptr[i]->getposy();
-            g_Console.writeToBuffer(c, " ", 0x09);
-
-            if (ptr[i]->get_count() != 20)
+            //int a = ptr[i]->get_count();
+            //a = a;
+            if (ptr[i]->get_count() != 100)
             {
                 ptr[i]->set_count(ptr[i]->get_count() + 1);
             }
             else
             {
-                c.X = ptr[i]->getposx();
+               /* c.X = ptr[i]->getposx();
                 c.Y = ptr[i]->getposy();
-                g_Console.writeToBuffer(c, " ", 0x09);
+                g_Console.writeToBuffer(c, "", 0x09);*/
 
                 ptr[i]->set_count(0);
 
@@ -578,15 +606,11 @@ void moveall()
                     break;
                 }
 
-                ptr[i]->set_pos(0.5);
-                c.X = ptr[i]->getposx();
-                c.Y = ptr[i]->getposy();
-                g_Console.writeToBuffer(c, " ", 0x09);
             }
-            
-               
 
-            g_Console.writeToBuffer(c, " ", 0x09);
+            ptr[i]->set_pos(0.1);
+    
+               
         }
         
     }

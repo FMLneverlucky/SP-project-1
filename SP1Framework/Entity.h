@@ -15,7 +15,7 @@ class Entity
 private:
 	direction direction = NOT;
 	Position pos;
-	int counter;
+	int counter = 0;
 public:
 	Entity();
 	~Entity();

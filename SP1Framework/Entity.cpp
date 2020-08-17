@@ -46,16 +46,28 @@ void Entity::set_pos()
 	switch (direction)
 	{
 	case UP:
-		pos.set_y(pos.get_y() - 0.1);
+		if (pos.get_y() > 0)
+		{
+			pos.set_y(pos.get_y() - 0.1);
+		}
 		break;
 	case DOWN:
-		pos.set_y(pos.get_y() + 0.1);
+		if (pos.get_y() < 24)
+		{
+			pos.set_y(pos.get_y() + 0.1);
+		}
 		break;
 	case LEFT:
-		pos.set_x(pos.get_x() - 0.2);
+		if (pos.get_x() > 0)
+		{
+			pos.set_x(pos.get_x() - 0.2);
+		}
 		break;
 	case RIGHT:
-		pos.set_x(pos.get_x() + 0.2);
+		if (pos.get_x() < 79)
+		{
+			pos.set_x(pos.get_x() + 0.2);
+		}
 		break;
 	case NOT:
 		break;
@@ -67,16 +79,28 @@ void Entity::set_pos(float speed)
 	switch (direction)
 	{
 	case UP:
-		pos.set_y(pos.get_y() - (0.1 * speed));
+		if (pos.get_y() > 0)
+		{
+			pos.set_y(pos.get_y() - (0.1 * speed));
+		}
 		break;
 	case DOWN:
-		pos.set_y(pos.get_y() + (0.1 * speed));
+		if (pos.get_y() < 24)
+		{
+			pos.set_y(pos.get_y() + (0.1 * speed));
+		}
 		break;
 	case LEFT:
-		pos.set_x(pos.get_x() - (0.2 * speed));
+		if (pos.get_x() > 0)
+		{
+			pos.set_x(pos.get_x() - (0.2 * speed));
+		}
 		break;
 	case RIGHT:
-		pos.set_x(pos.get_x() + (0.2 * speed));
+		if (pos.get_x() < 79)
+		{
+			pos.set_x(pos.get_x() + (0.2 * speed));
+		}
 		break;
 	case NOT:
 		break;
@@ -91,7 +115,7 @@ void Entity::set_pos(float xx, float yy)
 
 void Entity::set_count(int a)
 {
-	counter++;
+	counter = a;
 }
 
 int Entity::get_count()

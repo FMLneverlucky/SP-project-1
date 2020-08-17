@@ -67,3 +67,13 @@ void Entity::set_pos(float xx, float yy)
 	pos.set_x(xx);
 	pos.set_y(yy);
 }
+
+void Entity::set_count(int a)
+{
+	counter++;
+}
+
+int Entity::get_count()
+{
+	return counter;
+}

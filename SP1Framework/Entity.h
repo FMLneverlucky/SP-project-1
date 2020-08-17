@@ -15,6 +15,7 @@ class Entity
 private:
 	direction direction = NOT;
 	Position pos;
+	int counter;
 public:
 	Entity();
 	~Entity();
@@ -23,5 +24,7 @@ public:
 	void set_pos(float xx, float yy);
 	int getposx();
 	int getposy();
+	void set_count(int a);
+	int get_count();
 };
 

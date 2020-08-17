@@ -6,9 +6,11 @@ class NPC :
 private:
     bool angry;
     bool dead;
+    
 public:
     NPC();
     ~NPC();
     bool isHostile();
+    
 };
 

@@ -7,6 +7,7 @@ private:
 
 public:
 	Position();
+	Position(int x, int y);
 	float get_x(void);
 	float get_y(void);
 	void set_x(float newx);

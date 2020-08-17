@@ -502,53 +502,92 @@ void renderInputEvents()
     }   
 }
 
-//void spawnNPC(bool isPolice, int no)
-//{
-//    for (int i = 0; i < no; i++)
-//    {
-//        int xxx;
-//        int yyy;
-//        srand(time(NULL));
-//        do
-//        {
-//            xxx = rand() % 80;
-//            yyy = rand() % 24;
-//
-//        } while (false);
-//
-//        for (int i = 0; i < 10; i++)
-//        {
-//            if (ptr[i] == nullptr)
-//            {
-//                if (isPolice)
-//                {
-//                    ptr[i] = new Police;
-//                }
-//                else
-//                {
-//                    ptr[i] = new NPC;
-//                }
-//                ptr[i]->set_pos(xxx, yyy);
-//                break;
-//            }
-//        }
-//    }
-//}
+void spawnNPC(bool isPolice, int no)
+{
+    for (int i = 0; i < no; i++)
+    {
+        int xxx;
+        int yyy;
+        srand(time(NULL));
+        do
+        {
+            xxx = rand() % 80;
+            yyy = rand() % 24;
 
-//void moveall()
-//{
-//    COORD c;
-//    
-//    for (int i = 1; i < 10; i++)
-//    {
-//        if (ptr[i] != nullptr)
-//        {
-//            c.X = ptr[i]->getposx();
-//            c.Y = ptr[i]->getposy();
-//            g_Console.writeToBuffer(c, " ", 0x09);
-//
-//            g_Console.writeToBuffer(c, " ", 0x09);
-//        }
-//        
-//    }
-//}
+        } while (false);
+
+        for (int i = 0; i < 10; i++)
+        {
+            if (ptr[i] == nullptr)
+            {
+                if (isPolice)
+                {
+                    ptr[i] = new Police;
+                }
+                else
+                {
+                    ptr[i] = new NPC;
+                }
+                ptr[i]->set_pos(xxx, yyy);
+                break;
+            }
+        }
+    }
+}
+
+void moveall()
+{
+    COORD c;
+    
+    for (int i = 1; i < 10; i++)
+    {
+        if (ptr[i] != nullptr)
+        {
+            c.X = ptr[i]->getposx();
+            c.Y = ptr[i]->getposy();
+            g_Console.writeToBuffer(c, " ", 0x09);
+
+            if (ptr[i]->get_count() != 20)
+            {
+                ptr[i]->set_count(ptr[i]->get_count() + 1);
+            }
+            else
+            {
+                c.X = ptr[i]->getposx();
+                c.Y = ptr[i]->getposy();
+                g_Console.writeToBuffer(c, " ", 0x09);
+
+                ptr[i]->set_count(0);
+
+                int aaa = (rand() % 4) + 1;
+                switch (aaa)
+                {
+                case 1:
+                    ptr[i]->set_direction(1);
+                    break;
+                case 2:
+                    ptr[i]->set_direction(2);
+                    break;
+                case 3:
+                    ptr[i]->set_direction(3);
+                    break;
+                case 4:
+                    ptr[i]->set_direction(4);
+                    break;
+                default:
+                    break;
+                }
+
+                ptr[i]->set_pos();
+                c.X = ptr[i]->getposx();
+                c.Y = ptr[i]->getposy();
+                g_Console.writeToBuffer(c, " ", 0x09);
+            }
+            
+               
+
+            g_Console.writeToBuffer(c, " ", 0x09);
+        }
+        
+    }
+}

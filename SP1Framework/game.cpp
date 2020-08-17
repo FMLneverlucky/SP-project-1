@@ -6,6 +6,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include "Player.h"
+#include "NPC.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -15,6 +17,8 @@ SMouseEvent g_mouseEvent;
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
+
+Entity* ptr[10] = { new Player, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -36,6 +40,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
+    ptr[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -43,6 +48,7 @@ void init( void )
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
+
 }
 
 //--------------------------------------------------------------
@@ -58,6 +64,15 @@ void shutdown( void )
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
     g_Console.clearBuffer();
+
+    for (int i = 0; i < 10; i++)
+    {
+        if (ptr[i] != nullptr)
+        {
+            delete ptr[i];
+        }
+    }
+    
 }
 
 //--------------------------------------------------------------
@@ -255,33 +270,41 @@ void updateGame()       // gameplay logic
 }
 
 void moveCharacter()
-{    
+{   
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y -= 1 * g_dDeltaTime;
+        //ptr[0]->set_direction(1);
+        g_sChar.m_cLocation.Y--;
     }
-    if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
+    else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X--;        
+        g_sChar.m_cLocation.X--;     
+        //ptr[0]->set_direction(2);
     }
-    if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y++;        
+        g_sChar.m_cLocation.Y++;       
+        //ptr[0]->set_direction(3);
     }
-    if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X++;        
+        //ptr[0]->set_direction(4);
     }
+    
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
+    /*g_sChar.m_cLocation.Y = ptr[0]->getposy();
+    g_sChar.m_cLocation.X = ptr[0]->getposx();*/
+    
 
    
 }

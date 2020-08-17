@@ -10,6 +10,16 @@ Entity::~Entity()
 
 }
 
+int Entity::getposx()
+{
+	return pos.get_x();
+}
+
+int Entity::getposy()
+{
+	return pos.get_y();
+}
+
 void Entity::set_direction(int a)
 {
 	switch (a)
@@ -50,4 +60,10 @@ void Entity::set_pos()
 	default:
 		break;
 	}
+}
+
+void Entity::set_pos(int xx, int yy)
+{
+	pos.set_x(xx);
+	pos.set_y(yy);
 }

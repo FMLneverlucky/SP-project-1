@@ -279,38 +279,44 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        //ptr[0]->set_direction(1);
-        g_sChar.m_cLocation.Y--;
+        ptr[0]->set_direction(1);
+        //g_sChar.m_cLocation.Y = 13;
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X--;     
-        //ptr[0]->set_direction(2);
+        //g_sChar.m_cLocation.X--;     
+        ptr[0]->set_direction(3);
     }
     else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y++;       
-        //ptr[0]->set_direction(3);
+        //g_sChar.m_cLocation.Y++;       
+        ptr[0]->set_direction(2);
     }
     else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X++;        
-        //ptr[0]->set_direction(4);
+        //g_sChar.m_cLocation.X++;        
+        ptr[0]->set_direction(4);
+    }
+    else
+    {
+        ptr[0]->set_direction(0);
     }
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
-    /*g_sChar.m_cLocation.Y = ptr[0]->getposy();
-    g_sChar.m_cLocation.X = ptr[0]->getposx();*/
+
+    ptr[0]->set_pos();
+    g_sChar.m_cLocation.Y = ptr[0]->getposy();
+    g_sChar.m_cLocation.X = ptr[0]->getposx();
     
 
-   
 }
+
 void processUserInput()
 {
     // quits the game if player hits the escape key
@@ -496,38 +502,38 @@ void renderInputEvents()
     }   
 }
 
-void spawnNPC(bool isPolice, int no)
-{
-    for (int i = 0; i < no; i++)
-    {
-        int xxx;
-        int yyy;
-        srand(time(NULL));
-        do
-        {
-            xxx = rand() % 80;
-            yyy = rand() % 24;
-
-        } while (false);
-
-        for (int i = 0; i < 10; i++)
-        {
-            if (ptr[i] == nullptr)
-            {
-                if (isPolice)
-                {
-                    ptr[i] = new Police;
-                }
-                else
-                {
-                    ptr[i] = new NPC;
-                }
-                ptr[i]->set_pos(xxx, yyy);
-                break;
-            }
-        }
-    }
-}
+//void spawnNPC(bool isPolice, int no)
+//{
+//    for (int i = 0; i < no; i++)
+//    {
+//        int xxx;
+//        int yyy;
+//        srand(time(NULL));
+//        do
+//        {
+//            xxx = rand() % 80;
+//            yyy = rand() % 24;
+//
+//        } while (false);
+//
+//        for (int i = 0; i < 10; i++)
+//        {
+//            if (ptr[i] == nullptr)
+//            {
+//                if (isPolice)
+//                {
+//                    ptr[i] = new Police;
+//                }
+//                else
+//                {
+//                    ptr[i] = new NPC;
+//                }
+//                ptr[i]->set_pos(xxx, yyy);
+//                break;
+//            }
+//        }
+//    }
+//}
 
 //void moveall()
 //{

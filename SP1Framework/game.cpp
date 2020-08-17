@@ -147,10 +147,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     EKEYS key = K_COUNT;
     switch (keyboardEvent.wVirtualKeyCode)
     {
-    case VK_UP: key = K_UP; break;
-    case VK_DOWN: key = K_DOWN; break;
-    case VK_LEFT: key = K_LEFT; break; 
-    case VK_RIGHT: key = K_RIGHT; break; 
+    case 0x57: key = K_W; break;
+    case 0x53: key = K_S; break;
+    case 0x41: key = K_A; break;
+    case 0x44: key = K_D; break;
     case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break; 
     }
@@ -258,22 +258,22 @@ void moveCharacter()
 {    
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (getButtonHold() == K_UP && g_sChar.m_cLocation.Y > 0)
+    if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y--;       
+        g_sChar.m_cLocation.Y -= 1 * g_dDeltaTime;
     }
-    if (getButtonHold() == K_LEFT && g_sChar.m_cLocation.X > 0)
+    if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X--;        
     }
-    if (getButtonHold() == K_DOWN && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y++;        
     }
-    if (getButtonHold() == K_RIGHT && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X++;        
@@ -407,13 +407,13 @@ void renderInputEvents()
         ss.str("");
         switch (i)
         {
-        case K_UP: key = "UP";
+        case K_W: key = "W";
             break;
-        case K_DOWN: key = "DOWN";
+        case K_S: key = "S";
             break;
-        case K_LEFT: key = "LEFT";
+        case K_A: key = "A";
             break;
-        case K_RIGHT: key = "RIGHT";
+        case K_D: key = "D";
             break;
         case K_SPACE: key = "SPACE";
             break;

@@ -578,7 +578,7 @@ void moveall()
                     break;
                 }
 
-                ptr[i]->set_pos();
+                ptr[i]->set_pos(0.5);
                 c.X = ptr[i]->getposx();
                 c.Y = ptr[i]->getposy();
                 g_Console.writeToBuffer(c, " ", 0x09);

@@ -21,6 +21,7 @@ public:
 	~Entity();
 	void set_direction(int a);
 	void set_pos();
+	void set_pos(float speed);
 	void set_pos(float xx, float yy);
 	int getposx();
 	int getposy();

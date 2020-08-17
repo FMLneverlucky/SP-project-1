@@ -6,8 +6,17 @@ class Object
 	int sizeY;
 	Position pos;
 	Position pivot;
-	int scale;
+	int scaleX;
+	int scaleY;
 public:
-	Object();//int, int, Position, Position);
+	Object(int, int);
+	Object(int, int, Position);
+	Object(int, int, Position, Position);
 	~Object();
+	void size(int, int);
+	void scale(int, int);
+	void translate(int, int);
+	int length();
+	int height();
+	Position* position();
 };

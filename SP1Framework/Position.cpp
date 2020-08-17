@@ -1,4 +1,13 @@
 #include "Position.h"
+Position::Position(int x, int y)
+{
+	this->x = x;
+	this->y = y;
+}
+Position::~Position()
+{
+	//Nothing.
+}
 
 Position::Position():x(0), y(0)
 {

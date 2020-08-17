@@ -261,7 +261,7 @@ void moveCharacter()
     if (getButtonHold() == K_UP && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y -= 1 * g_dDeltaTime;
+        g_sChar.m_cLocation.Y--;
     }
     if (getButtonHold() == K_LEFT && g_sChar.m_cLocation.X > 0)
     {

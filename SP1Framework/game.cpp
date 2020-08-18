@@ -554,7 +554,7 @@ void spawnNPC(bool isPolice, int no)
         {
             pos.set_x(rand() % 80);
             pos.set_y(rand() % 24);
-        } while (occupied(&pos, entities) != nullptr); //while pos is not available
+        } while (occupied(&pos) != nullptr); //while pos is not available
 
         
               
@@ -633,7 +633,7 @@ void moveall(float spd)
     }
 }
 
-Entity* occupied(Position* pos, Entity* entities[11])
+Entity* occupied(Position* pos)
 {
     for (int i = 0; i < entityLimit; i++)
     {

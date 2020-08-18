@@ -80,7 +80,7 @@ void renderInputEvents();   // renders the status of input events
 void spawnNPC(bool isPolice, int no); //spawns NPCs
 void moveall(float spd); //moves all NPCs
 void renderNPC(); //draws NPCs on map
-Entity* occupied(Position*, Entity* entities[11]);//if no entity occupy that position, return nullptr
+Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 
 //UI, Map Objects - test
 void renderBox(); //draw a Box

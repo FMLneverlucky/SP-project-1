@@ -15,6 +15,6 @@ public:
     void anger();
     void set_count(int a);
     int get_count();
-    
+    char type();  // return char to tell what type of entity this is
 };
 

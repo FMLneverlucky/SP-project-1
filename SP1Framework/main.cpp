@@ -2,8 +2,14 @@
 
 #include "Framework\timer.h"
 #include "game.h"
+#include <stdlib.h>
+#include <time.h>
+
 #include "Player.h"
 #include "NPC.h"
+
+#include"Position.h"
+#include "Object.h"
 
 CStopWatch g_Timer;                            // Timer function to keep track of time and the frame rate
 bool g_bQuitGame = false;                    // Set to true if you want to quit the game
@@ -21,6 +27,7 @@ void mainLoop( void );
 // You should not be modifying this unless you know what you are doing
 int main( void )
 {
+    srand((unsigned int)time(NULL));
     init();      // initialize your variables
     mainLoop();  // main loop
     shutdown();  // do clean up, if any. free memory.

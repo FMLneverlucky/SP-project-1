@@ -6,11 +6,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "Player.h"
-#include "NPC.h"
 #include "time.h"
 #include <stdlib.h>
-#include "Police.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -22,9 +19,13 @@ SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 Player* player = new Player;
-NPC* ptr[30]; 
-int sizeofArray = 30;
+Entity* ePlayer = player;
+Entity* entities[11] = { ePlayer , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int entityLimit = 11;
+NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int NPCLimit = 10;
 
+Object box(1, 1, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -46,9 +47,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
-
     player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
-
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -57,13 +56,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-
-    for (int i = 0; i < sizeofArray; i++)
-    {
-        ptr[i] = nullptr;
-    }
-
-    spawnNPC(false, 2);
+    spawnNPC(false, 4);
 
 }
 
@@ -81,16 +74,13 @@ void shutdown( void )
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < sizeofArray; i++)
+    for (int i = 0; i < entityLimit; i++)
     {
-        if (ptr[i] != nullptr)
+        if (entities[i] != nullptr)
         {
-            delete ptr[i];
+            delete entities[i];
         }
     }
-
-    delete player;
-    
 }
 
 //--------------------------------------------------------------
@@ -276,7 +266,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > 0.5) // wait for 0.5 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -401,7 +391,7 @@ void renderGame()
 void renderMap()
 {
     // Set up sample colours, and output shadings
-    /*const WORD colors[] = {
+    const WORD colors[] = {
         0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
@@ -414,11 +404,10 @@ void renderMap()
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
         
-    }*/
-    
+    }
+
     renderNPC();
-    
-    
+    renderBox();
     
 }
 
@@ -528,18 +517,17 @@ void renderInputEvents()
 }
 
 void renderNPC()
-{
-    COORD cc;
+{//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
+    COORD c;
     int colour;
-    for (int i = 0; i < sizeofArray; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (ptr[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            
-            cc.X = ptr[i]->getposx();
-            cc.Y = ptr[i]->getposy();
+            c.X = NPCs[i]->getposx();
+            c.Y = NPCs[i]->getposy();
 
-            if (ptr[i]->isHostile())
+            if (NPCs[i]->isHostile())
             {
                 colour = 0x3C;
             }
@@ -548,8 +536,7 @@ void renderNPC()
                 colour = 0xF6;
             }
 
-            g_Console.writeToBuffer(cc, " ", colour);
-
+            g_Console.writeToBuffer(c, " ", colour);
         }
     }
     
@@ -559,32 +546,35 @@ void spawnNPC(bool isPolice, int no)
 {
     for (int i = 0; i < no; i++)
     {
-        int xxx;
-        int yyy;
-
-        srand(time(NULL));
-
+        Position pos;
         do
         {
-            xxx = rand() % 80;
-            yyy = rand() % 24;
-
-        } while (false); //while pos is not avail
-
-        for (int i = 0; i < sizeofArray; i++)
+            pos.set_x(rand() % 80);
+            pos.set_y(rand() % 24);
+        } while (occupied(&pos, entities) != nullptr); //while pos is not available
+        bool spawned = false;
+        for (int e = 0; e < entityLimit && !spawned; e++)
         {
-            if (ptr[i] == nullptr)
-            {
-                if (isPolice)
-                {
-                    ptr[i] = new Police;
+            if (entities[e] == nullptr)
+            {   
+                for (int n = 0; n < NPCLimit && !spawned; n++)
+                { 
+                    if (NPCs[n] == nullptr)
+                    {
+                        if (isPolice)
+                        {
+                            NPCs[n] = new Police;
+                            entities[e] = NPCs[n];
+                        }
+                        else
+                        {
+                            NPCs[n] = new NPC;
+                            entities[e] = NPCs[n];
+                        }
+                        entities[e]->set_pos(pos.get_x(), pos.get_y());
+                        spawned = true;
+                    }
                 }
-                else
-                {
-                    ptr[i] = new NPC;
-                }
-                ptr[i]->set_pos(xxx, yyy);
-                break;
             }
         }
         
@@ -594,40 +584,40 @@ void spawnNPC(bool isPolice, int no)
 void moveall(float spd)
 {
     
-    for (int i = 0; i < sizeofArray; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (ptr[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            
-            if (ptr[i]->get_count() < 300)
+            //int a = ptr[i]->get_count();
+            //a = a;
+            if (NPCs[i]->get_count() < 300)
             {
-                ptr[i]->set_count(ptr[i]->get_count() + 1);
-
-                //jus to make things smoother, so they dont move right before changing direction
-                if (ptr[i]->get_count() > 200)
+                NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+                if (NPCs[i]->get_count() > 200)
                 {
-                    ptr[i]->set_direction(0);
+                    NPCs[i]->set_direction(0);
                 }
             }
-            else //count = 300
+            else //count = 200
             {
+               
 
-                ptr[i]->set_count(0);
+                NPCs[i]->set_count(0);
 
                 int aaa = (rand() % 4) + 1;
                 switch (aaa)
                 {
                 case 1:
-                    ptr[i]->set_direction(1);
+                    NPCs[i]->set_direction(1);
                     break;
                 case 2:
-                    ptr[i]->set_direction(2);
+                    NPCs[i]->set_direction(2);
                     break;
                 case 3:
-                    ptr[i]->set_direction(3);
+                    NPCs[i]->set_direction(3);
                     break;
                 case 4:
-                    ptr[i]->set_direction(4);
+                    NPCs[i]->set_direction(4);
                     break;
                 default:
                     break;
@@ -635,10 +625,31 @@ void moveall(float spd)
 
             }
 
-            ptr[i]->set_pos(spd);
+            NPCs[i]->set_pos(spd);
     
                
         }
         
     }
+}
+
+Entity* occupied(Position* pos, Entity* entities[11])
+{
+    for (int i = 0; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr && entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+        {
+            return entities[i];
+        }
+    }
+    return nullptr;
+}
+
+void renderBox()
+{
+    COORD c;
+    c.X = box.position()->get_x();
+    c.Y = box.position()->get_y();
+    int colour = 0x3C;
+    g_Console.writeToBuffer(c, "±", colour);
 }

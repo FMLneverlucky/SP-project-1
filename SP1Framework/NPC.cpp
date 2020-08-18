@@ -30,4 +30,8 @@ int NPC::get_count()
 	return counter;
 }
 
+char NPC::type()
+{
+	return 'C'; // C for civilian. do diff char for diff derived class
+}
 

@@ -23,8 +23,8 @@ public:
 	void set_pos();
 	void set_pos(float speed);
 	void set_pos(float xx, float yy);
-	int getposx();
-	int getposy();
+	float getposx();
+	float getposy();
 	
 };
 

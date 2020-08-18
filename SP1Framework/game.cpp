@@ -323,7 +323,7 @@ void moveCharacter()
     g_sChar.m_cLocation.Y = player->getposy();
     g_sChar.m_cLocation.X = player->getposx();
 
-    moveall();
+    moveall(0.1);
     
 
 }
@@ -527,8 +527,14 @@ void renderNPC()
             c.X = ptr[i]->getposx();
             c.Y = ptr[i]->getposy();
 
-            
-            g_Console.writeToBuffer(c, " ", 0xF6);
+            if (ptr[i]->isHostile())
+            {
+                g_Console.writeToBuffer(c, " ", 0x3C);
+            }
+            else
+            {
+                g_Console.writeToBuffer(c, " ", 0xF6);
+            }
         }
     }
     
@@ -564,17 +570,12 @@ void spawnNPC(bool isPolice, int no)
                 break;
             }
         }
-        COORD c;
-        c.X = xxx;
-        c.Y = yyy;
-        //renderNPC(c);
         
     }
 }
 
-void moveall()
+void moveall(float spd)
 {
-    
     
     for (int i = 0; i < sizeofArray; i++)
     {
@@ -615,7 +616,7 @@ void moveall()
 
             }
 
-            ptr[i]->set_pos(0.1);
+            ptr[i]->set_pos(spd);
     
                
         }

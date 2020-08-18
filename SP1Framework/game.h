@@ -70,9 +70,9 @@ void renderToScreen();      // dump the contents of the buffer to the screen, on
 void renderInputEvents();   // renders the status of input events
 
 //NPCs - incomplete
-void spawnNPC(bool isPolice, int no);
-void moveall();
-void renderNPC();
+void spawnNPC(bool isPolice, int no); //spawns NPCs
+void moveall(float spd); //moves all NPCs
+void renderNPC(); //draws NPCs on map
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

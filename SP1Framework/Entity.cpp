@@ -113,12 +113,3 @@ void Entity::set_pos(float xx, float yy)
 	pos.set_y(yy);
 }
 
-void Entity::set_count(int a)
-{
-	counter = a;
-}
-
-int Entity::get_count()
-{
-	return counter;
-}

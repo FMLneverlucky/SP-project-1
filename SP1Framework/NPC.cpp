@@ -20,3 +20,14 @@ void NPC::anger()
 	angry = true;
 }
 
+void NPC::set_count(int a)
+{
+	counter = a;
+}
+
+int NPC::get_count()
+{
+	return counter;
+}
+
+

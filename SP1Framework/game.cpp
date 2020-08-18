@@ -60,7 +60,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    spawnNPC(false, 4);
+    spawnNPC(false, 5);
 
 }
 
@@ -569,12 +569,12 @@ void spawnNPC(bool isPolice, int no)
 {
     for (int i = 0; i < no; i++)
     {
-        Position pos;
+        Position temp;
         do
         {
-            pos.set_x(rand() % 80);
-            pos.set_y(rand() % 24);
-        } while (occupied(&pos) != nullptr); //while pos is not available
+            temp.set_x(rand() % 80);
+            temp.set_y(rand() % 24);
+        } while (occupied(&temp) != nullptr); //while pos is not available
 
         
               
@@ -592,7 +592,7 @@ void spawnNPC(bool isPolice, int no)
                     NPCs[n] = new NPC;
                     entities[n + 1] = NPCs[n];
                 }
-                entities[n + 1]->set_pos(pos.get_x(), pos.get_y());
+                entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
                 
                 break;
             }
@@ -613,6 +613,7 @@ void moveall(float spd)
             if (NPCs[i]->get_count() < 300)
             {
                 NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+
                 if (NPCs[i]->get_count() > 200)
                 {
                     NPCs[i]->set_direction(0);
@@ -620,32 +621,70 @@ void moveall(float spd)
             }
             else //count = 300
             {
-               
 
                 NPCs[i]->set_count(0);
 
-                int aaa = (rand() % 4) + 1;
-                switch (aaa)
+                if (NPCs[i]->isHostile() == false)
                 {
-                case 1:
-                    NPCs[i]->set_direction(1);
-                    break;
-                case 2:
-                    NPCs[i]->set_direction(2);
-                    break;
-                case 3:
-                    NPCs[i]->set_direction(3);
-                    break;
-                case 4:
-                    NPCs[i]->set_direction(4);
-                    break;
-                default:
-                    break;
+                    
+
+                    int aaa = (rand() % 4) + 1;
+                    switch (aaa)
+                    {
+                    case 1:
+                        NPCs[i]->set_direction(1);
+                        break;
+                    case 2:
+                        NPCs[i]->set_direction(2);
+                        break;
+                    case 3:
+                        NPCs[i]->set_direction(3);
+                        break;
+                    case 4:
+                        NPCs[i]->set_direction(4);
+                        break;
+                    default:
+                        break;
+                    }
+
+                    
+                }
+                else //is hostile
+                {
+                    int diffinx = g_sChar.m_cLocation.X - NPCs[i]->getposx();
+                    int diffiny = g_sChar.m_cLocation.Y - NPCs[i]->getposy();
+
+                    if (abs(diffinx) > abs(diffiny))
+                    {
+                        if (diffinx > 0)
+                        {
+                            NPCs[i]->set_direction(4);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(3);
+                        }
+                    }
+                    else //up or down
+                    {
+                        if (diffiny > 0)
+                        {
+                            NPCs[i]->set_direction(2);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(1);
+                        }
+                    }
+
+                    spd += 0.05;
                 }
 
-            }
 
+            }
             NPCs[i]->set_pos(spd);
+
+           
     
                
         }

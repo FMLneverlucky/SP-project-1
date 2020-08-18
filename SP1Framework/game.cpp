@@ -593,6 +593,7 @@ void moveall(float spd)
             if (NPCs[i]->get_count() < 300)
             {
                 NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+
                 if (NPCs[i]->get_count() > 200)
                 {
                     NPCs[i]->set_direction(0);
@@ -626,7 +627,7 @@ void moveall(float spd)
                         break;
                     }
 
-                    NPCs[i]->set_pos(spd);
+                    
                 }
                 else //is hostile
                 {
@@ -656,12 +657,12 @@ void moveall(float spd)
                         }
                     }
 
-                    NPCs[i]->set_pos(spd + 0.05);
+                    spd += 0.05;
                 }
 
 
-
             }
+            NPCs[i]->set_pos(spd);
 
            
     

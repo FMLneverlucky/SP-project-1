@@ -532,7 +532,7 @@ void renderNPC()
 
             if (NPCs[i]->isHostile())
             {
-                colour = 0x3C;
+                colour = 0x4D;
             }
             else
             {

@@ -81,6 +81,7 @@ void spawnNPC(bool isPolice, int no); //spawns NPCs
 void moveall(float spd); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
+void renderprojectile();
 
 //UI, Map Objects - test
 void renderBox(); //draw a Box

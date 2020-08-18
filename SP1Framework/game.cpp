@@ -8,6 +8,7 @@
 #include <sstream>
 #include "time.h"
 #include <stdlib.h>
+#include "Projectile.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -24,6 +25,9 @@ Entity* entities[11] = { ePlayer , nullptr, nullptr, nullptr, nullptr, nullptr, 
 const int entityLimit = 11;
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
+
+Projectile* projectile[3] = { nullptr, nullptr, nullptr };
+int particle_limit = 3;
 
 //Object box(1, 1, Position(3, 8));
 
@@ -80,6 +84,11 @@ void shutdown( void )
         {
             delete entities[i];
         }
+    }
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+            delete projectile[p];
     }
 }
 
@@ -314,6 +323,16 @@ void moveCharacter()
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
+        for (int p = 0; p < particle_limit; p++)
+        {
+            if (projectile[p] == nullptr)
+            {
+                projectile[p] = new Projectile;
+            }
+
+            projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+        }
+
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
@@ -408,6 +427,7 @@ void renderMap()
 
     renderNPC();
     renderBox();
+    renderprojectile();
     
 }
 
@@ -648,6 +668,26 @@ Entity* occupied(Position* pos)
     return nullptr;
 }
 
+void renderprojectile()
+{
+    COORD c;
+    int colour;
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+        {
+            projectile[p]->update_particle();
+
+            c.X = projectile[p]->get_px();
+            c.Y = projectile[p]->get_py();
+
+            colour = 0x6F;
+
+            g_Console.writeToBuffer(c, " ", colour);
+        }
+    }
+}
+
 void renderBox()
 {
     /*COORD c;
@@ -655,4 +695,16 @@ void renderBox()
     c.Y = box.position()->get_y();
     int colour = 0x3C;
     g_Console.writeToBuffer(c, "±", colour);*/
+}
+
+void Projectile::direction()
+{
+    if (g_mouseEvent.mousePosition.X < g_sChar.m_cLocation.X)
+        dir = left;
+    else if (g_mouseEvent.mousePosition.X > g_sChar.m_cLocation.X)
+        dir = right;
+    else if (g_mouseEvent.mousePosition.Y < g_sChar.m_cLocation.Y)
+        dir = down;
+    else
+        dir = up;
 }

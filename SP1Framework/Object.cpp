@@ -33,7 +33,7 @@ Object::~Object()
 {
 	//Nothing.
 }
-void Object::updateReferencePoint()//***DO THIS BEFORE DRAWING ANYTHING***
+void Object::updateReferencePoint()// calculate top left position
 {//calculate the reference position 
 	referencePos.set_x(pos.get_x() - (this->sizeX / 2.0));
 	referencePos.set_y(pos.get_y() - (this->sizeY / 2.0));
@@ -66,4 +66,9 @@ int Object::height()
 Position* Object::position()
 {
 	return &pos;
+}
+Position* Object::position()
+{
+	updateReferencePoint();
+	return &referencePos;
 }

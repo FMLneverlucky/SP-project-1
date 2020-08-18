@@ -11,6 +11,7 @@ public:
     NPC();
     ~NPC();
     bool isHostile();
+    void anger();
     
 };
 

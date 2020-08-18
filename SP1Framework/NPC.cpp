@@ -15,3 +15,8 @@ bool NPC::isHostile()
 	return angry;
 }
 
+void NPC::anger()
+{
+	angry = true;
+}
+

@@ -21,7 +21,9 @@ SMouseEvent g_mouseEvent;
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
-Entity* ptr[10] = { new Player, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Player* player = new Player;
+NPC* ptr[10] = { nullptr , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+int sizeofArray = 10;
 
 
 // Console object
@@ -44,7 +46,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
-    ptr[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -71,13 +73,15 @@ void shutdown( void )
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < sizeofArray; i++)
     {
         if (ptr[i] != nullptr)
         {
             delete ptr[i];
         }
     }
+
+    delete player;
     
 }
 
@@ -284,30 +288,30 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        ptr[0]->set_direction(1);
+        player->set_direction(1);
         //g_sChar.m_cLocation.Y = 13;
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.X--;     
-        ptr[0]->set_direction(3);
+        player->set_direction(3);
     }
     else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.Y++;       
-        ptr[0]->set_direction(2);
+        player->set_direction(2);
     }
     else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.X++;        
-        ptr[0]->set_direction(4);
+        player->set_direction(4);
     }
     else
     {
-        ptr[0]->set_direction(0);
+        player->set_direction(0);
     }
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
@@ -315,9 +319,9 @@ void moveCharacter()
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-    ptr[0]->set_pos();
-    g_sChar.m_cLocation.Y = ptr[0]->getposy();
-    g_sChar.m_cLocation.X = ptr[0]->getposx();
+    player->set_pos();
+    g_sChar.m_cLocation.Y = player->getposy();
+    g_sChar.m_cLocation.X = player->getposx();
 
     moveall();
     
@@ -404,16 +408,7 @@ void renderMap()
         
     }
 
-    for (int i = 1; i < 10; i++)
-    {
-        if (ptr[i] != nullptr)
-        {
-            COORD c;
-            c.X = ptr[i]->getposx();
-            c.Y = ptr[i]->getposy();
-            renderNPC(c);
-        }
-    }
+    renderNPC();
     
 }
 
@@ -522,9 +517,21 @@ void renderInputEvents()
     }   
 }
 
-void renderNPC(COORD c)
+void renderNPC()
 {
-    g_Console.writeToBuffer(c, " ", 0xF6);
+    for (int i = 0; i < sizeofArray; i++)
+    {
+        if (ptr[i] != nullptr)
+        {
+            COORD c;
+            c.X = ptr[i]->getposx();
+            c.Y = ptr[i]->getposy();
+
+            
+            g_Console.writeToBuffer(c, " ", 0xF6);
+        }
+    }
+    
 }
 
 void spawnNPC(bool isPolice, int no)
@@ -541,7 +548,7 @@ void spawnNPC(bool isPolice, int no)
 
         } while (false); //while pos is not avail
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < sizeofArray; i++)
         {
             if (ptr[i] == nullptr)
             {
@@ -569,7 +576,7 @@ void moveall()
 {
     
     
-    for (int i = 1; i < 10; i++)
+    for (int i = 0; i < sizeofArray; i++)
     {
         if (ptr[i] != nullptr)
         {

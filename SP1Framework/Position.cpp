@@ -10,6 +10,11 @@ Position::Position():x(0), y(0)
 
 }
 
+Position::~Position()
+{
+	//Nothing.
+}
+
 float Position::get_x()
 {
 	return x;

@@ -1,22 +1,37 @@
 #include"Object.h"
-Object::Object(int sizeX = 1, int sizeY = 1)
+Object::Object()
+{
+	sizeX = 1;
+	sizeY = 1;
+	scaleX = 1;
+	scaleY = 1;
+	pos.set_x(0);
+	pos.set_y(0);
+	pivot.set_x(0);
+	pivot.set_y(0);
+}
+Object::Object(int sizeX, int sizeY)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
 	scaleX = 1;
 	scaleY = 1;
-	//init pos and pivot
+	pos.set_x(0);
+	pos.set_y(0);
+	pivot.set_x(0);
+	pivot.set_y(0);
 }
-Object::Object(int sizeX = 1, int sizeY = 1, Position pos)
+Object::Object(int sizeX, int sizeY, Position pos)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
 	scaleX = 1;
 	scaleY = 1;
 	this->pos = pos;
-	//init pivot
+	pivot.set_x(0);
+	pivot.set_y(0);
 }
-Object::Object(int sizeX = 1, int sizeY = 1,Position pos, Position pivot)
+Object::Object(int sizeX, int sizeY, Position pos, Position pivot)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;

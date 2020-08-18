@@ -9,6 +9,7 @@ class Object
 	int scaleX;
 	int scaleY;
 public:
+	Object();
 	Object(int, int);
 	Object(int, int, Position);
 	Object(int, int, Position, Position);

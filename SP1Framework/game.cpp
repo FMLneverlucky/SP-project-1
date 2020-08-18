@@ -6,11 +6,15 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "Player.h"
-#include "NPC.h"
 #include "time.h"
 #include <stdlib.h>
+//Entities
+#include "Player.h"
+#include "NPC.h"
 #include "Police.h"
+
+#include "Object.h"
+#include "Position.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -25,6 +29,7 @@ Player* player = new Player;
 NPC* ptr[10] = { nullptr , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 int sizeofArray = 10;
 
+//Object box(1, 1);
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");

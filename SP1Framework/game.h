@@ -74,6 +74,9 @@ void spawnNPC(bool isPolice, int no); //spawns NPCs
 void moveall(float spd); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 
+//UI, Map Objects - test
+void spawnBox(); //create a Box
+
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent);      // define this function for the console to call when there are mouse events

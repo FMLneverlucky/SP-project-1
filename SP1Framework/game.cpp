@@ -340,7 +340,7 @@ void moveCharacter()
     g_sChar.m_cLocation.Y = player->getposy();
     g_sChar.m_cLocation.X = player->getposx();
 
-    moveall(0.2);
+    moveall(0.1);
     
 
 }

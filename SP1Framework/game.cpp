@@ -6,11 +6,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "Player.h"
-#include "NPC.h"
 #include "time.h"
 #include <stdlib.h>
-#include "Police.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -22,9 +19,13 @@ SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 Player* player = new Player;
-NPC* ptr[10] = { nullptr , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-int sizeofArray = 10;
+Entity* ePlayer = player;
+Entity* entities[11] = { ePlayer , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int entityLimit = 11;
+NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int NPCLimit = 10;
 
+Object box(1, 1, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -73,16 +74,13 @@ void shutdown( void )
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < sizeofArray; i++)
+    for (int i = 0; i < entityLimit; i++)
     {
-        if (ptr[i] != nullptr)
+        if (entities[i] != nullptr)
         {
-            delete ptr[i];
+            delete entities[i];
         }
     }
-
-    delete player;
-    
 }
 
 //--------------------------------------------------------------
@@ -268,7 +266,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > 0.5) // wait for 0.5 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -409,6 +407,7 @@ void renderMap()
     }
 
     renderNPC();
+    renderBox();
     
 }
 
@@ -518,18 +517,20 @@ void renderInputEvents()
 }
 
 void renderNPC()
-{
+{//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
+    
+    //only separated them cos didnt see the need for player to be in entities pointer array since we using ascii but if we change it ye thatll be good
+    //initially i changed Entities pointer array to NPCs bcos player was taken out and i could use NPC class functions only on NPC pointers unless virtual thingy
     COORD c;
     int colour;
-    for (int i = 0; i < sizeofArray; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (ptr[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            
-            c.X = ptr[i]->getposx();
-            c.Y = ptr[i]->getposy();
+            c.X = NPCs[i]->getposx();
+            c.Y = NPCs[i]->getposy();
 
-            if (ptr[i]->isHostile())
+            if (NPCs[i]->isHostile())
             {
                 colour = 0x3C;
             }
@@ -548,32 +549,35 @@ void spawnNPC(bool isPolice, int no)
 {
     for (int i = 0; i < no; i++)
     {
-        int xxx;
-        int yyy;
-        srand(time(NULL));
+        Position pos;
         do
         {
-            xxx = rand() % 80;
-            yyy = rand() % 24;
+            pos.set_x(rand() % 80);
+            pos.set_y(rand() % 24);
+        } while (occupied(&pos) != nullptr); //while pos is not available
 
-        } while (false); //while pos is not avail
-
-        for (int i = 0; i < sizeofArray; i++)
-        {
-            if (ptr[i] == nullptr)
+        
+              
+        for (int n = 0; n < NPCLimit; n++)
+        { 
+            if (NPCs[n] == nullptr)
             {
                 if (isPolice)
                 {
-                    ptr[i] = new Police;
+                    NPCs[n] = new Police;
+                    entities[n + 1] = NPCs[n];
                 }
                 else
                 {
-                    ptr[i] = new NPC;
+                    NPCs[n] = new NPC;
+                    entities[n + 1] = NPCs[n];
                 }
-                ptr[i]->set_pos(xxx, yyy);
+                entities[n + 1]->set_pos(pos.get_x(), pos.get_y());
+                
                 break;
             }
         }
+        
         
     }
 }
@@ -581,40 +585,39 @@ void spawnNPC(bool isPolice, int no)
 void moveall(float spd)
 {
     
-    for (int i = 0; i < sizeofArray; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (ptr[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            //int a = ptr[i]->get_count();
-            //a = a;
-            if (ptr[i]->get_count() < 300)
+            
+            if (NPCs[i]->get_count() < 300)
             {
-                ptr[i]->set_count(ptr[i]->get_count() + 1);
-                if (ptr[i]->get_count() > 200)
+                NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+                if (NPCs[i]->get_count() > 200)
                 {
-                    ptr[i]->set_direction(0);
+                    NPCs[i]->set_direction(0);
                 }
             }
-            else //count = 200
+            else //count = 300
             {
                
 
-                ptr[i]->set_count(0);
+                NPCs[i]->set_count(0);
 
                 int aaa = (rand() % 4) + 1;
                 switch (aaa)
                 {
                 case 1:
-                    ptr[i]->set_direction(1);
+                    NPCs[i]->set_direction(1);
                     break;
                 case 2:
-                    ptr[i]->set_direction(2);
+                    NPCs[i]->set_direction(2);
                     break;
                 case 3:
-                    ptr[i]->set_direction(3);
+                    NPCs[i]->set_direction(3);
                     break;
                 case 4:
-                    ptr[i]->set_direction(4);
+                    NPCs[i]->set_direction(4);
                     break;
                 default:
                     break;
@@ -622,10 +625,31 @@ void moveall(float spd)
 
             }
 
-            ptr[i]->set_pos(spd);
+            NPCs[i]->set_pos(spd);
     
                
         }
         
     }
+}
+
+Entity* occupied(Position* pos)
+{
+    for (int i = 0; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr && entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+        {
+            return entities[i];
+        }
+    }
+    return nullptr;
+}
+
+void renderBox()
+{
+    COORD c;
+    c.X = box.position()->get_x();
+    c.Y = box.position()->get_y();
+    int colour = 0x3C;
+    g_Console.writeToBuffer(c, "±", colour);
 }

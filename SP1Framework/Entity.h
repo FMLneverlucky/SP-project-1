@@ -25,6 +25,7 @@ public:
 	void set_pos(float xx, float yy);
 	float getposx();
 	float getposy();
-	
+	Position* getpos();
+	virtual char type() = 0; // return char to tell what type of entity this is
 };
 

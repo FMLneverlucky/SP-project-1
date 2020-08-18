@@ -7,11 +7,11 @@ private:
 
 public:
 	Position();
-	Position(int x, int y);
+	Position(float x, float y);
+	~Position();
 	float get_x(void);
 	float get_y(void);
 	void set_x(float newx);
 	void set_y(float newy);
-
 };
 

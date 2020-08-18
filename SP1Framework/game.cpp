@@ -518,6 +518,9 @@ void renderInputEvents()
 
 void renderNPC()
 {//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
+    
+    //only separated them cos didnt see the need for player to be in entities pointer array since we using ascii but if we change it ye thatll be good
+    //initially i changed Entities pointer array to NPCs bcos player was taken out and i could use NPC class functions only on NPC pointers unless virtual thingy
     COORD c;
     int colour;
     for (int i = 0; i < NPCLimit; i++)
@@ -552,31 +555,29 @@ void spawnNPC(bool isPolice, int no)
             pos.set_x(rand() % 80);
             pos.set_y(rand() % 24);
         } while (occupied(&pos, entities) != nullptr); //while pos is not available
-        bool spawned = false;
-        for (int e = 0; e < entityLimit && !spawned; e++)
-        {
-            if (entities[e] == nullptr)
-            {   
-                for (int n = 0; n < NPCLimit && !spawned; n++)
-                { 
-                    if (NPCs[n] == nullptr)
-                    {
-                        if (isPolice)
-                        {
-                            NPCs[n] = new Police;
-                            entities[e] = NPCs[n];
-                        }
-                        else
-                        {
-                            NPCs[n] = new NPC;
-                            entities[e] = NPCs[n];
-                        }
-                        entities[e]->set_pos(pos.get_x(), pos.get_y());
-                        spawned = true;
-                    }
+
+        
+              
+        for (int n = 0; n < NPCLimit; n++)
+        { 
+            if (NPCs[n] == nullptr)
+            {
+                if (isPolice)
+                {
+                    NPCs[n] = new Police;
+                    entities[n + 1] = NPCs[n];
                 }
+                else
+                {
+                    NPCs[n] = new NPC;
+                    entities[n + 1] = NPCs[n];
+                }
+                entities[n + 1]->set_pos(pos.get_x(), pos.get_y());
+                
+                break;
             }
         }
+        
         
     }
 }
@@ -588,8 +589,7 @@ void moveall(float spd)
     {
         if (NPCs[i] != nullptr)
         {
-            //int a = ptr[i]->get_count();
-            //a = a;
+            
             if (NPCs[i]->get_count() < 300)
             {
                 NPCs[i]->set_count(NPCs[i]->get_count() + 1);
@@ -598,7 +598,7 @@ void moveall(float spd)
                     NPCs[i]->set_direction(0);
                 }
             }
-            else //count = 200
+            else //count = 300
             {
                
 

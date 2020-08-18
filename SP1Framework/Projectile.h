@@ -11,19 +11,16 @@ enum face
 
 class Projectile
 {
-	int x, y, m_x, m_y;
+	int x, y;
 	face dir;
 
 public:
 	Projectile();
 	~Projectile();
 	void set_ppos(int px, int py);
-	void set_mpos(int mx, int my);
 	void update_particle();
 	int get_px(void);
 	int get_py(void);
-	int get_mx(void);
-	int get_my(void);
-	void direction();
+	void direction(int m_x, int m_y);
 };
 

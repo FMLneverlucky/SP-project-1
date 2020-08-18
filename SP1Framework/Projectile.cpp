@@ -4,8 +4,6 @@ Projectile::Projectile()
 {
 	x = 40;
 	y = 0;
-	m_x = 0;
-	m_y = 0;
 	dir = none;
 }
 
@@ -19,12 +17,6 @@ void Projectile::set_ppos(int px, int py)
 	y = py;
 }
 
-void Projectile::set_mpos(int mx, int my)
-{
-	m_x = mx;
-	m_y = my;
-}
-
 void Projectile::update_particle()
 {
 	if (dir == left)
@@ -34,10 +26,10 @@ void Projectile::update_particle()
 		this->x += 1;
 
 	else if (dir == down)
-		this->y += 1;
+		this->y -= 1;
 
 	else
-		this->y -= 1;
+		this->y += 1;
 }
 
 int Projectile::get_px(void)
@@ -50,17 +42,7 @@ int Projectile::get_py(void)
 	return y;
 }
 
-int Projectile::get_mx(void)
-{
-	return m_x;
-}
-
-int Projectile::get_my(void)
-{
-	return m_y;
-}
-
-void Projectile::direction()
+void Projectile::direction(int m_x, int m_y)
 {
 	if (m_x < x)
 		dir = left;

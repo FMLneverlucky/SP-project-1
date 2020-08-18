@@ -534,9 +534,6 @@ void renderInputEvents()
     default:        
         break;
     }   
-
-    Projectile mouse;
-    mouse.set_mpos(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
 }
 
 void renderNPC()
@@ -716,7 +713,7 @@ void renderprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            projectile[p]->direction();
+            projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
             projectile[p]->update_particle();
 
             c.X = projectile[p]->get_px();

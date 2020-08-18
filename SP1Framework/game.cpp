@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include "Projectile.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -468,4 +469,10 @@ void renderInputEvents()
     default:        
         break;
     }   
+}
+
+void Projectile::get_mpos(int, int)
+{
+    x = g_mouseEvent.mousePosition.X;
+    y = g_mouseEvent.mousePosition.Y;
 }

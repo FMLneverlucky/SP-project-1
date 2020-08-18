@@ -25,7 +25,7 @@ const int entityLimit = 11;
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
 
-Object box(1, 1, Position(3, 8));
+//Object box(1, 1, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -650,9 +650,9 @@ Entity* occupied(Position* pos)
 
 void renderBox()
 {
-    COORD c;
+    /*COORD c;
     c.X = box.position()->get_x();
     c.Y = box.position()->get_y();
     int colour = 0x3C;
-    g_Console.writeToBuffer(c, "±", colour);
+    g_Console.writeToBuffer(c, "±", colour);*/
 }

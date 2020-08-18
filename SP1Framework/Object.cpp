@@ -55,6 +55,11 @@ void Object::translate(float x, float y)
 	pos.set_x(pos.get_x() + x);
 	pos.set_y(pos.get_y() + y);
 }
+void Object::setPivot(int x, int y)
+{
+	pivot.set_x(x);
+	pivot.set_y(y);
+}
 int Object::length()
 {
 	return sizeX;
@@ -67,7 +72,7 @@ Position* Object::position()
 {
 	return &pos;
 }
-Position* Object::position()
+Position* Object::referencePosition()
 {
 	updateReferencePoint();
 	return &referencePos;

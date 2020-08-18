@@ -5,8 +5,8 @@ Object::Object(int sizeX = 1, int sizeY = 1)
 	this->sizeY = sizeY;
 	scaleX = 1;
 	scaleY = 1;
-	pos.set_x(0);
-	pos.set_y(0);
+	pos.set_x(1);
+	pos.set_y(1);
 	pivot.set_x(0);
 	pivot.set_y(0);
 }
@@ -33,6 +33,11 @@ Object::~Object()
 {
 	//Nothing.
 }
+void Object::updateReferencePoint()//***DO THIS BEFORE DRAWING ANYTHING***
+{//calculate the reference position 
+	referencePos.set_x(pos.get_x() - (this->sizeX / 2.0));
+	referencePos.set_y(pos.get_y() - (this->sizeY / 2.0));
+}
 void Object::size(int x, int y)
 {
 	sizeX = x;
@@ -40,21 +45,23 @@ void Object::size(int x, int y)
 }
 void Object::scale(int x, int y)
 {
-	scaleX = x;
-	scaleY = y;
-	//change size according to pivot point
+	sizeX *= x;
+	sizeY *= y;
+	pos.set_x(pos.get_x() + (pos.get_x() - pivot.get_x()) * x);
+	pos.set_y(pos.get_y() + (pos.get_y() - pivot.get_y()) * y);
 }
-void Object::translate(int x, int y)
+void Object::translate(float x, float y)
 {
-	//change pos
+	pos.set_x(pos.get_x() + x);
+	pos.set_y(pos.get_y() + y);
 }
 int Object::length()
 {
-	return sizeX * scaleX;
+	return sizeX;
 }
 int Object::height()
 {
-	return sizeY * scaleY;
+	return sizeY;
 }
 Position* Object::position()
 {

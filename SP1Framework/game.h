@@ -4,6 +4,13 @@
 
 #include "Framework\timer.h"
 
+//Entities
+#include "Player.h"
+#include "NPC.h"
+#include "Police.h"
+
+#include "Object.h"
+
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
 
@@ -73,9 +80,10 @@ void renderInputEvents();   // renders the status of input events
 void spawnNPC(bool isPolice, int no); //spawns NPCs
 void moveall(float spd); //moves all NPCs
 void renderNPC(); //draws NPCs on map
+Entity* occupied(Position*, Entity* entities[11]);//if no entity occupy that position, return nullptr
 
 //UI, Map Objects - test
-void spawnBox(); //create a Box
+void renderBox(); //draw a Box
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

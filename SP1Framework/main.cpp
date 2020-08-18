@@ -2,6 +2,9 @@
 
 #include "Framework\timer.h"
 #include "game.h"
+#include <stdlib.h>
+#include <time.h>
+
 #include "Player.h"
 #include "NPC.h"
 
@@ -24,6 +27,7 @@ void mainLoop( void );
 // You should not be modifying this unless you know what you are doing
 int main( void )
 {
+    srand((unsigned int)time(NULL));
     init();      // initialize your variables
     mainLoop();  // main loop
     shutdown();  // do clean up, if any. free memory.

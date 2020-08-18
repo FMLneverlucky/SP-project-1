@@ -19,6 +19,10 @@ float Entity::getposy()
 {
 	return pos.get_y();
 }
+Position* Entity::getpos()
+{
+	return &pos;
+}
 
 void Entity::set_direction(int a)
 {

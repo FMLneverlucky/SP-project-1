@@ -637,9 +637,12 @@ Entity* occupied(Position* pos)
 {
     for (int i = 0; i < entityLimit; i++)
     {
-        if (entities[i] != nullptr && entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+        if (entities[i] != nullptr)
         {
-            return entities[i];
+            if (entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+            {
+                return entities[i];
+            }
         }
     }
     return nullptr;

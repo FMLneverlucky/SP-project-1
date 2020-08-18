@@ -10,12 +10,12 @@ Entity::~Entity()
 
 }
 
-int Entity::getposx()
+float Entity::getposx()
 {
 	return pos.get_x();
 }
 
-int Entity::getposy()
+float Entity::getposy()
 {
 	return pos.get_y();
 }

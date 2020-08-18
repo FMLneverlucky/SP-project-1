@@ -55,7 +55,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    spawnNPC(false, 2);
+    spawnNPC(false, 4);
 
 }
 
@@ -519,22 +519,26 @@ void renderInputEvents()
 
 void renderNPC()
 {
+    COORD c;
+    int colour;
     for (int i = 0; i < sizeofArray; i++)
     {
         if (ptr[i] != nullptr)
         {
-            COORD c;
+            
             c.X = ptr[i]->getposx();
             c.Y = ptr[i]->getposy();
 
             if (ptr[i]->isHostile())
             {
-                g_Console.writeToBuffer(c, " ", 0x3C);
+                colour = 0x3C;
             }
             else
             {
-                g_Console.writeToBuffer(c, " ", 0xF6);
+                colour = 0xF6;
             }
+
+            g_Console.writeToBuffer(c, " ", colour);
         }
     }
     
@@ -583,15 +587,17 @@ void moveall(float spd)
         {
             //int a = ptr[i]->get_count();
             //a = a;
-            if (ptr[i]->get_count() != 100)
+            if (ptr[i]->get_count() < 300)
             {
                 ptr[i]->set_count(ptr[i]->get_count() + 1);
+                if (ptr[i]->get_count() > 200)
+                {
+                    ptr[i]->set_direction(0);
+                }
             }
-            else
+            else //count = 200
             {
-               /* c.X = ptr[i]->getposx();
-                c.Y = ptr[i]->getposy();
-                g_Console.writeToBuffer(c, "", 0x09);*/
+               
 
                 ptr[i]->set_count(0);
 

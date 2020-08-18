@@ -12,12 +12,12 @@ Entity::~Entity()
 
 float Entity::getposx()
 {
-	return pos.get_x();
+	return this->pos.get_x();
 }
 
 float Entity::getposy()
 {
-	return pos.get_y();
+	return this->pos.get_y();
 }
 
 void Entity::set_direction(int a)
@@ -109,7 +109,7 @@ void Entity::set_pos(float speed)
 
 void Entity::set_pos(float xx, float yy)
 {
-	pos.set_x(xx);
-	pos.set_y(yy);
+	this->pos.set_x(xx);
+	this->pos.set_y(yy);
 }
 

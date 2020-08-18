@@ -22,8 +22,8 @@ SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 Player* player = new Player;
-NPC* ptr[10] = { nullptr , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-int sizeofArray = 10;
+NPC* ptr[30]; 
+int sizeofArray = 30;
 
 
 // Console object
@@ -46,7 +46,9 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
+
     player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -55,7 +57,13 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    spawnNPC(false, 4);
+
+    for (int i = 0; i < sizeofArray; i++)
+    {
+        ptr[i] = nullptr;
+    }
+
+    spawnNPC(false, 2);
 
 }
 
@@ -393,7 +401,7 @@ void renderGame()
 void renderMap()
 {
     // Set up sample colours, and output shadings
-    const WORD colors[] = {
+    /*const WORD colors[] = {
         0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
@@ -406,9 +414,11 @@ void renderMap()
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
         
-    }
-
+    }*/
+    
     renderNPC();
+    
+    
     
 }
 
@@ -519,15 +529,15 @@ void renderInputEvents()
 
 void renderNPC()
 {
-    COORD c;
+    COORD cc;
     int colour;
     for (int i = 0; i < sizeofArray; i++)
     {
         if (ptr[i] != nullptr)
         {
             
-            c.X = ptr[i]->getposx();
-            c.Y = ptr[i]->getposy();
+            cc.X = ptr[i]->getposx();
+            cc.Y = ptr[i]->getposy();
 
             if (ptr[i]->isHostile())
             {
@@ -538,7 +548,8 @@ void renderNPC()
                 colour = 0xF6;
             }
 
-            g_Console.writeToBuffer(c, " ", colour);
+            g_Console.writeToBuffer(cc, " ", colour);
+
         }
     }
     
@@ -550,7 +561,9 @@ void spawnNPC(bool isPolice, int no)
     {
         int xxx;
         int yyy;
+
         srand(time(NULL));
+
         do
         {
             xxx = rand() % 80;
@@ -585,19 +598,19 @@ void moveall(float spd)
     {
         if (ptr[i] != nullptr)
         {
-            //int a = ptr[i]->get_count();
-            //a = a;
+            
             if (ptr[i]->get_count() < 300)
             {
                 ptr[i]->set_count(ptr[i]->get_count() + 1);
+
+                //jus to make things smoother, so they dont move right before changing direction
                 if (ptr[i]->get_count() > 200)
                 {
                     ptr[i]->set_direction(0);
                 }
             }
-            else //count = 200
+            else //count = 300
             {
-               
 
                 ptr[i]->set_count(0);
 

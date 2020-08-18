@@ -340,7 +340,7 @@ void moveCharacter()
     g_sChar.m_cLocation.Y = player->getposy();
     g_sChar.m_cLocation.X = player->getposx();
 
-    moveall(0.1);
+    moveall(0.2);
     
 
 }
@@ -610,7 +610,7 @@ void moveall(float spd)
         if (NPCs[i] != nullptr)
         {
             
-            if (NPCs[i]->get_count() < 300)
+            if (NPCs[i]->get_count() < 300 && NPCs[i]->isHostile() == false)
             {
                 NPCs[i]->set_count(NPCs[i]->get_count() + 1);
 
@@ -676,8 +676,6 @@ void moveall(float spd)
                             NPCs[i]->set_direction(1);
                         }
                     }
-
-                    spd += 0.05;
                 }
 
 

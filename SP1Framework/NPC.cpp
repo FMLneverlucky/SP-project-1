@@ -1,6 +1,6 @@
 #include "NPC.h"
 
-NPC::NPC() :angry(false), dead(false)
+NPC::NPC() :angry(true), dead(false)
 {
 	//no codes yet
 }

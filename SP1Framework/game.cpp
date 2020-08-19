@@ -339,6 +339,11 @@ void moveCharacter()
     {
         entities[0]->set_direction(0);
     }
+
+    if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
+    {
+        entities[0]->set_direction(0);
+    }
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
@@ -357,22 +362,12 @@ void moveCharacter()
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-    for (int p = 0; p < particle_limit; p++)
-    {
-        if (projectile[p] != nullptr)
-        {
-            projectile[p]->update_particle();
-        }
-    }
-    
-    if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
-    {
-        entities[0]->set_direction(0);
-    }
-    
-    entities[0]->update_pos(g_dDeltaTime);
-
-    moveall();
+ 
+    entities[0]->update_pos(g_dDeltaTime); //sets pos of player
+    g_sChar.m_cLocation.Y = entities[0]->getposy(); //moves player
+    g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
+    moveall(); //moves NPCs
+    limitprojectile(); //moves/updates projectiles
 
     for (int p = 0; p < particle_limit; p++)
     {
@@ -395,11 +390,7 @@ void moveCharacter()
         }
     }
 
-    g_sChar.m_cLocation.Y = entities[0]->getposy();
-    g_sChar.m_cLocation.X = entities[0]->getposx();
-
-    moveall();
-    limitprojectile();
+ 
 
 }
 
@@ -683,7 +674,7 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no, float spd)
+void spawnNPC(bool isPolice, int no, float spd) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
 {
     for (int i = 0; i < no; i++)
     {
@@ -728,11 +719,12 @@ void moveall()
         if (NPCs[i] != nullptr)
         {
             
-            if (NPCs[i]->get_count() < 300 && NPCs[i]->isHostile() == false)
+            int tempcount = ((rand() % 3) + 5) / g_dDeltaTime;
+            if (NPCs[i]->get_count() < tempcount && NPCs[i]->isHostile() == false)
             {
                 NPCs[i]->set_count(NPCs[i]->get_count() + 1);
 
-                if (NPCs[i]->get_count() > 200)
+                if (NPCs[i]->get_count() > (0.7 * tempcount))
                 {
                     NPCs[i]->set_direction(0);
                 }
@@ -745,22 +737,25 @@ void moveall()
                 if (NPCs[i]->isHostile() == false)
                 {
                 
-                    int aaa = (rand() % 4) + 1;
+                    int aaa = (rand() % 7) + 1;
                     switch (aaa)
                     {
-                    case 1:
+                    case 1: //Up
                         NPCs[i]->set_direction(1);
                         break;
-                    case 2:
+                    case 2: //Down
                         NPCs[i]->set_direction(2);
                         break;
-                    case 3:
+                    case 3: //Left
                         NPCs[i]->set_direction(3);
                         break;
-                    case 4:
+                    case 4: //Right
                         NPCs[i]->set_direction(4);
                         break;
-                    default:
+                    case 5: //Don't move
+                        NPCs[i]->set_direction(0);
+                        break;
+                    default: //(6 or 7) continue in same direction
                         break;
                     }
 

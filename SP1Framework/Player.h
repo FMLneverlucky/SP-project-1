@@ -10,5 +10,6 @@ public:
     ~Player();
     char type();  // return char to tell what type of entity this is
     void update_pos();
+    Position* new_pos();
 };
 

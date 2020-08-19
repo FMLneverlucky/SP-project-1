@@ -85,10 +85,12 @@ void spawnNPC(bool isPolice, int no, float spd); //spawns NPCs
 void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
-void renderprojectile();
+void renderprojectile(); //set projectile colour and draw on map
 
 //UI, Map Objects - test
+void initBox(); //spawn all boxes for UI here
 void renderBox(); //draw a Box
+
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

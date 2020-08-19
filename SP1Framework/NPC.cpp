@@ -1,6 +1,6 @@
 #include "NPC.h"
 
-NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1)
+NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(3)
 {
 	
 }
@@ -18,6 +18,7 @@ bool NPC::isHostile()
 void NPC::anger()
 {
 	angry = true;
+	counter = 0;
 }
 
 void NPC::set_count(int a)
@@ -85,8 +86,28 @@ Position* NPC::new_pos(float dtime)
 	return &tempp;
 }
 
+int NPC::get_damage()
+{
+	return damage;
+}
+
+int NPC::get_ftime()
+{
+	return freezetime;
+}
+
 void NPC::update_pos(float dtime)
 {
 	pos.set_x(new_pos(dtime)->get_x());
 	pos.set_y(new_pos(dtime)->get_y());
+}
+
+void NPC::cooldownstart()
+{
+	freezetime = cooldown;
+}
+
+void NPC::cooldownend()
+{
+	freezetime = 0;
 }

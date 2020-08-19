@@ -6,10 +6,12 @@ class NPC :
 private:
     bool angry;
     bool dead;
-    int counter;
-    float speed;
+    int freezetime;
     int damage;
     int cooldown;
+    float speed;
+
+    int counter;
     
 public:
     NPC();
@@ -20,8 +22,12 @@ public:
     int get_count();
     char type();  // return char to tell what type of entity this is
     float get_speed();
+    int get_damage();
+    int get_ftime();
     void set_speed(float spd);
     void update_pos(float dtime);
+    void cooldownstart();
+    void cooldownend();
     Position* new_pos(float dtime);
 
 };

@@ -57,3 +57,18 @@ void Player::update_pos(float dtime)
 	pos.set_x(new_pos(dtime)->get_x());
 	pos.set_y(new_pos(dtime)->get_y());
 }
+
+int Player::get_HP()
+{
+	return HP;
+}
+
+void Player::resetHP()
+{
+	HP = 5;
+}
+
+void Player::loseHP(int ack)
+{
+	HP -= ack;
+}

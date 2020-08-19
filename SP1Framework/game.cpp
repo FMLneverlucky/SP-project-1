@@ -30,9 +30,9 @@ SMouseEvent g_mouseEvent;
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
-//Player* player = new Player;
+Player* player = new Player;
 //Entity* ePlayer = player;
-Entity* entities[21] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* entities[21] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 21;
 
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -368,6 +368,7 @@ void moveCharacter()
     g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
     moveall(); //moves NPCs
     limitprojectile(); //moves/updates projectiles
+    check_collision();
 
     for (int p = 0; p < particle_limit; p++)
     {
@@ -718,25 +719,25 @@ void moveall()
     {
         if (NPCs[i] != nullptr)
         {
-            
-            int tempcount = ((rand() % 3) + 5) / g_dDeltaTime;
-            if (NPCs[i]->get_count() < tempcount && NPCs[i]->isHostile() == false)
+            if (NPCs[i]->isHostile() == false)
             {
-                NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+                int tempcount = ((rand() % 3) + 5) / g_dDeltaTime;
 
-                if (NPCs[i]->get_count() > (0.7 * tempcount))
+                if (NPCs[i]->get_count() < tempcount && NPCs[i]->isHostile() == false)
                 {
-                    NPCs[i]->set_direction(0);
+                    NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+
+                    if (NPCs[i]->get_count() > (0.7 * tempcount))
+                    {
+                        NPCs[i]->set_direction(0);
+                    }
                 }
-            }
-            else //count = 300
-            {
-
-                NPCs[i]->set_count(0); 
-
-                if (NPCs[i]->isHostile() == false)
+                else //count = 300
                 {
-                
+
+                    NPCs[i]->set_count(0);
+
+                    
                     int aaa = (rand() % 7) + 1;
                     switch (aaa)
                     {
@@ -759,45 +760,67 @@ void moveall()
                         break;
                     }
 
+                    
                 }
-                else //is hostile
-                {
-                    int diffinx = g_sChar.m_cLocation.X - NPCs[i]->getposx();
-                    int diffiny = g_sChar.m_cLocation.Y - NPCs[i]->getposy();
 
-                    if (abs(diffinx) > abs(diffiny))
-                    {
-                        if (diffinx > 0)
-                        {
-                            NPCs[i]->set_direction(4);
-                        }
-                        else
-                        {
-                            NPCs[i]->set_direction(3);
-                        }
-                    }
-                    else //up or down
-                    {
-                        if (diffiny > 0)
-                        {
-                            NPCs[i]->set_direction(2);
-                        }
-                        else
-                        {
-                            NPCs[i]->set_direction(1);
-                        }
-                    }
+                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i])
+                {
+
+                    NPCs[i]->set_direction(0);
                 }
+
+                
             }
-             
-            if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i])
+            else if (NPCs[i]->get_ftime() != 0) //npc is hostile but on cooldown
             {
                 NPCs[i]->set_direction(0);
+                NPCs[i]->set_count(NPCs[i]->get_count() - 1);
+                if (NPCs[i]->get_count() == 0)
+                {
+                    NPCs[i]->cooldownend();
+                }
+                
+            }
+            else //npc is hostile and not on cooldown
+            {
+                int diffinx = g_sChar.m_cLocation.X - NPCs[i]->getposx();
+                int diffiny = g_sChar.m_cLocation.Y - NPCs[i]->getposy();
+
+                if (abs(diffinx) > abs(diffiny))
+                {
+                    if (diffinx > 0)
+                    {
+                        NPCs[i]->set_direction(4);
+                    }
+                    else
+                    {
+                        NPCs[i]->set_direction(3);
+                    }
+                                
+                }
+                else //up or down
+                {
+                    if (diffiny > 0)
+                    {
+                        NPCs[i]->set_direction(2);
+                    }
+                    else
+                    {
+                        NPCs[i]->set_direction(1);
+                    }
+                }
+
+                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i] && occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() != 'P')
+                {
+                    
+                    NPCs[i]->set_direction(0);
+                }
+                            
             }
 
             NPCs[i]->update_pos(g_dDeltaTime);
-               
         }
+        
         
     }
 }
@@ -879,4 +902,18 @@ void limitprojectile()
     }
 }
 
-
+void check_collision()
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P')
+            {
+                NPCs[i]->cooldownstart();
+                NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                player->loseHP(NPCs[i]->get_damage());
+            }
+        }
+    }
+}

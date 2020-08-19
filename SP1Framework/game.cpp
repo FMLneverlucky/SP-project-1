@@ -15,6 +15,8 @@ bool checkInputs = false;
 bool checkTimeElapsed = false;
 bool checkFramerate = true;
 
+std::string gameName = "zsdfghjk";
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -34,7 +36,7 @@ const int NPCLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-Object box(1, 1, Position(3, 8));
+//Object box(5, 5, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -280,7 +282,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 0.5) // wait for 0.5 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > 10) // wait for 0.5 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -370,7 +372,7 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderSplashScreen();
+    case S_SPLASHSCREEN: renderMainMenu();
         break;
     case S_GAME: renderGame();
         break;
@@ -432,7 +434,6 @@ void renderMap()
     }*/
 
     renderNPC();
-    renderBox();
     renderprojectile();
     
 }
@@ -734,16 +735,26 @@ void renderprojectile()
         }
     }
 }
-void initBox()
-{
-    //Object button()
-}
 
-void renderBox()
+void renderBox(Object* box, int colour, std::string text = " ")
 {
     COORD c;
-    c.X = box.position()->get_x();
-    c.Y = box.position()->get_y();
-    int colour = 0x0F;
-    g_Console.writeToBuffer(c, "Test", colour);
+    c.Y = box->referencePosition()->get_y();
+    for (int y = 0; y < box->height(); y++)
+    {
+        c.X = box->referencePosition()->get_x();
+        for (int x = 0; x < box->length(); x++)
+        {   
+            c.X++;
+            g_Console.writeToBuffer(c, text, colour);
+        }
+        c.Y++;
+    }
+}
+
+void renderMainMenu()
+{
+    COORD c = g_Console.getConsoleSize();
+    Object text(gameName.length(), 1, Position(c.X / 2, c.Y / 5));
+    renderBox(&text, 0x0F, gameName);
 }

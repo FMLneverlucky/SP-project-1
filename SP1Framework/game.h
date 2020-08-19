@@ -3,6 +3,7 @@
 #define _GAME_H
 
 #include "Framework\timer.h"
+#include<string>
 
 //Entities
 #include "Player.h"
@@ -84,8 +85,9 @@ Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 void renderprojectile();
 
 //UI, Map Objects - test
+void renderMainMenu(); //main menu.
 void initBox(); //spawn all boxes for UI here
-void renderBox(); //draw a Box
+void renderBox(Object*, int, std::string); // draw box. make sure box size is half of string length
 
 
 // keyboard and mouse input event managers

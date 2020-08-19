@@ -24,5 +24,5 @@ public:
 	int height();
 	Position* position();// get center of object
 	Position* referencePosition();// get top left position of object
-	//virtual char type() = 0;// know what type of object this is
+	char type();// know what type of object this is
 };

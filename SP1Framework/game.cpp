@@ -29,7 +29,7 @@ const int NPCLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-//Object box(1, 1, Position(3, 8));
+Object box(1, 1, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -725,12 +725,16 @@ void renderprojectile()
         }
     }
 }
+void initBox()
+{
+    //Object button()
+}
 
 void renderBox()
 {
-    /*COORD c;
+    COORD c;
     c.X = box.position()->get_x();
     c.Y = box.position()->get_y();
     int colour = 0x3C;
-    g_Console.writeToBuffer(c, "±", colour);*/
+    g_Console.writeToBuffer(c, "Test", colour);
 }

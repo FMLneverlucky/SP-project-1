@@ -291,7 +291,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 10) // wait for 0.5 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > 1) // wait for 0.5 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -348,28 +348,55 @@ void moveCharacter()
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 break;
             }
+            
         }
 
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    for (int p = 0; p < particle_limit; p++)
     {
-        entities[0]->set_direction(0);
+        if (projectile[p] != nullptr)
+        {
+            projectile[p]->update_particle();
+        }
     }
-
+    
     if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
     {
         entities[0]->set_direction(0);
     }
 
     entities[0]->update_pos();
+    moveall();
 
+    for (int p = 0; p < particle_limit; p++)
+    {
+        
+
+        if (projectile[p] != nullptr && occupied(projectile[p]->getpos()) != nullptr)
+        {
+            if (occupied(projectile[p]->getpos())->type() == 'C')
+            {
+                for (int i = 0; i < NPCLimit; i++)
+                {
+                    if (NPCs[i] != nullptr)
+                    {
+                        if (NPCs[i] == occupied(projectile[p]->getpos()))
+                        {
+                            NPCs[i]->anger();
+                        }
+                    }
+                }
+            }
+
+        }
+    }
 
     g_sChar.m_cLocation.Y = entities[0]->getposy();
     g_sChar.m_cLocation.X = entities[0]->getposx();
 
-    moveall();
+    
     
 
 }
@@ -798,9 +825,7 @@ void renderprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            
-            projectile[p]->update_particle();
-
+          
             pr.X = projectile[p]->get_px();
             pr.Y = projectile[p]->get_py();
 

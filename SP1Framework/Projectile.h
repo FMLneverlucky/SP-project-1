@@ -1,4 +1,5 @@
 #pragma once
+#include "Position.h"
 
 enum face
 {
@@ -22,5 +23,6 @@ public:
 	int get_px(void);
 	int get_py(void);
 	void direction(int m_x, int m_y);
+	Position* getpos();
 };
 

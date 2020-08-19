@@ -15,7 +15,6 @@ public:
 	Object(int, int, Position, Position);
 	~Object();
 	//set functions
-	void updateReferencePoint();// calculate top left position
 	void size(int, int);// ignores pivot point, changes lengths directly
 	void scale(int, int);// change size according to pivot point, multiplies the lengths
 	void translate(float, float);// moves the object
@@ -25,5 +24,5 @@ public:
 	int height();
 	Position* position();// get center of object
 	Position* referencePosition();// get top left position of object
-	virtual char type() = 0;// know what type of object this is
+	//virtual char type() = 0;// know what type of object this is
 };

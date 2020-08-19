@@ -85,7 +85,9 @@ void renderprojectile();
 void renderNP();
 
 //UI, Map Objects - test
+void initBox(); //spawn all boxes for UI here
 void renderBox(); //draw a Box
+
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

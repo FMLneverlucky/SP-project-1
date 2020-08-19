@@ -8,12 +8,14 @@ private:
     bool dead;
     int freezetime;
     int damage;
-    int cooldown;
     float speed;
 
     int counter;
+protected:
+    int cooldown;
     
 public:
+    NPC(int cd);
     NPC();
     ~NPC();
     bool isHostile();

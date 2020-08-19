@@ -1,8 +1,12 @@
 #include "NPC.h"
 
-NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(3)
+NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(cd)
 {
 	
+}
+NPC::NPC()
+{
+
 }
 
 NPC::~NPC()

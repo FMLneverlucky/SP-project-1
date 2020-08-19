@@ -76,7 +76,7 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     spawnWall(10);
-    spawnNPC(false, 5, 0.1);
+    spawnNPC(false, 5, 0.1, 3);
 
 }
 
@@ -675,7 +675,7 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no, float spd) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
+void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
 {
     for (int i = 0; i < no; i++)
     {
@@ -694,12 +694,12 @@ void spawnNPC(bool isPolice, int no, float spd) //spd shud be btw 0.1 and 0.9; s
             {
                 if (isPolice)
                 {
-                    NPCs[n] = new Police;
+                    NPCs[n] = new Police(cooldowntime);
                     entities[n + 1] = NPCs[n];
                 }
                 else
                 {
-                    NPCs[n] = new NPC;
+                    NPCs[n] = new NPC(cooldowntime);
                     entities[n + 1] = NPCs[n];
                 }
                 entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
@@ -908,7 +908,7 @@ void check_collision()
     {
         if (NPCs[i] != nullptr)
         {
-            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P')
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() == 0)
             {
                 NPCs[i]->cooldownstart();
                 NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);

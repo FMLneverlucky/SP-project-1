@@ -810,26 +810,16 @@ void renderprojectile()
         }
     }
 }
-
-void renderBox(Object* box, int colour, std::string text = " ")
+void initBox()
 {
-    COORD c;
-    c.Y = box->referencePosition()->get_y();
-    for (int y = 0; y < box->height(); y++)
-    {
-        c.X = box->referencePosition()->get_x();
-        for (int x = 0; x < box->length(); x++)
-        {   
-            c.X++;
-            g_Console.writeToBuffer(c, text, colour);
-        }
-        c.Y++;
-    }
+    //Object button()
 }
 
-void renderMainMenu()
+void renderBox()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object text(gameName.length(), 1, Position(c.X / 2, c.Y / 5));
-    renderBox(&text, 0x0F, gameName);
+    COORD c;
+    c.X = box.position()->get_x();
+    c.Y = box.position()->get_y();
+    int colour = 0x0F;
+    g_Console.writeToBuffer(c, "Test", colour);
 }

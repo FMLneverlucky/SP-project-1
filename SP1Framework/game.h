@@ -76,6 +76,10 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+//Walls
+void spawnWall(int no);
+void renderWall();
+
 //NPCs - incomplete
 void spawnNPC(bool isPolice, int no, float spd); //spawns NPCs
 void moveall(); //moves all NPCs

@@ -9,6 +9,7 @@
 #include "time.h"
 #include <stdlib.h>
 #include "Projectile.h"
+#include "Wall.h"
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -21,10 +22,14 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 //Player* player = new Player;
 //Entity* ePlayer = player;
-Entity* entities[11] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 11;
+Entity* entities[21] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int entityLimit = 21;
+
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
+
+Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, };
+const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
@@ -60,6 +65,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
+    spawnWall(10);
     spawnNPC(false, 5, 0.1);
 
 }
@@ -425,6 +431,7 @@ void renderMap()
         
     }
 
+    renderWall();
     renderNPC();
     renderBox();
     renderprojectile();
@@ -536,6 +543,52 @@ void renderInputEvents()
     }   
 }
 
+void renderWall()
+{//maybe?
+    COORD c;
+    int colour;
+    for (int i = 0; i < WallLimit; i++)
+    {
+        if (Walls[i] != nullptr)
+        {
+            c.X = Walls[i]->getposx();
+            c.Y = Walls[i]->getposy();
+
+            colour = 0x00;
+
+            g_Console.writeToBuffer(c, "W", colour);
+        }
+    }
+
+}
+
+void spawnWall(int no)
+{
+    for (int i = 0; i < no; i++)
+    {
+        Position temp;
+        do
+        {
+            temp.set_x(rand() % 80);
+            temp.set_y(rand() % 24);
+        } while (occupied(&temp) != nullptr); //while pos is not available
+
+
+
+        for (int w = 0; w < WallLimit; w++)
+        {
+            if (Walls[w] == nullptr)
+            {
+                Walls[w] = new Wall;
+                entities[w + 11] = Walls[w];
+                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());
+                break;
+            }
+        }
+
+    }
+}
+
 void renderNPC()
 {//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
     
@@ -559,7 +612,7 @@ void renderNPC()
                 colour = 0xF6;
             }
 
-            g_Console.writeToBuffer(c, " ", colour);
+            g_Console.writeToBuffer(c, "N", colour);
         }
     }
     
@@ -576,10 +629,10 @@ void spawnNPC(bool isPolice, int no, float spd)
             temp.set_y(rand() % 24);
         } while (occupied(&temp) != nullptr); //while pos is not available
 
-        
-              
+
+
         for (int n = 0; n < NPCLimit; n++)
-        { 
+        {
             if (NPCs[n] == nullptr)
             {
                 if (isPolice)
@@ -597,8 +650,8 @@ void spawnNPC(bool isPolice, int no, float spd)
                 break;
             }
         }
-        
-        
+
+
     }
 }
 

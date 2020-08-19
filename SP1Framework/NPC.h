@@ -6,7 +6,9 @@ class NPC :
 private:
     bool angry;
     bool dead;
-    int counter = 0;
+    int counter;
+    float speed;
+    int damage;
     
 public:
     NPC();
@@ -16,5 +18,8 @@ public:
     void set_count(int a);
     int get_count();
     char type();  // return char to tell what type of entity this is
+    float get_speed();
+    void set_speed(float spd);
+    void update_pos();
 };
 

@@ -23,6 +23,7 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 //Entity* ePlayer = player;
 Entity* entities[11] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 11;
+
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
 
@@ -336,7 +337,14 @@ void moveCharacter()
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
+    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    {
+        entities[0]->set_direction(0);
+    }
+
     entities[0]->update_pos();
+
+
     g_sChar.m_cLocation.Y = entities[0]->getposy();
     g_sChar.m_cLocation.X = entities[0]->getposx();
 
@@ -426,6 +434,7 @@ void renderMap()
     }
 
     renderNPC();
+    renderNP();
     renderBox();
     renderprojectile();
     
@@ -626,8 +635,7 @@ void moveall()
 
                 if (NPCs[i]->isHostile() == false)
                 {
-                    
-
+                
                     int aaa = (rand() % 4) + 1;
                     switch (aaa)
                     {
@@ -647,7 +655,6 @@ void moveall()
                         break;
                     }
 
-                    
                 }
                 else //is hostile
                 {
@@ -680,10 +687,13 @@ void moveall()
 
 
             }
-            NPCs[i]->update_pos();
 
-           
-    
+            if (occupied(NPCs[i]->new_pos()) != nullptr)
+            {
+                NPCs[i]->set_direction(0);
+            }
+
+            NPCs[i]->update_pos();
                
         }
         
@@ -696,7 +706,7 @@ Entity* occupied(Position* pos)
     {
         if (entities[i] != nullptr)
         {
-            if (entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+            if ((int)entities[i]->getpos()->get_x() == (int)pos->get_x() && (int)entities[i]->getpos()->get_y() == (int)pos->get_y())
             {
                 return entities[i];
             }
@@ -733,4 +743,13 @@ void renderBox()
     c.Y = box.position()->get_y();
     int colour = 0x3C;
     g_Console.writeToBuffer(c, "±", colour);*/
+}
+
+void renderNP()
+{
+    COORD c;
+    c.X = entities[0]->new_pos()->get_x();
+    c.Y = entities[0]->new_pos()->get_y();
+    int colour = 0xD4;
+    g_Console.writeToBuffer(c, " ", colour);
 }

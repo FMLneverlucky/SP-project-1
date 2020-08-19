@@ -55,3 +55,5 @@ void Entity::set_pos(float xx, float yy)
 	pos.set_y(yy);
 }
 
+
+

@@ -82,6 +82,7 @@ void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 void renderprojectile();
+void renderNP();
 
 //UI, Map Objects - test
 void renderBox(); //draw a Box

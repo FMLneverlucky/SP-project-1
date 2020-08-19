@@ -85,13 +85,14 @@ void renderInputEvents();   // renders the status of input events
 void spawnWall(int no);
 void renderWall();
 
-//NPCs - incomplete
+//NPCs 
 void spawnNPC(bool isPolice, int no, float spd); //spawns NPCs
 void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 void renderprojectile(); //set projectile colour and draw on map
 void limitprojectile();
+void check_collision();
 
 //UI, Map Objects
 void renderMainMenu(); //main menu.

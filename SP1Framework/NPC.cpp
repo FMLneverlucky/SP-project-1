@@ -1,6 +1,6 @@
 #include "NPC.h"
 
-NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1)
+NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(3)
 {
 	
 }
@@ -18,6 +18,7 @@ bool NPC::isHostile()
 void NPC::anger()
 {
 	angry = true;
+	counter = 0;
 }
 
 void NPC::set_count(int a)
@@ -45,7 +46,7 @@ void NPC::set_speed(float spd)
 	speed = spd;
 }
 
-Position* NPC::new_pos()
+Position* NPC::new_pos(float dtime)
 {
 	
 	tempp.set_x(pos.get_x());
@@ -57,25 +58,25 @@ Position* NPC::new_pos()
 	case UP:
 		if (pos.get_y() > 0)
 		{
-			tempp.set_y(pos.get_y() - (0.1 * speed));
+			tempp.set_y(pos.get_y() - (10 * speed * dtime));
 		}
 		break;
 	case DOWN:
 		if (pos.get_y() < 24)
 		{
-			tempp.set_y(pos.get_y() + (0.1 * speed));
+			tempp.set_y(pos.get_y() + (10 * speed * dtime));
 		}
 		break;
 	case LEFT:
 		if (pos.get_x() > 0)
 		{
-			tempp.set_x(pos.get_x() - (0.2 * speed));
+			tempp.set_x(pos.get_x() - (20 * speed * dtime));
 		}
 		break;
 	case RIGHT:
 		if (pos.get_x() < 79)
 		{
-			tempp.set_x(pos.get_x() + (0.2 * speed));
+			tempp.set_x(pos.get_x() + (20 * speed * dtime));
 		}
 		break;
 	case NOT:
@@ -85,8 +86,28 @@ Position* NPC::new_pos()
 	return &tempp;
 }
 
-void NPC::update_pos()
+int NPC::get_damage()
 {
-	pos.set_x(new_pos()->get_x());
-	pos.set_y(new_pos()->get_y());
+	return damage;
+}
+
+int NPC::get_ftime()
+{
+	return freezetime;
+}
+
+void NPC::update_pos(float dtime)
+{
+	pos.set_x(new_pos(dtime)->get_x());
+	pos.set_y(new_pos(dtime)->get_y());
+}
+
+void NPC::cooldownstart()
+{
+	freezetime = cooldown;
+}
+
+void NPC::cooldownend()
+{
+	freezetime = 0;
 }

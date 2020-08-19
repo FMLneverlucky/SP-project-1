@@ -89,7 +89,7 @@ Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 void renderprojectile(); //set projectile colour and draw on map
 
 //UI, Map Objects - test
-void renderMainMenu(); //main menu.
+//void renderMainMenu(); //main menu.
 void initBox(); //spawn all boxes for UI here
 void renderBox(Object*, int, std::string); // draw box. make sure box size is half of string length
 

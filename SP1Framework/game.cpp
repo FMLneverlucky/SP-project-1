@@ -394,7 +394,7 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderMainMenu();
+    case S_SPLASHSCREEN: renderSplashScreen();
         break;
     case S_GAME: renderGame();
         break;
@@ -810,16 +810,12 @@ void renderprojectile()
         }
     }
 }
-void initBox()
-{
-    //Object button()
-}
 
-void renderBox()
+void renderBox(Object*, int, std::string)
 {
-    COORD c;
+   /* COORD c;
     c.X = box.position()->get_x();
     c.Y = box.position()->get_y();
     int colour = 0x0F;
-    g_Console.writeToBuffer(c, "Test", colour);
+    g_Console.writeToBuffer(c, "Test", colour);*/
 }

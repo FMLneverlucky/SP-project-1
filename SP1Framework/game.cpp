@@ -19,9 +19,9 @@ SMouseEvent g_mouseEvent;
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
-Player* player = new Player;
-Entity* ePlayer = player;
-Entity* entities[11] = { ePlayer , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+//Player* player = new Player;
+//Entity* ePlayer = player;
+Entity* entities[11] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 11;
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
@@ -51,7 +51,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
-    player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    entities[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -295,30 +295,30 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        player->set_direction(1);
+        entities[0]->set_direction(1);
         //g_sChar.m_cLocation.Y = 13;
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.X--;     
-        player->set_direction(3);
+        entities[0]->set_direction(3);
     }
     else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.Y++;       
-        player->set_direction(2);
+        entities[0]->set_direction(2);
     }
     else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.X++;        
-        player->set_direction(4);
+        entities[0]->set_direction(4);
     }
     else
     {
-        player->set_direction(0);
+        entities[0]->set_direction(0);
     }
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
@@ -336,9 +336,9 @@ void moveCharacter()
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-    player->set_pos();
-    g_sChar.m_cLocation.Y = player->getposy();
-    g_sChar.m_cLocation.X = player->getposx();
+    entities[0]->update_pos();
+    g_sChar.m_cLocation.Y = entities[0]->getposy();
+    g_sChar.m_cLocation.X = entities[0]->getposx();
 
     moveall();
     
@@ -680,7 +680,7 @@ void moveall()
 
 
             }
-            NPCs[i]->set_pos(NPCs[i]->get_speed());
+            NPCs[i]->update_pos();
 
            
     

@@ -20,5 +20,6 @@ public:
     char type();  // return char to tell what type of entity this is
     float get_speed();
     void set_speed(float spd);
+    void update_pos();
 };
 

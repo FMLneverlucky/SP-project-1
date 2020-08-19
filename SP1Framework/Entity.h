@@ -12,7 +12,7 @@ enum direction
 
 class Entity
 {
-private:
+protected:
 	direction direction = NOT;
 	Position pos;
 	
@@ -20,8 +20,7 @@ public:
 	Entity();
 	~Entity();
 	void set_direction(int a);
-	void set_pos();
-	void set_pos(float speed);
+	virtual void update_pos() = 0;
 	void set_pos(float xx, float yy);
 	float getposx();
 	float getposy();

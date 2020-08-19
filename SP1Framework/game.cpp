@@ -365,19 +365,18 @@ void moveCharacter()
         }
     }
     
-    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
     {
         entities[0]->set_direction(0);
     }
+    
+    entities[0]->update_pos(g_dDeltaTime);
 
-    entities[0]->update_pos();
     moveall();
 
     for (int p = 0; p < particle_limit; p++)
     {
-        
-
-        if (projectile[p] != nullptr && occupied(projectile[p]->getpos()) != nullptr)
+        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr))
         {
             if (occupied(projectile[p]->getpos())->type() == 'C')
             {
@@ -787,12 +786,12 @@ void moveall()
                 }
             }
              
-            if (occupied(NPCs[i]->new_pos()) != nullptr && occupied(NPCs[i]->new_pos()) != NPCs[i])
+            if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i])
             {
                 NPCs[i]->set_direction(0);
             }
 
-            NPCs[i]->update_pos();
+            NPCs[i]->update_pos(g_dDeltaTime);
                
         }
         
@@ -875,3 +874,5 @@ void limitprojectile()
         }
     }
 }
+
+

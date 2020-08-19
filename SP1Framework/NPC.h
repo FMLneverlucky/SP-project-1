@@ -9,6 +9,7 @@ private:
     int counter;
     float speed;
     int damage;
+    int cooldown;
     
 public:
     NPC();
@@ -20,8 +21,8 @@ public:
     char type();  // return char to tell what type of entity this is
     float get_speed();
     void set_speed(float spd);
-    void update_pos();
-    Position* new_pos();
+    void update_pos(float dtime);
+    Position* new_pos(float dtime);
 
 };
 

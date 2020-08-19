@@ -45,7 +45,7 @@ void NPC::set_speed(float spd)
 	speed = spd;
 }
 
-Position* NPC::new_pos()
+Position* NPC::new_pos(float dtime)
 {
 	
 	tempp.set_x(pos.get_x());
@@ -57,25 +57,25 @@ Position* NPC::new_pos()
 	case UP:
 		if (pos.get_y() > 0)
 		{
-			tempp.set_y(pos.get_y() - (0.1 * speed));
+			tempp.set_y(pos.get_y() - (0.1 * speed * dtime));
 		}
 		break;
 	case DOWN:
 		if (pos.get_y() < 24)
 		{
-			tempp.set_y(pos.get_y() + (0.1 * speed));
+			tempp.set_y(pos.get_y() + (0.1 * speed * dtime));
 		}
 		break;
 	case LEFT:
 		if (pos.get_x() > 0)
 		{
-			tempp.set_x(pos.get_x() - (0.2 * speed));
+			tempp.set_x(pos.get_x() - (0.2 * speed * dtime));
 		}
 		break;
 	case RIGHT:
 		if (pos.get_x() < 79)
 		{
-			tempp.set_x(pos.get_x() + (0.2 * speed));
+			tempp.set_x(pos.get_x() + (0.2 * speed * dtime));
 		}
 		break;
 	case NOT:
@@ -85,8 +85,8 @@ Position* NPC::new_pos()
 	return &tempp;
 }
 
-void NPC::update_pos()
+void NPC::update_pos(float dtime)
 {
-	pos.set_x(new_pos()->get_x());
-	pos.set_y(new_pos()->get_y());
+	pos.set_x(new_pos(dtime)->get_x());
+	pos.set_y(new_pos(dtime)->get_y());
 }

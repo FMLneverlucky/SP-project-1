@@ -41,3 +41,15 @@ int Projectile::get_py(void)
 {
 	return y;
 }
+
+void Projectile::direction(int m_x, int m_y)
+{
+	if (m_x < x)
+		dir = left;
+	else if (m_x > x)
+		dir = right;
+	else if (m_y < y)
+		dir = down;
+	else
+		dir = up;
+}

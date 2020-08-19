@@ -21,6 +21,6 @@ public:
 	void update_particle();
 	int get_px(void);
 	int get_py(void);
-	void direction();
+	void direction(int m_x, int m_y);
 };
 

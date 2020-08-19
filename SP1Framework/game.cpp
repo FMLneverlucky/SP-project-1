@@ -713,6 +713,7 @@ void renderprojectile()
     {
         if (projectile[p] != nullptr)
         {
+            projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
             projectile[p]->update_particle();
 
             c.X = projectile[p]->get_px();
@@ -732,16 +733,4 @@ void renderBox()
     c.Y = box.position()->get_y();
     int colour = 0x3C;
     g_Console.writeToBuffer(c, "±", colour);*/
-}
-
-void Projectile::direction()
-{
-    if (g_mouseEvent.mousePosition.X < g_sChar.m_cLocation.X)
-        dir = left;
-    else if (g_mouseEvent.mousePosition.X > g_sChar.m_cLocation.X)
-        dir = right;
-    else if (g_mouseEvent.mousePosition.Y < g_sChar.m_cLocation.Y)
-        dir = down;
-    else
-        dir = up;
 }

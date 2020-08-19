@@ -1,10 +1,17 @@
 #pragma once
 #include "Entity.h"
 
-class Wall:
+//enum types
+//{
+//
+//};
+
+class Wall :
     public Entity
+
 {
 private:
+    //int type;
 
 public:
     Wall();

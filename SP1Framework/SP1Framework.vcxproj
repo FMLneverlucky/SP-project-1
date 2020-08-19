@@ -90,6 +90,7 @@
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="Wall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entity.h" />
@@ -102,6 +103,7 @@
     <ClInclude Include="Police.h" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="Projectile.h" />
+    <ClInclude Include="Wall.h" />
     <ClInclude Include="UI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

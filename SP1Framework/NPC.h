@@ -21,5 +21,7 @@ public:
     float get_speed();
     void set_speed(float spd);
     void update_pos();
+    Position* new_pos();
+
 };
 

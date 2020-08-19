@@ -9,6 +9,7 @@
 #include "time.h"
 #include <stdlib.h>
 #include "Projectile.h"
+#include "Wall.h"
 
 //FOR TESTING
 bool checkInputs = false;
@@ -28,10 +29,14 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 //Player* player = new Player;
 //Entity* ePlayer = player;
-Entity* entities[11] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 11;
+Entity* entities[21] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int entityLimit = 21;
+
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
+
+Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, };
+const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
@@ -67,6 +72,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
+    spawnWall(10);
     spawnNPC(false, 5, 0.1);
 
 }
@@ -95,7 +101,10 @@ void shutdown( void )
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
-            delete projectile[p];
+        {
+            if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
+                delete projectile[p];
+        }
     }
 }
 
@@ -335,15 +344,28 @@ void moveCharacter()
             if (projectile[p] == nullptr)
             {
                 projectile[p] = new Projectile;
+                projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+                projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+                break;
             }
-
-            projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
         }
 
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
+    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    {
+        entities[0]->set_direction(0);
+    }
+
+    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    {
+        entities[0]->set_direction(0);
+    }
+
     entities[0]->update_pos();
+
+
     g_sChar.m_cLocation.Y = entities[0]->getposy();
     g_sChar.m_cLocation.X = entities[0]->getposx();
 
@@ -433,6 +455,7 @@ void renderMap()
         
     }*/
 
+    renderWall();
     renderNPC();
     renderprojectile();
     
@@ -548,6 +571,52 @@ void renderInputEvents()
     }   
 }
 
+void renderWall()
+{//maybe?
+    COORD c;
+    int colour;
+    for (int i = 0; i < WallLimit; i++)
+    {
+        if (Walls[i] != nullptr)
+        {
+            c.X = Walls[i]->getposx();
+            c.Y = Walls[i]->getposy();
+
+            colour = 0x00;
+
+            g_Console.writeToBuffer(c, "W", colour);
+        }
+    }
+
+}
+
+void spawnWall(int no)
+{
+    for (int i = 0; i < no; i++)
+    {
+        Position temp;
+        do
+        {
+            temp.set_x(rand() % 80);
+            temp.set_y(rand() % 24);
+        } while (occupied(&temp) != nullptr); //while pos is not available
+
+
+
+        for (int w = 0; w < WallLimit; w++)
+        {
+            if (Walls[w] == nullptr)
+            {
+                Walls[w] = new Wall;
+                entities[w + 11] = Walls[w];
+                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());
+                break;
+            }
+        }
+
+    }
+}
+
 void renderNPC()
 {//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
     
@@ -571,7 +640,7 @@ void renderNPC()
                 colour = 0xF6;
             }
 
-            g_Console.writeToBuffer(c, " ", colour);
+            g_Console.writeToBuffer(c, "N", colour);
         }
     }
     
@@ -588,10 +657,10 @@ void spawnNPC(bool isPolice, int no, float spd)
             temp.set_y(rand() % 24);
         } while (occupied(&temp) != nullptr); //while pos is not available
 
-        
-              
+
+
         for (int n = 0; n < NPCLimit; n++)
-        { 
+        {
             if (NPCs[n] == nullptr)
             {
                 if (isPolice)
@@ -609,8 +678,8 @@ void spawnNPC(bool isPolice, int no, float spd)
                 break;
             }
         }
-        
-        
+
+
     }
 }
 
@@ -638,8 +707,7 @@ void moveall()
 
                 if (NPCs[i]->isHostile() == false)
                 {
-                    
-
+                
                     int aaa = (rand() % 4) + 1;
                     switch (aaa)
                     {
@@ -659,7 +727,6 @@ void moveall()
                         break;
                     }
 
-                    
                 }
                 else //is hostile
                 {
@@ -690,10 +757,13 @@ void moveall()
                     }
                 }
             }
-            NPCs[i]->update_pos();
 
-           
-    
+            if (occupied(NPCs[i]->new_pos()) != nullptr)
+            {
+                NPCs[i]->set_direction(0);
+            }
+
+            NPCs[i]->update_pos();
                
         }
         
@@ -706,7 +776,7 @@ Entity* occupied(Position* pos)
     {
         if (entities[i] != nullptr)
         {
-            if (entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+            if ((int)entities[i]->getpos()->get_x() == (int)pos->get_x() && (int)entities[i]->getpos()->get_y() == (int)pos->get_y())
             {
                 return entities[i];
             }
@@ -715,21 +785,26 @@ Entity* occupied(Position* pos)
     return nullptr;
 }
 
+void initBox()
+{
+    //Object button()
+}
+
 void renderprojectile()
 {
-    COORD c;
+    COORD pr;
     int colour;
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
         {
-            projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+            
             projectile[p]->update_particle();
 
-            c.X = projectile[p]->get_px();
-            c.Y = projectile[p]->get_py();
+            pr.X = projectile[p]->get_px();
+            pr.Y = projectile[p]->get_py();
 
-            colour = 0x6F;
+            colour = 0xA1;
 
             g_Console.writeToBuffer(c, " ", colour);
         }

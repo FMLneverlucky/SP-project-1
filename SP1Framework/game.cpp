@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include "Projectile.h"
 
+//FOR TESTING
+bool checkInputs = false;
+bool checkTimeElapsed = false;
+bool checkFramerate = true;
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -371,7 +376,8 @@ void render()
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
-    renderInputEvents();    // renders status of input events
+    if (checkInputs)
+        renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
@@ -415,7 +421,7 @@ void renderMap()
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
 
-    COORD c;
+    /*COORD c;
     for (int i = 0; i < 12; ++i)
     {
         c.X = 5 * i;
@@ -423,7 +429,7 @@ void renderMap()
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
         
-    }
+    }*/
 
     renderNPC();
     renderBox();
@@ -445,20 +451,25 @@ void renderCharacter()
 void renderFramerate()
 {
     COORD c;
-    // displays the framerate
     std::ostringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << 1.0 / g_dDeltaTime << "fps";
-    c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str());
-
+    // displays the framerate
+    if (checkFramerate)
+    {
+        ss << std::fixed << std::setprecision(3);
+        ss << 1.0 / g_dDeltaTime << "fps";
+        c.X = g_Console.getConsoleSize().X - 9;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str());
+    }
     // displays the elapsed time
-    ss.str("");
-    ss << g_dElapsedTime << "secs";
-    c.X = 0;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
+    if (checkTimeElapsed)
+    {
+        ss.str("");
+        ss << g_dElapsedTime << "secs";
+        c.X = 0;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str(), 0x59);
+    }
 }
 
 // this is an example of how you would use the input events
@@ -677,8 +688,6 @@ void moveall()
                         }
                     }
                 }
-
-
             }
             NPCs[i]->update_pos();
 
@@ -735,6 +744,6 @@ void renderBox()
     COORD c;
     c.X = box.position()->get_x();
     c.Y = box.position()->get_y();
-    int colour = 0x3C;
+    int colour = 0x0F;
     g_Console.writeToBuffer(c, "Test", colour);
 }

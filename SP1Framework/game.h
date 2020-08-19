@@ -91,6 +91,7 @@ void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 void renderprojectile(); //set projectile colour and draw on map
+void limitprojectile();
 
 //UI, Map Objects
 void renderMainMenu(); //main menu.

@@ -11,6 +11,11 @@
 #include "Projectile.h"
 #include "Wall.h"
 
+//FOR TESTING
+bool checkInputs = false;
+bool checkTimeElapsed = false;
+bool checkFramerate = true;
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -34,7 +39,7 @@ const int WallLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-//Object box(1, 1, Position(3, 8));
+Object box(1, 1, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -342,7 +347,14 @@ void moveCharacter()
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
+    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    {
+        entities[0]->set_direction(0);
+    }
+
     entities[0]->update_pos();
+
+
     g_sChar.m_cLocation.Y = entities[0]->getposy();
     g_sChar.m_cLocation.X = entities[0]->getposx();
 
@@ -377,7 +389,8 @@ void render()
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
-    renderInputEvents();    // renders status of input events
+    if (checkInputs)
+        renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
@@ -421,7 +434,7 @@ void renderMap()
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
 
-    COORD c;
+    /*COORD c;
     for (int i = 0; i < 12; ++i)
     {
         c.X = 5 * i;
@@ -429,7 +442,7 @@ void renderMap()
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
         
-    }
+    }*/
 
     renderWall();
     renderNPC();
@@ -452,20 +465,25 @@ void renderCharacter()
 void renderFramerate()
 {
     COORD c;
-    // displays the framerate
     std::ostringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << 1.0 / g_dDeltaTime << "fps";
-    c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str());
-
+    // displays the framerate
+    if (checkFramerate)
+    {
+        ss << std::fixed << std::setprecision(3);
+        ss << 1.0 / g_dDeltaTime << "fps";
+        c.X = g_Console.getConsoleSize().X - 9;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str());
+    }
     // displays the elapsed time
-    ss.str("");
-    ss << g_dElapsedTime << "secs";
-    c.X = 0;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
+    if (checkTimeElapsed)
+    {
+        ss.str("");
+        ss << g_dElapsedTime << "secs";
+        c.X = 0;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str(), 0x59);
+    }
 }
 
 // this is an example of how you would use the input events
@@ -679,8 +697,7 @@ void moveall()
 
                 if (NPCs[i]->isHostile() == false)
                 {
-                    
-
+                
                     int aaa = (rand() % 4) + 1;
                     switch (aaa)
                     {
@@ -700,7 +717,6 @@ void moveall()
                         break;
                     }
 
-                    
                 }
                 else //is hostile
                 {
@@ -730,13 +746,14 @@ void moveall()
                         }
                     }
                 }
-
-
             }
-            NPCs[i]->update_pos();
 
-           
-    
+            if (occupied(NPCs[i]->new_pos()) != nullptr)
+            {
+                NPCs[i]->set_direction(0);
+            }
+
+            NPCs[i]->update_pos();
                
         }
         
@@ -749,13 +766,18 @@ Entity* occupied(Position* pos)
     {
         if (entities[i] != nullptr)
         {
-            if (entities[i]->getpos()->get_x() == pos->get_x() && entities[i]->getpos()->get_y() == pos->get_y())
+            if ((int)entities[i]->getpos()->get_x() == (int)pos->get_x() && (int)entities[i]->getpos()->get_y() == (int)pos->get_y())
             {
                 return entities[i];
             }
         }
     }
     return nullptr;
+}
+
+void initBox()
+{
+    //Object button()
 }
 
 void renderprojectile()
@@ -779,11 +801,14 @@ void renderprojectile()
     }
 }
 
+
 void renderBox()
 {
-    /*COORD c;
+    COORD c;
     c.X = box.position()->get_x();
     c.Y = box.position()->get_y();
+
     int colour = 0x3C;
-    g_Console.writeToBuffer(c, "±", colour);*/
+    g_Console.writeToBuffer(c, "±", colour);
 }
+

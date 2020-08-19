@@ -88,7 +88,10 @@ void shutdown( void )
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
-            delete projectile[p];
+        {
+            if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
+                delete projectile[p];
+        }
     }
 }
 
@@ -328,9 +331,10 @@ void moveCharacter()
             if (projectile[p] == nullptr)
             {
                 projectile[p] = new Projectile;
+                projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+                projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+                break;
             }
-
-            projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
         }
 
         g_sChar.m_bActive = !g_sChar.m_bActive;
@@ -707,21 +711,21 @@ Entity* occupied(Position* pos)
 
 void renderprojectile()
 {
-    COORD c;
+    COORD pr;
     int colour;
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
         {
-            projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+            
             projectile[p]->update_particle();
 
-            c.X = projectile[p]->get_px();
-            c.Y = projectile[p]->get_py();
+            pr.X = projectile[p]->get_px();
+            pr.Y = projectile[p]->get_py();
 
-            colour = 0x6F;
+            colour = 0xA1;
 
-            g_Console.writeToBuffer(c, " ", colour);
+            g_Console.writeToBuffer(pr, " ", colour);
         }
     }
 }

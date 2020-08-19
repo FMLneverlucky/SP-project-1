@@ -15,7 +15,6 @@ public:
 	Object(int, int, Position, Position);
 	~Object();
 	//set functions
-	void size(int, int);// ignores pivot point, changes lengths directly
 	void scale(int, int);// change size according to pivot point, multiplies the lengths
 	void translate(float, float);// moves the object
 	void setPivot(int, int);

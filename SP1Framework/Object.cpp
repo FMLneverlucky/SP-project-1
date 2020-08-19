@@ -33,11 +33,6 @@ Object::~Object()
 {
 	//Nothing.
 }
-void Object::size(int x, int y)
-{
-	sizeX = x;
-	sizeY = y;
-}
 void Object::scale(int x, int y)
 {
 	sizeX *= x;

@@ -46,8 +46,12 @@ enum EKEYS
 // Enumeration for the different screen states
 enum EGAMESTATES
 {
-    S_SPLASHSCREEN,
-    S_GAME,
+    S_MAINMENU,
+    S_GAMEMODE1,
+    S_GAMEMODE2,
+    S_GAMEMODE3,
+    S_PAUSEMENU,
+    S_TEST,
     S_COUNT
 };
 
@@ -88,11 +92,11 @@ void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
 void renderprojectile(); //set projectile colour and draw on map
 
-//UI, Map Objects - test
+//UI, Map Objects
 void renderMainMenu(); //main menu.
-void initBox(); //spawn all boxes for UI here
-void renderBox(Object*, int, std::string); // draw box. make sure box size is half of string length
-
+void mainMenuWait(); //init UI for main menu
+void renderBox(Object*, int, std::string); // draw box. can add text if you want
+int checkButtonClicks(Object* [], int);// check if player clicked a button
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

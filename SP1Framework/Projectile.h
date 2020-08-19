@@ -1,5 +1,5 @@
 #pragma once
-#include<string>
+#include "Position.h"
 
 enum face
 {
@@ -26,5 +26,6 @@ public:
 	void set_spacecount(int fc);
 	int get_spacecount();
 	void direction(int m_x, int m_y);
+	Position* getpos();
 };
 

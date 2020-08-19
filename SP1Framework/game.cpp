@@ -15,9 +15,12 @@
 bool checkInputs = false;
 bool checkTimeElapsed = false;
 bool checkFramerate = true;
+float splashScreenTime = 10;
 
-std::string gameName = "zsdfghjk";
-
+std::string gameName = "A Very Fun Game";
+std::string gameMode1 = "GameMode1";
+std::string gameMode2 = "GameMode2";
+std::string gameMode3 = "GameMode3";
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -291,7 +294,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 1) // wait for 0.5 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > splashScreenTime) // wait for set time to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -348,23 +351,50 @@ void moveCharacter()
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 break;
             }
+            
         }
 
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    for (int p = 0; p < particle_limit; p++)
     {
-        entities[0]->set_direction(0);
+        if (projectile[p] != nullptr)
+        {
+            projectile[p]->update_particle();
+        }
     }
-
+    
     if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
     {
         entities[0]->set_direction(0);
     }
 
     entities[0]->update_pos();
+    moveall();
 
+    for (int p = 0; p < particle_limit; p++)
+    {
+        
+
+        if (projectile[p] != nullptr && occupied(projectile[p]->getpos()) != nullptr)
+        {
+            if (occupied(projectile[p]->getpos())->type() == 'C')
+            {
+                for (int i = 0; i < NPCLimit; i++)
+                {
+                    if (NPCs[i] != nullptr)
+                    {
+                        if (NPCs[i] == occupied(projectile[p]->getpos()))
+                        {
+                            NPCs[i]->anger();
+                        }
+                    }
+                }
+            }
+
+        }
+    }
 
     g_sChar.m_cLocation.Y = entities[0]->getposy();
     g_sChar.m_cLocation.X = entities[0]->getposx();
@@ -394,7 +424,7 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderSplashScreen();
+    case S_SPLASHSCREEN: renderMainMenu();
         break;
     case S_GAME: renderGame();
         break;
@@ -809,6 +839,24 @@ void renderprojectile()
     }
 }
 
+void renderBox(Object* box, int colour, std::string text = " ")
+{
+    COORD c;
+    char temp;
+    int i = 0;// for displaying text
+    c.Y = box->referencePosition()->get_y();
+    for (int y = 0; y < box->height(); y++)
+    {
+        c.X = box->referencePosition()->get_x();
+        for (int x = 0; x < box->length(); x++)
+        {
+            c.X++;
+            g_Console.writeToBuffer(c, temp = (x >= ((box->length() + 1) / 2) - 1 - text.length() / 2 && x < ((box->length() + 1) / 2) + text.length() / 2  && y == box->height() / 2) ? text[i++] : ' ', colour);
+        }
+        c.Y++;
+    }
+}
+
 void limitprojectile()
 {
     for (int p = 0; p < particle_limit; p++)
@@ -831,9 +879,14 @@ void limitprojectile()
 
 void renderBox(Object*, int, std::string)
 {
-   /* COORD c;
-    c.X = box.position()->get_x();
-    c.Y = box.position()->get_y();
-    int colour = 0x0F;
-    g_Console.writeToBuffer(c, "Test", colour);*/
+    COORD c = g_Console.getConsoleSize();
+    Object title(71, 3, Position(c.X / 2, c.Y / 5));
+    renderBox(&title, 0x0F, gameName);
+
+    Object button(gameMode1.length() + 2, 3, Position(c.X / 2, c.Y * 2 / 5));
+    renderBox(&button, 0x04, gameMode1);
+    Object button2(gameMode2.length() + 2, 3, Position(c.X / 2, c.Y * 3 / 5));
+    renderBox(&button2, 0xA, gameMode2);
+    Object button3(gameMode3.length() + 2, 3, Position(c.X / 2, c.Y * 4 / 5));
+    renderBox(&button3, 0x0B, gameMode3);
 }

@@ -2,6 +2,8 @@
 #include "Entity.h"
 class Player : public Entity
 {
+private:
+    int HP;
 public:
     Player();
     ~Player();

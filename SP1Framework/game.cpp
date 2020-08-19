@@ -60,7 +60,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    spawnNPC(false, 5);
+    spawnNPC(false, 5, 0.1);
 
 }
 
@@ -340,7 +340,7 @@ void moveCharacter()
     g_sChar.m_cLocation.Y = player->getposy();
     g_sChar.m_cLocation.X = player->getposx();
 
-    moveall(0.1);
+    moveall();
     
 
 }
@@ -565,7 +565,7 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no)
+void spawnNPC(bool isPolice, int no, float spd)
 {
     for (int i = 0; i < no; i++)
     {
@@ -593,7 +593,7 @@ void spawnNPC(bool isPolice, int no)
                     entities[n + 1] = NPCs[n];
                 }
                 entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
-                
+                NPCs[n]->set_speed(spd);
                 break;
             }
         }
@@ -602,7 +602,7 @@ void spawnNPC(bool isPolice, int no)
     }
 }
 
-void moveall(float spd)
+void moveall()
 {
     
     for (int i = 0; i < NPCLimit; i++)
@@ -680,7 +680,7 @@ void moveall(float spd)
 
 
             }
-            NPCs[i]->set_pos(spd);
+            NPCs[i]->set_pos(NPCs[i]->get_speed());
 
            
     

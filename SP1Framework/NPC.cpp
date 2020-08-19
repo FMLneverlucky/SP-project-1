@@ -1,8 +1,8 @@
 #include "NPC.h"
 
-NPC::NPC() :angry(false), dead(false)
+NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1)
 {
-	//no codes yet
+	
 }
 
 NPC::~NPC()
@@ -35,3 +35,12 @@ char NPC::type()
 	return 'C'; // C for civilian. do diff char for diff derived class
 }
 
+float NPC::get_speed()
+{
+	return speed;
+}
+
+void NPC::set_speed(float spd)
+{
+	speed = spd;
+}

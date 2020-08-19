@@ -629,9 +629,8 @@ void spawnWall(int no)
         {
             temp.set_x(rand() % 80);
             temp.set_y(rand() % 24);
+
         } while (occupied(&temp) != nullptr); //while pos is not available
-
-
 
         for (int w = 0; w < WallLimit; w++)
         {
@@ -787,7 +786,7 @@ void moveall()
                     }
                 }
             }
-
+             
             if (occupied(NPCs[i]->new_pos()) != nullptr && occupied(NPCs[i]->new_pos()) != NPCs[i])
             {
                 NPCs[i]->set_direction(0);

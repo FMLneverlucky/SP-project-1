@@ -5,6 +5,7 @@ Projectile::Projectile()
 	x = 40;
 	y = 0;
 	dir = none;
+	spacecount = 0;
 }
 
 Projectile::~Projectile()
@@ -20,16 +21,16 @@ void Projectile::set_ppos(int px, int py)
 void Projectile::update_particle()
 {
 	if (dir == left)
-		this->x = x -= 0.5;
+		this->x -= 0.2;
 
 	else if (dir == right)
-		this->x += 0.5;
+		this->x += 0.2;
 
 	else if (dir == down)
-		this->y -= 0.5;
+		this->y -= 0.2;
 
 	else
-		this->y += 0.5;
+		this->y += 0.2;
 }
 
 int Projectile::get_px(void)
@@ -42,16 +43,40 @@ int Projectile::get_py(void)
 	return y;
 }
 
+void Projectile::set_spacecount(int fc)
+{
+	spacecount = fc;
+}
+
+int Projectile::get_spacecount()
+{
+	return spacecount;
+}
+
 void Projectile::direction(int m_x, int m_y)
 {
 	if (m_x < x)
+	{
 		dir = left;
+		spacecount = 20;
+	}
+
 	else if (m_x > x)
+	{
 		dir = right;
+		spacecount = 20;
+	}
 	else if (m_y < y)
+	{
 		dir = down;
+		spacecount = 10;
+	}
 	else
+	{
 		dir = up;
+		spacecount = 10;
+	}
+}
 }
 
 Position* Projectile::getpos()

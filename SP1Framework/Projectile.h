@@ -1,4 +1,5 @@
 #pragma once
+#include<string>
 
 enum face
 {
@@ -13,6 +14,7 @@ class Projectile
 {
 	float x, y;
 	face dir;
+	int spacecount;
 
 public:
 	Projectile();
@@ -21,6 +23,8 @@ public:
 	void update_particle();
 	int get_px(void);
 	int get_py(void);
+	void set_spacecount(int fc);
+	int get_spacecount();
 	void direction(int m_x, int m_y);
 };
 

@@ -291,7 +291,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 10) // wait for 0.5 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > 1) // wait for 0.5 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -370,7 +370,7 @@ void moveCharacter()
     g_sChar.m_cLocation.X = entities[0]->getposx();
 
     moveall();
-    
+    limitprojectile();
 
 }
 
@@ -688,14 +688,14 @@ void moveall()
     
     for (int i = 0; i < NPCLimit; i++)
     {
-        if (NPCs[i] != nullptr)
+        if (NPCs[i] != nullptr) // npc exists
         {
             
-            if (NPCs[i]->get_count() < 300 && NPCs[i]->isHostile() == false)
+            if (NPCs[i]->get_count() < 300 && NPCs[i]->isHostile() == false) // npc is not 300 and not hostile
             {
-                NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+                NPCs[i]->set_count(NPCs[i]->get_count() + 1); //get initalized counter and make it hav speed 1 loops until 300
 
-                if (NPCs[i]->get_count() > 200)
+                if (NPCs[i]->get_count() > 200) //makes npc stop maybe can use???
                 {
                     NPCs[i]->set_direction(0);
                 }
@@ -703,7 +703,7 @@ void moveall()
             else //count = 300
             {
 
-                NPCs[i]->set_count(0);
+                NPCs[i]->set_count(0); 
 
                 if (NPCs[i]->isHostile() == false)
                 {
@@ -798,8 +798,6 @@ void renderprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            
-            projectile[p]->update_particle();
 
             pr.X = projectile[p]->get_px();
             pr.Y = projectile[p]->get_py();
@@ -807,6 +805,26 @@ void renderprojectile()
             colour = 0xA1;
 
             g_Console.writeToBuffer(pr, " ", colour);
+        }
+    }
+}
+
+void limitprojectile()
+{
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+        {
+            if (projectile[p]->get_spacecount() != 0)
+            {
+                projectile[p]->update_particle();
+                projectile[p]->set_spacecount(projectile[p]->get_spacecount()-1);
+            }
+            else
+            {
+                delete projectile[p];
+                projectile[p] = nullptr;
+            }
         }
     }
 }

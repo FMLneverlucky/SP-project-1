@@ -9,11 +9,14 @@
 #include "time.h"
 #include <stdlib.h>
 #include "Projectile.h"
+#include "Wall.h"
 
 //FOR TESTING
 bool checkInputs = false;
 bool checkTimeElapsed = false;
 bool checkFramerate = true;
+
+std::string gameName = "zsdfghjk";
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -26,16 +29,19 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 //Player* player = new Player;
 //Entity* ePlayer = player;
-Entity* entities[11] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 11;
+Entity* entities[21] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int entityLimit = 21;
 
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
 
+Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, };
+const int WallLimit = 10;
+
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-Object box(1, 1, Position(3, 8));
+//Object box(5, 5, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -66,6 +72,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
+    spawnWall(10);
     spawnNPC(false, 5, 0.1);
 
 }
@@ -94,7 +101,10 @@ void shutdown( void )
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
-            delete projectile[p];
+        {
+            if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
+                delete projectile[p];
+        }
     }
 }
 
@@ -281,7 +291,7 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 0.5) // wait for 0.5 seconds to switch to game mode, else do nothing
+    if (g_dElapsedTime > 10) // wait for 0.5 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
 }
 
@@ -334,12 +344,18 @@ void moveCharacter()
             if (projectile[p] == nullptr)
             {
                 projectile[p] = new Projectile;
+                projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+                projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+                break;
             }
-
-            projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
         }
 
         g_sChar.m_bActive = !g_sChar.m_bActive;
+    }
+
+    if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
+    {
+        entities[0]->set_direction(0);
     }
 
     if (occupied(entities[0]->new_pos()) != nullptr && occupied(entities[0]->new_pos()) != entities[0])
@@ -378,7 +394,7 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderSplashScreen();
+    case S_SPLASHSCREEN: renderMainMenu();
         break;
     case S_GAME: renderGame();
         break;
@@ -439,8 +455,8 @@ void renderMap()
         
     }*/
 
+    renderWall();
     renderNPC();
-    renderBox();
     renderprojectile();
     
 }
@@ -555,6 +571,52 @@ void renderInputEvents()
     }   
 }
 
+void renderWall()
+{//maybe?
+    COORD c;
+    int colour;
+    for (int i = 0; i < WallLimit; i++)
+    {
+        if (Walls[i] != nullptr)
+        {
+            c.X = Walls[i]->getposx();
+            c.Y = Walls[i]->getposy();
+
+            colour = 0x00;
+
+            g_Console.writeToBuffer(c, "W", colour);
+        }
+    }
+
+}
+
+void spawnWall(int no)
+{
+    for (int i = 0; i < no; i++)
+    {
+        Position temp;
+        do
+        {
+            temp.set_x(rand() % 80);
+            temp.set_y(rand() % 24);
+        } while (occupied(&temp) != nullptr); //while pos is not available
+
+
+
+        for (int w = 0; w < WallLimit; w++)
+        {
+            if (Walls[w] == nullptr)
+            {
+                Walls[w] = new Wall;
+                entities[w + 11] = Walls[w];
+                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());
+                break;
+            }
+        }
+
+    }
+}
+
 void renderNPC()
 {//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
     
@@ -578,7 +640,7 @@ void renderNPC()
                 colour = 0xF6;
             }
 
-            g_Console.writeToBuffer(c, " ", colour);
+            g_Console.writeToBuffer(c, "N", colour);
         }
     }
     
@@ -595,10 +657,10 @@ void spawnNPC(bool isPolice, int no, float spd)
             temp.set_y(rand() % 24);
         } while (occupied(&temp) != nullptr); //while pos is not available
 
-        
-              
+
+
         for (int n = 0; n < NPCLimit; n++)
-        { 
+        {
             if (NPCs[n] == nullptr)
             {
                 if (isPolice)
@@ -616,8 +678,8 @@ void spawnNPC(bool isPolice, int no, float spd)
                 break;
             }
         }
-        
-        
+
+
     }
 }
 
@@ -730,33 +792,44 @@ void initBox()
 
 void renderprojectile()
 {
-    COORD c;
+    COORD pr;
     int colour;
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
         {
-            projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+            
             projectile[p]->update_particle();
 
-            c.X = projectile[p]->get_px();
-            c.Y = projectile[p]->get_py();
+            pr.X = projectile[p]->get_px();
+            pr.Y = projectile[p]->get_py();
 
-            colour = 0x6F;
+            colour = 0xA1;
 
             g_Console.writeToBuffer(c, " ", colour);
         }
     }
 }
-\
 
-void renderBox()
+void renderBox(Object* box, int colour, std::string text = " ")
 {
     COORD c;
-    c.X = box.position()->get_x();
-    c.Y = box.position()->get_y();
-
-    int colour = 0x3C;
-    g_Console.writeToBuffer(c, "±", colour);
+    c.Y = box->referencePosition()->get_y();
+    for (int y = 0; y < box->height(); y++)
+    {
+        c.X = box->referencePosition()->get_x();
+        for (int x = 0; x < box->length(); x++)
+        {   
+            c.X++;
+            g_Console.writeToBuffer(c, text, colour);
+        }
+        c.Y++;
+    }
 }
 
+void renderMainMenu()
+{
+    COORD c = g_Console.getConsoleSize();
+    Object text(gameName.length(), 1, Position(c.X / 2, c.Y / 5));
+    renderBox(&text, 0x0F, gameName);
+}

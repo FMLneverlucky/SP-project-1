@@ -11,7 +11,7 @@ enum face
 
 class Projectile
 {
-	int x, y;
+	float x, y;
 	face dir;
 
 public:

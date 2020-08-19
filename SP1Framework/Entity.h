@@ -15,6 +15,7 @@ class Entity
 protected:
 	direction direction = NOT;
 	Position pos;
+	Position tempp;
 	
 public:
 	Entity();
@@ -25,6 +26,8 @@ public:
 	float getposx();
 	float getposy();
 	Position* getpos();
+	virtual Position* new_pos() = 0;
 	virtual char type() = 0; // return char to tell what type of entity this is
+	
 };
 

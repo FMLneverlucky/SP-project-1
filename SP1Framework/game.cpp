@@ -38,7 +38,7 @@ const int entityLimit = 21;
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
 
-Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, };
+Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
@@ -619,26 +619,35 @@ void renderWall()
 
 }
 
-void spawnWall(int no)
+void spawnWall(int no) //function to spawn wall
 {
-    for (int i = 0; i < no; i++)
+    for (int i = 0; i < no; i++) //for loop to spawn each wall
     {
-        Position temp;
+        //find random x and y on unused spaces
+        Position temp; //declare temporary position class to hold coordinates for each wall entity
+        bool isSpaceNearPlayer;
         do
         {
-            temp.set_x(rand() % 80);
-            temp.set_y(rand() % 24);
-
-        } while (occupied(&temp) != nullptr); //while pos is not available
-
-        for (int w = 0; w < WallLimit; w++)
-        {
-            if (Walls[w] == nullptr)
+            
+            temp.set_x(rand() % 80); //set x coordinate of temp variable as a number from 0 to 80
+            temp.set_y(rand() % 24); //set y coordinate of temp variable as a number from 0 to 25
+            if (temp.get_x() > 39 && temp.get_x() <= 41)
             {
-                Walls[w] = new Wall;
-                entities[w + 11] = Walls[w];
-                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());
-                break;
+                if (temp.get_y() > 12 && temp.get_y() <= 14)
+                {
+                    isSpaceNearPlayer = true;
+                }
+            }
+        } while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true); //while pos is not available
+
+        for (int w = 0; w < WallLimit; w++) // for loop to set positions on map for each wall entity
+        {
+            if (Walls[w] == nullptr) //check for wall entity not assigned on map
+            {
+                Walls[w] = new Wall; //set element of array as new object under wall class
+                entities[w + 11] = Walls[w]; //set element from wall array to corresponding element on entity array
+                entities[w + 11]->set_pos(temp.get_x(), temp.get_y()); //set position of the temp wall entity to an element in the entity array
+                break; //break from current loop
             }
         }
 

@@ -2,7 +2,7 @@
 
 Wall::Wall()
 {
-
+	
 };
 
 Wall::~Wall()
@@ -12,7 +12,23 @@ Wall::~Wall()
 
 char Wall::type()
 {
-	return 'W';
+	switch (*expression*)
+	{
+	case 1:
+		return 'R';
+	case 2:
+		return 'O';
+	case 3:
+		return 'Y';
+	case 4:
+		return 'G';
+	case 5:
+		return 'L';
+	case 6:
+		return 'B';
+	case 7:
+		return 'P';
+	}
 };
 
 void Wall::update_pos(float dtime)
@@ -22,7 +38,6 @@ void Wall::update_pos(float dtime)
 
 Position* Wall::new_pos(float dtime)
 {
-	//no codes
 	Position p;
 	return &p;
 }

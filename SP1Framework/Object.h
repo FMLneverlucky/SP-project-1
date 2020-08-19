@@ -7,15 +7,13 @@ class Object
 	Position pos;// the center of the object
 	Position pivot;// pivot point for scaling
 	Position referencePos;// top left position
-	int scaleX;
-	int scaleY;
 public:
 	Object(int, int);
 	Object(int, int, Position);
 	Object(int, int, Position, Position);
 	~Object();
 	//set functions
-	void size(int, int);// ignores pivot point, changes lengths directly
+	void move(float, float);// change pos
 	void scale(int, int);// change size according to pivot point, multiplies the lengths
 	void translate(float, float);// moves the object
 	void setPivot(int, int);

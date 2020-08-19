@@ -15,12 +15,24 @@
 bool checkInputs = false;
 bool checkTimeElapsed = false;
 bool checkFramerate = true;
-float splashScreenTime = 10;
+float splashScreenTime = 0.5;
 
+//UI NAMES
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "GameMode1";
 std::string gameMode2 = "GameMode2";
 std::string gameMode3 = "GameMode3";
+std::string gameMode4 = "Click This"; // for game test. not for final product
+
+//MAINMENU
+Object* MMButtons[4];
+Object MMButton(gameMode1.length() + 2, 3);
+Object MMButton2(gameMode2.length() + 2, 3);
+Object MMButton3(gameMode3.length() + 2, 3);
+Object MMButton4(gameMode4.length() + 2, 3);
+int MMButtonCount = 4;
+
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -28,7 +40,7 @@ SMouseEvent g_mouseEvent;
 
 // Game specific variables here
 SGameChar   g_sChar;
-EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
+EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 //Entity* ePlayer = player;
@@ -62,7 +74,7 @@ void init( void )
     g_dElapsedTime = 0.0;    
 
     // sets the initial state for the game
-    g_eGameState = S_SPLASHSCREEN;
+    g_eGameState = S_MAINMENU;
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
@@ -149,9 +161,9 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 {    
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: // don't handle anything for the splash screen
+    case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
         break;
-    case S_GAME: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
+    case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
         break;
     }
 }
@@ -176,9 +188,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 {    
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: // don't handle anything for the splash screen
+    case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
         break;
-    case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+    case S_TEST: 
+        (mouseEvent); // handle gameplay mouse event
         break;
     }
 }
@@ -284,9 +297,9 @@ void update(double dt)
 
     switch (g_eGameState)
     {
-        case S_SPLASHSCREEN : splashScreenWait(); // game logic for the splash screen
+        case S_MAINMENU: mainMenuWait(); // game logic for the splash screen
             break;
-        case S_GAME: updateGame(); // gameplay logic when we are in the game
+        case S_TEST: updateGame(); // gameplay logic when we are in the game
             break;
     }
 }
@@ -295,7 +308,7 @@ void update(double dt)
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_dElapsedTime > splashScreenTime) // wait for set time to switch to game mode, else do nothing
-        g_eGameState = S_GAME;
+        g_eGameState = S_TEST;
 }
 
 void updateGame()       // gameplay logic
@@ -415,9 +428,9 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: splashScreenWait();
+    case S_MAINMENU: renderMainMenu();
         break;
-    case S_GAME: renderGame();
+    case S_TEST: renderGame();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -840,7 +853,7 @@ Entity* occupied(Position* pos)
     return nullptr;
 }
 
-void initBox()
+void initBoxMainMenu()
 {
     //Object button()
 }
@@ -882,6 +895,70 @@ void renderBox(Object* box, int colour, std::string text = " ")
     }
 }
 
+void renderMainMenu()
+{
+    COORD c = g_Console.getConsoleSize();
+    Object title(71, 3, Position(c.X / 2, c.Y / 5));
+    renderBox(&title, 0x0F, gameName);
+
+    MMButton.move(c.X / 2, c.Y * 2 / 5);
+    MMButton2.move(c.X / 2, c.Y * 3 / 5);
+    MMButton3.move(c.X / 2, c.Y * 4 / 5);
+    MMButton4.move(c.X / 2, c.Y);
+
+    MMButtons[0] = &MMButton;
+    MMButtons[1] = &MMButton2;
+    MMButtons[2] = &MMButton3;
+    MMButtons[3] = &MMButton4;
+
+    renderBox(&MMButton, 0x04, gameMode1);
+    renderBox(&MMButton2, 0xA, gameMode2);
+    renderBox(&MMButton3, 0x0B, gameMode3);
+    renderBox(&MMButton4, 0x06, gameMode4);
+}
+
+void mainMenuWait()
+{
+    int clicked = checkButtonClicks(MMButtons, MMButtonCount);
+    switch (clicked)
+    {
+    case 0:
+        g_eGameState = S_GAMEMODE1;
+        break;
+    case 1:
+        g_eGameState = S_GAMEMODE2;
+        break;
+    case 2:
+        g_eGameState = S_GAMEMODE3;
+        break;
+    case 3:
+        g_eGameState = S_TEST;
+        break;
+    default:
+        break;
+    }
+}
+
+int checkButtonClicks(Object** buttons, int arrayLength)
+{
+    int mouseX, mouseY;
+    if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {// check when player left click 
+        mouseX = g_mouseEvent.mousePosition.X;
+        mouseY = g_mouseEvent.mousePosition.Y;
+        for (int i = 0; i < arrayLength; i++)
+        {//check all the objects in the given array
+            if (mouseX >= buttons[i]->referencePosition()->get_x() &&
+                mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
+                mouseY >= buttons[i]->referencePosition()->get_y() &&
+                mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
+            {// check if mouse is within this Object
+                return i;
+            }
+        }
+    }
+    return arrayLength;
+}
 void limitprojectile()
 {
     for (int p = 0; p < particle_limit; p++)

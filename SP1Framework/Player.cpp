@@ -24,25 +24,25 @@ Position* Player::new_pos(float dtime)
 	case UP:
 		if (pos.get_y() > 0)
 		{
-			tempp.set_y(tempp.get_y() - (1 * dtime));
+			tempp.set_y(tempp.get_y() - (5 * dtime));
 		}
 		break;
 	case DOWN:
 		if (pos.get_y() < 24)
 		{
-			tempp.set_y(tempp.get_y() + (1 * dtime));
+			tempp.set_y(tempp.get_y() + (5 * dtime));
 		}
 		break;
 	case LEFT:
 		if (pos.get_x() > 0)
 		{
-			tempp.set_x(tempp.get_x() - (2 * dtime));
+			tempp.set_x(tempp.get_x() - (10 * dtime));
 		}
 		break;
 	case RIGHT:
 		if (pos.get_x() < 79)
 		{
-			tempp.set_x(tempp.get_x() + (2 * dtime));
+			tempp.set_x(tempp.get_x() + (10 * dtime));
 		}
 		break;
 	case NOT:

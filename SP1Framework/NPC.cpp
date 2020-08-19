@@ -57,25 +57,25 @@ Position* NPC::new_pos(float dtime)
 	case UP:
 		if (pos.get_y() > 0)
 		{
-			tempp.set_y(pos.get_y() - (0.1 * speed * dtime));
+			tempp.set_y(pos.get_y() - (5 * speed * dtime));
 		}
 		break;
 	case DOWN:
 		if (pos.get_y() < 24)
 		{
-			tempp.set_y(pos.get_y() + (0.1 * speed * dtime));
+			tempp.set_y(pos.get_y() + (5 * speed * dtime));
 		}
 		break;
 	case LEFT:
 		if (pos.get_x() > 0)
 		{
-			tempp.set_x(pos.get_x() - (0.2 * speed * dtime));
+			tempp.set_x(pos.get_x() - (10 * speed * dtime));
 		}
 		break;
 	case RIGHT:
 		if (pos.get_x() < 79)
 		{
-			tempp.set_x(pos.get_x() + (0.2 * speed * dtime));
+			tempp.set_x(pos.get_x() + (10 * speed * dtime));
 		}
 		break;
 	case NOT:

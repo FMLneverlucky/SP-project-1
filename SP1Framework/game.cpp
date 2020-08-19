@@ -758,7 +758,7 @@ void moveall()
                 }
             }
 
-            if (occupied(NPCs[i]->new_pos()) != nullptr)
+            if (occupied(NPCs[i]->new_pos()) != nullptr && occupied(NPCs[i]->new_pos()) != NPCs[i])
             {
                 NPCs[i]->set_direction(0);
             }

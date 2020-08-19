@@ -424,7 +424,7 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderMainMenu();
+    case S_SPLASHSCREEN: splashScreenWait();
         break;
     case S_GAME: renderGame();
         break;
@@ -718,14 +718,14 @@ void moveall()
     
     for (int i = 0; i < NPCLimit; i++)
     {
-        if (NPCs[i] != nullptr) // npc exists
+        if (NPCs[i] != nullptr)
         {
             
-            if (NPCs[i]->get_count() < 300 && NPCs[i]->isHostile() == false) // npc is not 300 and not hostile
+            if (NPCs[i]->get_count() < 300 && NPCs[i]->isHostile() == false)
             {
-                NPCs[i]->set_count(NPCs[i]->get_count() + 1); //get initalized counter and make it hav speed 1 loops until 300
+                NPCs[i]->set_count(NPCs[i]->get_count() + 1);
 
-                if (NPCs[i]->get_count() > 200) //makes npc stop maybe can use???
+                if (NPCs[i]->get_count() > 200)
                 {
                     NPCs[i]->set_direction(0);
                 }
@@ -875,18 +875,4 @@ void limitprojectile()
             }
         }
     }
-}
-
-void renderBox(Object*, int, std::string)
-{
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 5));
-    renderBox(&title, 0x0F, gameName);
-
-    Object button(gameMode1.length() + 2, 3, Position(c.X / 2, c.Y * 2 / 5));
-    renderBox(&button, 0x04, gameMode1);
-    Object button2(gameMode2.length() + 2, 3, Position(c.X / 2, c.Y * 3 / 5));
-    renderBox(&button2, 0xA, gameMode2);
-    Object button3(gameMode3.length() + 2, 3, Position(c.X / 2, c.Y * 4 / 5));
-    renderBox(&button3, 0x0B, gameMode3);
 }

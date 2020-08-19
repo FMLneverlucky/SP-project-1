@@ -77,7 +77,6 @@ void Projectile::direction(int m_x, int m_y)
 		spacecount = 10;
 	}
 }
-}
 
 Position* Projectile::getpos()
 {

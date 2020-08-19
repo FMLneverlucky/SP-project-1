@@ -1,17 +1,23 @@
 #pragma once
 #include "Entity.h"
 
-//enum types
-//{
-//
-//};
+enum types
+{
+    red,
+    orange,
+    yellow,
+    green,
+    light_blue,
+    blue,
+    purple,
+};
 
 class Wall :
     public Entity
 
 {
 private:
-    //int type;
+    types wall;
 
 public:
     Wall();
@@ -19,4 +25,5 @@ public:
     char type();
     void update_pos();
     Position* new_pos();
+
 };

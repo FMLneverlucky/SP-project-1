@@ -97,7 +97,7 @@ void limitprojectile();
 void renderMainMenu(); //main menu.
 void mainMenuWait(); //init UI for main menu
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
-int checkButtonClicks(Object* [], int);// check if player clicked a button
+int checkButtonClicks(Object**, int);// check if player clicked a button
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

@@ -3,10 +3,8 @@ Object::Object(int sizeX = 1, int sizeY = 1)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
-	scaleX = 1;
-	scaleY = 1;
-	pos.set_x(1);
-	pos.set_y(1);
+	pos.set_x(0);
+	pos.set_y(0);
 	pivot.set_x(0);
 	pivot.set_y(0);
 }
@@ -14,8 +12,6 @@ Object::Object(int sizeX, int sizeY, Position pos)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
-	scaleX = 1;
-	scaleY = 1;
 	this->pos = pos;
 	pivot.set_x(0);
 	pivot.set_y(0);
@@ -24,14 +20,19 @@ Object::Object(int sizeX, int sizeY, Position pos, Position pivot)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
-	scaleX = 1;
-	scaleY = 1;
 	this->pos = pos;
 	this->pivot = pivot;
 }
 Object::~Object()
 {
 	//Nothing.
+}
+void Object::move(float x, float y)
+{
+	pivot.set_x(pivot.get_x() + (x - pos.get_x()));
+	pivot.set_y(pivot.get_y() + (y - pos.get_y()));
+	pos.set_x(x);
+	pos.set_y(y);
 }
 void Object::scale(int x, int y)
 {
@@ -44,6 +45,8 @@ void Object::translate(float x, float y)
 {
 	pos.set_x(pos.get_x() + x);
 	pos.set_y(pos.get_y() + y);
+	pivot.set_x(pivot.get_x() + x);
+	pivot.set_y(pivot.get_y() + y);
 }
 void Object::setPivot(int x, int y)
 {

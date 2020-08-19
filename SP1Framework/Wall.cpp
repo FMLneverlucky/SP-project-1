@@ -19,3 +19,10 @@ void Wall::update_pos()
 {
 
 };
+
+Position* Wall::new_pos()
+{
+	//no codes
+	Position p;
+	return &p;
+}

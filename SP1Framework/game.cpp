@@ -806,7 +806,7 @@ void renderprojectile()
 
             colour = 0xA1;
 
-            g_Console.writeToBuffer(c, " ", colour);
+            g_Console.writeToBuffer(pr, " ", colour);
         }
     }
 }

@@ -11,4 +11,5 @@ public:
     ~Wall();
     char type();
     void update_pos();
+    Position* new_pos();
 };

@@ -33,11 +33,6 @@ Object::~Object()
 {
 	//Nothing.
 }
-void Object::updateReferencePoint()// calculate top left position
-{//calculate the reference position 
-	referencePos.set_x(pos.get_x() - (this->sizeX / 2.0));
-	referencePos.set_y(pos.get_y() - (this->sizeY / 2.0));
-}
 void Object::size(int x, int y)
 {
 	sizeX = x;
@@ -74,6 +69,7 @@ Position* Object::position()
 }
 Position* Object::referencePosition()
 {
-	updateReferencePoint();
+	referencePos.set_x(pos.get_x() - (this->sizeX / 2.0));
+	referencePos.set_y(pos.get_y() - (this->sizeY / 2.0));
 	return &referencePos;
 }

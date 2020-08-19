@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include "Projectile.h"
 
+//FOR TESTING
+bool checkInputs = false;
+bool checkTimeElapsed = false;
+bool checkFramerate = true;
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -19,9 +24,9 @@ SMouseEvent g_mouseEvent;
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
-Player* player = new Player;
-Entity* ePlayer = player;
-Entity* entities[11] = { ePlayer , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+//Player* player = new Player;
+//Entity* ePlayer = player;
+Entity* entities[11] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 11;
 NPC* NPCs[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 10;
@@ -29,7 +34,7 @@ const int NPCLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-//Object box(1, 1, Position(3, 8));
+Object box(1, 1, Position(3, 8));
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -51,7 +56,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
-    player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    entities[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -298,30 +303,30 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        player->set_direction(1);
+        entities[0]->set_direction(1);
         //g_sChar.m_cLocation.Y = 13;
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.X--;     
-        player->set_direction(3);
+        entities[0]->set_direction(3);
     }
     else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.Y++;       
-        player->set_direction(2);
+        entities[0]->set_direction(2);
     }
     else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.X++;        
-        player->set_direction(4);
+        entities[0]->set_direction(4);
     }
     else
     {
-        player->set_direction(0);
+        entities[0]->set_direction(0);
     }
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
@@ -340,9 +345,9 @@ void moveCharacter()
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-    player->set_pos();
-    g_sChar.m_cLocation.Y = player->getposy();
-    g_sChar.m_cLocation.X = player->getposx();
+    entities[0]->update_pos();
+    g_sChar.m_cLocation.Y = entities[0]->getposy();
+    g_sChar.m_cLocation.X = entities[0]->getposx();
 
     moveall();
     
@@ -375,7 +380,8 @@ void render()
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
-    renderInputEvents();    // renders status of input events
+    if (checkInputs)
+        renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
@@ -419,7 +425,7 @@ void renderMap()
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
 
-    COORD c;
+    /*COORD c;
     for (int i = 0; i < 12; ++i)
     {
         c.X = 5 * i;
@@ -427,7 +433,7 @@ void renderMap()
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
         
-    }
+    }*/
 
     renderNPC();
     renderBox();
@@ -449,20 +455,25 @@ void renderCharacter()
 void renderFramerate()
 {
     COORD c;
-    // displays the framerate
     std::ostringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << 1.0 / g_dDeltaTime << "fps";
-    c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str());
-
+    // displays the framerate
+    if (checkFramerate)
+    {
+        ss << std::fixed << std::setprecision(3);
+        ss << 1.0 / g_dDeltaTime << "fps";
+        c.X = g_Console.getConsoleSize().X - 9;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str());
+    }
     // displays the elapsed time
-    ss.str("");
-    ss << g_dElapsedTime << "secs";
-    c.X = 0;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
+    if (checkTimeElapsed)
+    {
+        ss.str("");
+        ss << g_dElapsedTime << "secs";
+        c.X = 0;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str(), 0x59);
+    }
 }
 
 // this is an example of how you would use the input events
@@ -681,10 +692,8 @@ void moveall()
                         }
                     }
                 }
-
-
             }
-            NPCs[i]->set_pos(NPCs[i]->get_speed());
+            NPCs[i]->update_pos();
 
            
     
@@ -729,12 +738,16 @@ void renderprojectile()
         }
     }
 }
+void initBox()
+{
+    //Object button()
+}
 
 void renderBox()
 {
-    /*COORD c;
+    COORD c;
     c.X = box.position()->get_x();
     c.Y = box.position()->get_y();
-    int colour = 0x3C;
-    g_Console.writeToBuffer(c, "±", colour);*/
+    int colour = 0x0F;
+    g_Console.writeToBuffer(c, "Test", colour);
 }

@@ -44,3 +44,36 @@ void NPC::set_speed(float spd)
 {
 	speed = spd;
 }
+
+void NPC::update_pos()
+{
+	switch (direction)
+	{
+	case UP:
+		if (pos.get_y() > 0)
+		{
+			pos.set_y(pos.get_y() - (0.1 * speed));
+		}
+		break;
+	case DOWN:
+		if (pos.get_y() < 24)
+		{
+			pos.set_y(pos.get_y() + (0.1 * speed));
+		}
+		break;
+	case LEFT:
+		if (pos.get_x() > 0)
+		{
+			pos.set_x(pos.get_x() - (0.2 * speed));
+		}
+		break;
+	case RIGHT:
+		if (pos.get_x() < 79)
+		{
+			pos.set_x(pos.get_x() + (0.2 * speed));
+		}
+		break;
+	case NOT:
+		break;
+	}
+}

@@ -16,7 +16,7 @@ class Projectile
 	face dir;
 	int spacecount;
 	Position pos;
-
+	
 public:
 	Projectile();
 	~Projectile();
@@ -26,6 +26,7 @@ public:
 	int get_py(void);
 	void set_spacecount(int fc);
 	int get_spacecount();
+	
 	void direction(int m_x, int m_y);
 	Position* getpos();
 };

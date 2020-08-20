@@ -55,13 +55,13 @@ int Projectile::get_spacecount()
 
 void Projectile::direction(int m_x, int m_y)
 {
-	if (m_x < x)
+	if ((m_x < x) && ((x - m_x) > (y - m_y)) && ((x - m_x) > (m_y - y)))
 	{
 		dir = left;
 		spacecount = 20;
 	}
 
-	else if (m_x > x)
+	else if ((m_x > x) && ((m_x - x) > (y - m_y)) && ((m_x - x) > (m_y - y)))
 	{
 		dir = right;
 		spacecount = 20;
@@ -84,3 +84,4 @@ Position* Projectile::getpos()
 	pos.set_y(y);
 	return &pos;
 }
+

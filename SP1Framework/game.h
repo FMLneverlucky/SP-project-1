@@ -94,6 +94,10 @@ void renderprojectile(); //set projectile colour and draw on map
 void limitprojectile();
 void check_collision();
 
+//PowerUp
+void spawnPowerUp();
+void renderPowerUp();
+
 //UI, Map Objects
 void renderMainMenu(); //main menu.
 void mainMenuWait(); //init UI for main menu

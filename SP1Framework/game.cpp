@@ -190,7 +190,7 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
     case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
         break;
     case S_TEST: 
-        (mouseEvent); // handle gameplay mouse event
+        gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
         break;
     }
 }

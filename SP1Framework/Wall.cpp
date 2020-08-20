@@ -1,4 +1,6 @@
 #include "Wall.h"
+#include <stdlib.h>
+#include <iostream>
 
 Wall::Wall()
 {
@@ -15,34 +17,82 @@ char Wall::type()
 	//this function is for checking what type of entity it is (since entity pointer cannot tell)
 	//this is the virtual function from entity
 	//create another gettype or smt if u meant to use this for diff types of wall; as in 3x1 2x2 and so on
-
-	/*switch (*expression*)
-	{
-	case 1:
-		return 'R';
-		break;
-	case 2:
-		return 'O';
-		break;
-	case 3:
-		return 'Y';
-		break;
-	case 4:
-		return 'G';
-		break;
-	case 5:
-		return 'L';
-		break;
-	case 6:
-		return 'B';
-		break;
-	case 7:
-		return 'P';
-		break;
-	}*/
-
 	return 'W';
 };
+
+int Wall::setType()
+{
+	int x = rand() % 7;
+	int nextWall;
+	switch (x)
+	{
+	case 1:
+		nextWall = I;
+		break;
+	case 2:
+		nextWall = J;
+		break;
+	case 3:
+		nextWall = L;
+		break;
+	case 4:
+		nextWall = O;
+		break;
+	case 5:
+		nextWall = S;
+		break;
+	case 6:
+		nextWall = T;
+		break;
+	case 7:
+		nextWall = Z;
+		break;
+	default:
+		nextWall = d;
+
+		return nextWall;
+	}
+}
+
+void Wall::typeI()
+{
+
+}
+
+void Wall::typeJ()
+{
+
+}
+
+void Wall::typeL()
+{
+
+}
+
+void Wall::typeO()
+{
+
+}
+
+void Wall::typeS()
+{
+
+}
+
+void Wall::typeT()
+{
+
+}
+
+void Wall::typeZ()
+{
+
+}
+
+void Wall::typed()
+{
+
+}
 
 void Wall::update_pos(float dtime)
 {

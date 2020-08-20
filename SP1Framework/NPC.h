@@ -22,7 +22,7 @@ public:
     void anger();
     void set_count(int a);
     int get_count();
-    char type();  // return char to tell what type of entity this is
+    virtual char type();  // return char to tell what type of entity this is
     float get_speed();
     int get_damage();
     int get_ftime();

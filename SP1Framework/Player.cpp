@@ -1,5 +1,5 @@
 #include "Player.h"
-Player::Player() : HP(5)
+Player::Player() : HP(5), cooldown(0)
 {
 
 }
@@ -71,4 +71,14 @@ void Player::resetHP()
 void Player::loseHP(int ack)
 {
 	HP -= ack;
+}
+
+void Player::set_cooldown(int a)
+{
+	cooldown = a;
+}
+
+int Player::get_cooldown()
+{
+	return cooldown;
 }

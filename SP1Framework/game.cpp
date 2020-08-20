@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "Projectile.h"
 #include "Wall.h"
+#include "PowerUp.h"
 
 //FOR TESTING
 bool checkInputs = false;
@@ -65,6 +66,9 @@ const int WallLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
+PowerUp* powerup = nullptr;
+
+
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
 
@@ -95,7 +99,8 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     spawnWall(10);
-    spawnNPC(false, 5, 0.1, 3);
+    spawnNPC(false, 3, 0.1, 3);
+    spawnNPC(true, 2, 0.1, 3);
 
 }
 
@@ -127,6 +132,18 @@ void shutdown( void )
             if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
                 delete projectile[p];
         }
+    }
+    for (int i = 0; i < WallLimit; i++)
+    {
+        if (Walls[i] != nullptr)
+        {
+            delete Walls[i];
+        }
+    }
+
+    if (powerup != nullptr)
+    {
+        delete powerup;
     }
 }
 
@@ -239,6 +256,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
             buttonHoldRelease(key);
     }    
 }
+
 bool heldKey[6] = {false, false, false, false, false, false};
 void buttonHoldPress(EKEYS key)
 {
@@ -340,8 +358,9 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
+        //g_sChar.m_cLocation.Y--;
         entities[0]->set_direction(1);
-        //g_sChar.m_cLocation.Y = 13;
+        
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
@@ -366,6 +385,7 @@ void moveCharacter()
         entities[0]->set_direction(0);
     }
 
+
     if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
     {
         entities[0]->set_direction(0);
@@ -373,28 +393,44 @@ void moveCharacter()
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
+
+
         for (int p = 0; p < particle_limit; p++)
         {
             if (projectile[p] == nullptr)
             {
+
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 break;
             }
-            
         }
 
-        g_sChar.m_bActive = !g_sChar.m_bActive;
-    }
 
- 
+
+        //g_sChar.m_bActive = !g_sChar.m_bActive;
+        for (int n = 0; n < NPCLimit; n++)
+        {
+            if (NPCs[n] != nullptr)
+            {
+                if (NPCs[n]->type() == 'B')
+                {
+                    NPCs[n]->anger();
+                }
+            }
+        }
+    }
+    
+
+    player->set_cooldown(player->get_cooldown() - 1);
     entities[0]->update_pos(g_dDeltaTime); //sets pos of player
     g_sChar.m_cLocation.Y = entities[0]->getposy(); //moves player
     g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
     moveall(); //moves NPCs
     limitprojectile(); //moves/updates projectiles
     check_collision();
+
 
     for (int p = 0; p < particle_limit; p++)
     {
@@ -485,7 +521,7 @@ void renderMap()
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
 
-    /*COORD c;
+   /* COORD c;
     for (int i = 0; i < 12; ++i)
     {
         c.X = 5 * i;
@@ -661,8 +697,17 @@ void spawnWall(int no) //function to spawn wall
                 break; //break from current loop
             }
         }
-
     }
+}
+
+void renderPowerUp()
+{
+
+}
+
+void spawnPowerUp()
+{
+    //powerup = new PowerUp(15 / g_dDeltaTime);
 }
 
 void renderNPC()
@@ -679,16 +724,38 @@ void renderNPC()
             c.X = NPCs[i]->getposx();
             c.Y = NPCs[i]->getposy();
 
-            if (NPCs[i]->isHostile())
+            if (NPCs[i]->type() == 'B')
             {
-                colour = 0x4D;
+                if (NPCs[i]->isHostile())
+                {
+                    colour = 0xC3;
+                }
+                else
+                {
+                    colour = 0xE5;
+                }
+ 
             }
             else
             {
-                colour = 0xF6;
+                if (NPCs[i]->isHostile())
+                {
+                    colour = 0x4D;
+                }
+                else
+                {
+                    colour = 0xF6;
+                }
             }
 
-            g_Console.writeToBuffer(c, "N", colour);
+            if (NPCs[i]->get_ftime() != 0)
+            {
+                colour = 0x3C;
+            }
+
+            g_Console.writeToBuffer(c, " ", colour);
+
+            
         }
     }
     
@@ -704,8 +771,6 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
             temp.set_x(rand() % 80);
             temp.set_y(rand() % 24);
         } while (occupied(&temp) != nullptr); //while pos is not available
-
-
 
         for (int n = 0; n < NPCLimit; n++)
         {
@@ -751,7 +816,7 @@ void moveall()
                         NPCs[i]->set_direction(0);
                     }
                 }
-                else //count = 300
+                else 
                 {
 
                     NPCs[i]->set_count(0);
@@ -802,8 +867,8 @@ void moveall()
             }
             else //npc is hostile and not on cooldown
             {
-                int diffinx = g_sChar.m_cLocation.X - NPCs[i]->getposx();
-                int diffiny = g_sChar.m_cLocation.Y - NPCs[i]->getposy();
+                int diffinx = g_sChar.m_cLocation.X - (int)NPCs[i]->getposx();
+                int diffiny = g_sChar.m_cLocation.Y - (int)NPCs[i]->getposy();
 
                 if (abs(diffinx) > abs(diffiny))
                 {
@@ -815,7 +880,34 @@ void moveall()
                     {
                         NPCs[i]->set_direction(3);
                     }
-                                
+                 
+                }
+                else if (abs(diffinx) == abs(diffiny))
+                {
+                    int a = (rand() % 2) + 1;
+                    switch (a)
+                    {
+                    case 1:
+                        if (diffinx > 0)
+                        {
+                            NPCs[i]->set_direction(4);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(3);
+                        }
+                        break;
+                    default:
+
+                        if (diffiny > 0)
+                        {
+                            NPCs[i]->set_direction(2);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(1);
+                        }
+                    }
                 }
                 else //up or down
                 {
@@ -828,11 +920,13 @@ void moveall()
                         NPCs[i]->set_direction(1);
                     }
                 }
-
-                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i] && occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() != 'P')
+                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
                 {
-                    
-                    NPCs[i]->set_direction(0);
+                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W')
+                    {
+
+                        NPCs[i]->set_direction(0);
+                    }
                 }
                             
             }

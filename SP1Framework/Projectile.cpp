@@ -84,3 +84,4 @@ Position* Projectile::getpos()
 	pos.set_y(y);
 	return &pos;
 }
+

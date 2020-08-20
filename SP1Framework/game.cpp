@@ -684,8 +684,7 @@ void renderNPC()
                 {
                     colour = 0xE5;
                 }
-
-                g_Console.writeToBuffer(c, " ", colour);
+ 
             }
             else
             {
@@ -697,9 +696,14 @@ void renderNPC()
                 {
                     colour = 0xF6;
                 }
-
-                g_Console.writeToBuffer(c, " ", colour);
             }
+
+            if (NPCs[i]->get_ftime() != 0)
+            {
+                colour = 0x3C;
+            }
+
+            g_Console.writeToBuffer(c, " ", colour);
 
             
         }
@@ -762,7 +766,7 @@ void moveall()
                         NPCs[i]->set_direction(0);
                     }
                 }
-                else //count = 300
+                else 
                 {
 
                     NPCs[i]->set_count(0);
@@ -827,6 +831,33 @@ void moveall()
                         NPCs[i]->set_direction(3);
                     }
                  
+                }
+                else if (abs(diffinx) == abs(diffiny))
+                {
+                    int a = (rand() % 2) + 1;
+                    switch (a)
+                    {
+                    case 1:
+                        if (diffinx > 0)
+                        {
+                            NPCs[i]->set_direction(4);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(3);
+                        }
+                        break;
+                    default:
+
+                        if (diffiny > 0)
+                        {
+                            NPCs[i]->set_direction(2);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(1);
+                        }
+                    }
                 }
                 else //up or down
                 {

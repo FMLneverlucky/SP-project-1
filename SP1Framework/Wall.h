@@ -18,12 +18,15 @@ class Wall :
 
 {
 protected:
+    Position wallPivotPoint;
     types nextWall;
 
 public:
     Wall();
     ~Wall();
     char type();
+
+    //diff walls
     int setType();
     void Wall::typeI();
     void Wall::typeJ();
@@ -33,6 +36,12 @@ public:
     void Wall::typeT();
     void Wall::typeZ();
     void Wall::typed();
+
+    //updates for walls in game as entity
     void update_pos(float dtime);
     Position* new_pos(float dtime);
+
+    //wall spawning
+    void spawnWall(int no);
+    void renderWall();
 };

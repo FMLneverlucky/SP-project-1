@@ -2,6 +2,23 @@
 #include <stdlib.h>
 #include <iostream>
 
+//position things
+float Entity::getposx()
+{
+	return pos.get_x();
+}
+
+float Entity::getposy()
+{
+	return pos.get_y();
+}
+Position* Entity::getpos()
+{
+	return &pos;
+}
+
+
+
 Wall::Wall()
 {
 	
@@ -13,16 +30,13 @@ Wall::~Wall()
 };
 
 char Wall::type()
-{
-	//this function is for checking what type of entity it is (since entity pointer cannot tell)
-	//this is the virtual function from entity
-	//create another gettype or smt if u meant to use this for diff types of wall; as in 3x1 2x2 and so on
-	return 'W';
-};
+{																					//this function is for checking what type of entity it is (since entity pointer cannot tell)
+	return 'W';																		//this is the virtual function from entity
+};																					//create another gettype or smt if u meant to use this for diff types of wall; as in 3x1 2x2 and so on
 
 int Wall::setType()
 {
-	int x = rand() % 7;
+	int x = rand() % 8;
 	int nextWall;
 	switch (x)
 	{
@@ -49,9 +63,8 @@ int Wall::setType()
 		break;
 	default:
 		nextWall = d;
-
-		return nextWall;
 	}
+	return nextWall;
 }
 
 void Wall::typeI()

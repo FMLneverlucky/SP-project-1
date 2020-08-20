@@ -4,7 +4,7 @@ NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), 
 {
 	
 }
-NPC::NPC()
+NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0)
 {
 
 }

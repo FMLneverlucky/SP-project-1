@@ -124,14 +124,14 @@ void shutdown( void )
                 delete projectile[p];
         }
     }
-    for (int i = 0; i < WallLimit; i++)
+   /* for (int i = 0; i < WallLimit; i++)
     {
         if (Walls[i] != nullptr)
         {
             delete Walls[i];
         }
     }
-
+    */
     if (powerup != nullptr)
     {
         delete powerup;

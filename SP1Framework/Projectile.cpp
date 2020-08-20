@@ -23,11 +23,34 @@ void Projectile::update_particle()
 	if (dir == left)
 		this->x -= 0.2;
 
+	else if (dir == top_left)
+	{
+		this->x -= 0.2;
+		this->y -= 0.2;
+	}
+
+	else if (dir == top_right)
+	{
+		this->x += 0.2;
+		this->y -= 0.2;
+	}
+
 	else if (dir == right)
 		this->x += 0.2;
 
 	else if (dir == down)
 		this->y -= 0.2;
+
+	else if (dir == btm_left)
+	{
+		this->x -= 0.2;
+		this->y += 0.2;
+	}
+	else if (dir == btm_right)
+	{
+		this->x += 0.2;
+		this->y += 0.2;
+	}
 
 	else
 		this->y += 0.2;
@@ -61,15 +84,40 @@ void Projectile::direction(int m_x, int m_y)
 		spacecount = 20;
 	}
 
+	else if ((m_x < x) && (m_y < y))
+	{
+		dir = top_left;
+		spacecount = 10;
+	}
+
 	else if ((m_x > x) && ((m_x - x) > (y - m_y)) && ((m_x - x) > (m_y - y)))
 	{
 		dir = right;
 		spacecount = 20;
 	}
+
+	else if ((m_x > x) && (m_y < y))
+	{
+		dir = top_right;
+		spacecount = 10;
+	}
+
+	else if ((m_x > x) && (m_y > y))
+	{
+		dir = btm_right;
+		spacecount = 15;
+	}
+
+	else if ((m_x < x) && (m_y > y))
+	{
+		dir = btm_left;
+		spacecount = 15;
+	}
+
 	else if (m_y < y)
 	{
 		dir = down;
-		spacecount = 10;
+		spacecount = 20;
 	}
 	else
 	{

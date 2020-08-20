@@ -6,8 +6,12 @@ enum face
 	none,
 	up,
 	down,
+	top_left,
 	left,
-	right
+	top_right,
+	right,
+	btm_right,
+	btm_left
 };
 
 class Projectile

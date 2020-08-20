@@ -232,6 +232,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
             buttonHoldRelease(key);
     }    
 }
+
 bool heldKey[6] = {false, false, false, false, false, false};
 void buttonHoldPress(EKEYS key)
 {
@@ -327,8 +328,9 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
+        //g_sChar.m_cLocation.Y--;
         entities[0]->set_direction(1);
-        //g_sChar.m_cLocation.Y = 13;
+        
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
@@ -352,6 +354,7 @@ void moveCharacter()
     {
         entities[0]->set_direction(0);
     }
+
 
     if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
     {
@@ -630,7 +633,7 @@ void spawnWall(int no) //function to spawn wall
     {
         //find random x and y on unused spaces
         Position temp; //declare temporary position class to hold coordinates for each wall entity
-        bool isSpaceNearPlayer;
+        bool isSpaceNearPlayer = false;
         do
         {
             
@@ -655,7 +658,6 @@ void spawnWall(int no) //function to spawn wall
                 break; //break from current loop
             }
         }
-
     }
 }
 

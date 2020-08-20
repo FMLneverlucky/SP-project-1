@@ -15,6 +15,7 @@ class Projectile
 	float x, y;
 	face dir;
 	int spacecount;
+	Position pos;
 
 public:
 	Projectile();

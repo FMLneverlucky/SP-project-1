@@ -96,8 +96,8 @@ void level_end();
 void level_start();
 
 //Walls
-void spawnWall(int no);
-void renderWall();
+//void spawnWall(int no);
+//void renderWall();
 
 //NPCs 
 void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs

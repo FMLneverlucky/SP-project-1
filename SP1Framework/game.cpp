@@ -57,11 +57,8 @@ SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
-//Entity* ePlayer = player;
-Entity* entities[31] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 21;
 
-Entity* entities[31] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* entities[31] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 31;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -405,7 +402,7 @@ void set_spawn()
 
     spawnNPC(false, noC, spd, cdtime * g_dDeltaTime);
     spawnNPC(true, noP, spd, cdtime * g_dDeltaTime);
-    spawnWall(noW);
+    //spawnWall(noW);
 
     NGameState = N_LEVEL;
 }
@@ -648,7 +645,7 @@ void renderMap()
         
     }*/
 
-    renderWall();
+    //renderWall();
     renderNPC();
     renderprojectile();
     
@@ -808,8 +805,8 @@ void Wall::spawnWall(int no)                                                    
             if (Walls[w] == nullptr)                                                                    //check for wall entity not assigned on map
             {
                 Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
-                entities[w + 11] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 11]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
+                entities[w + 21] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
+                entities[w + 21]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
                 break;                                                                                  //break from current loop
             }
         }

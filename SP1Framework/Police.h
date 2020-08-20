@@ -3,5 +3,9 @@
 class Police :
     public NPC
 {
+public:
+    Police();
+    Police(int cd);
+    char type();
 };
 

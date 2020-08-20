@@ -3,6 +3,14 @@
 #define _GAME_H
 
 #include "Framework\timer.h"
+#include<string>
+
+//Entities
+#include "Player.h"
+#include "NPC.h"
+#include "Police.h"
+
+#include "Object.h"
 
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
@@ -38,8 +46,12 @@ enum EKEYS
 // Enumeration for the different screen states
 enum EGAMESTATES
 {
-    S_SPLASHSCREEN,
-    S_GAME,
+    S_MAINMENU,
+    S_GAMEMODE1,
+    S_GAMEMODE2,
+    S_GAMEMODE3,
+    S_PAUSEMENU,
+    S_TEST,
     S_COUNT
 };
 
@@ -48,6 +60,13 @@ struct SGameChar
 {
     COORD m_cLocation;
     bool  m_bActive;
+};
+
+enum NormalMode
+{
+    N_INIT,
+    N_LEVEL,
+    N_NEXTLEVEL
 };
 
 void init        ( void );      // initialize your variables, allocate memory, etc
@@ -69,6 +88,36 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+//Normal Mode
+void playNormal();
+void playLevel();
+void set_spawn();
+void level_end();
+void level_start();
+
+//Walls
+//void spawnWall(int no);
+//void renderWall();
+
+//NPCs 
+void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs
+void moveall(); //moves all NPCs
+void renderNPC(); //draws NPCs on map
+Entity* occupied(Position*);//if no entity occupy that position, return nullptr
+void renderprojectile(); //set projectile colour and draw on map
+void limitprojectile();
+void check_collision();
+
+//PowerUp
+void spawnPowerUp();
+void renderPowerUp();
+
+//UI, Map Objects
+void renderMainMenu(); //main menu.
+void mainMenuWait(); //init UI for main menu
+void renderBox(Object*, int, std::string); // draw box. can add text if you want
+int checkButtonClicks(Object**, int);// check if player clicked a button
+
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent);      // define this function for the console to call when there are mouse events
@@ -76,9 +125,7 @@ void buttonHoldPress(EKEYS key);
 void buttonHoldRelease(EKEYS key); 
 int getButtonHold();
 
-
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 
-
 
 #endif // _GAME_H

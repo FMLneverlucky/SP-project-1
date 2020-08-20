@@ -20,7 +20,7 @@ void gotoXY(COORD c)
 // Input    : int, int
 // Output   : Nil
 //--------------------------------------------------------------
-void gotoXY(int iX,int iY)
+void gotoXY(short int iX,short int iY)
 {
     COORD c = { iX, iY };
     gotoXY(c);
@@ -145,7 +145,7 @@ void Console::initConsole(COORD consoleSize, LPCSTR lpConsoleTitle)
 	setConsoleWindowSize();
     SetConsoleActiveScreenBuffer(m_hScreenBuffer);
     m_topleft_c = { 0, 0 };
-    m_writeRegion = { 0, 0, m_cConsoleSize.X - 1, m_cConsoleSize.Y - 1 };
+    m_writeRegion = { 0, 0, m_cConsoleSize.X + 10, m_cConsoleSize.Y + 10 };
 
     // initialize the input console
     initInput();
@@ -248,7 +248,7 @@ void Console::clearBuffer(WORD attribute)
     }
 }
 
-void Console::writeToBuffer(SHORT x, SHORT y, LPCSTR str, WORD attribute, SHORT length)
+void Console::writeToBuffer(SHORT x, SHORT y, LPCSTR str, WORD attribute, unsigned length)
 {
 	size_t index = max(x + m_cConsoleSize.X * y, 0);
     size_t str_idx = 0;
@@ -316,7 +316,7 @@ void Console::readConsoleInput()
 
     // Dispatch the events to the appropriate handler. 
 
-    for (int i = 0; i < numInputEvents; i++)
+    for (unsigned long int i = 0; i < numInputEvents; i++)
     {
         switch (m_irInBuf[i].EventType)
         {

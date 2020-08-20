@@ -6,6 +6,46 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include "time.h"
+#include <stdlib.h>
+#include "Projectile.h"
+#include "Wall.h"
+#include "PowerUp.h"
+
+//FOR TESTING
+bool checkInputs = false;
+bool checkTimeElapsed = false;
+bool checkFramerate = true;
+float splashScreenTime = 0.5;
+
+//UI NAMES
+std::string gameName = "A Very Fun Game";
+std::string gameMode1 = "GameMode1";
+std::string gameMode2 = "GameMode2";
+std::string gameMode3 = "GameMode3";
+std::string gameMode4 = "Click This"; // for game test. not for final product
+
+//MAINMENU
+Object* MMButtons[4];
+Object MMButton(gameMode1.length() + 2, 3);
+Object MMButton2(gameMode2.length() + 2, 3);
+Object MMButton3(gameMode3.length() + 2, 3);
+Object MMButton4(gameMode4.length() + 2, 3);
+int MMButtonCount = 4;
+
+//NORMAL MODE
+NormalMode NGameState = N_INIT;
+int level = 1; //level no.
+bool lose = false; //end game
+bool clear = false;
+int noC; //no. of civilian
+int noP; //no. of Police
+float spd; //spd of NPCs relative to player
+int cdtime; //cooldown time of hostile NPCs after collision w player
+int noW; //no of walls
+
+//TEST
+double timer = 0;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -14,7 +54,23 @@ SMouseEvent g_mouseEvent;
 
 // Game specific variables here
 SGameChar   g_sChar;
-EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
+EGAMESTATES g_eGameState = S_MAINMENU; // initial state
+
+Player* player = new Player;
+
+Entity* entities[31] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int entityLimit = 31;
+
+NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int NPCLimit = 20;
+
+Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int WallLimit = 10;
+
+Projectile* projectile[3] = { nullptr, nullptr, nullptr };
+int particle_limit = 3;
+
+PowerUp* powerup = nullptr;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -32,10 +88,11 @@ void init( void )
     g_dElapsedTime = 0.0;    
 
     // sets the initial state for the game
-    g_eGameState = S_SPLASHSCREEN;
+    g_eGameState = S_MAINMENU;
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
+    entities[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -43,6 +100,10 @@ void init( void )
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
+
+    //spawnWall(10);
+    //spawnNPC(false, 3, 0.1, 3);
+    //spawnNPC(true, 2, 0.1, 3);
 }
 
 //--------------------------------------------------------------
@@ -58,6 +119,29 @@ void shutdown( void )
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
     g_Console.clearBuffer();
+
+    for (int i = 0; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr)
+        {
+            delete entities[i];
+        }
+    }
+
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+        {
+            if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
+                delete projectile[p];
+        }
+    }
+    
+
+    if (powerup != nullptr)
+    {
+        delete powerup;
+    }
 }
 
 //--------------------------------------------------------------
@@ -98,9 +182,11 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 {    
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: // don't handle anything for the splash screen
+    case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
         break;
-    case S_GAME: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
+    case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
+        break;
+    case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
         break;
     }
 }
@@ -125,9 +211,11 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 {    
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: // don't handle anything for the splash screen
+    case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
         break;
-    case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+    case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+        break;
+    case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
         break;
     }
 }
@@ -168,6 +256,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
             buttonHoldRelease(key);
     }    
 }
+
 bool heldKey[6] = {false, false, false, false, false, false};
 void buttonHoldPress(EKEYS key)
 {
@@ -233,58 +322,246 @@ void update(double dt)
 
     switch (g_eGameState)
     {
-        case S_SPLASHSCREEN : splashScreenWait(); // game logic for the splash screen
+        case S_MAINMENU: mainMenuWait(); // game logic for the splash screen
             break;
-        case S_GAME: updateGame(); // gameplay logic when we are in the game
+        case S_TEST: updateGame(); // gameplay logic when we are in the game
+            break;
+        case S_GAMEMODE1: playNormal();
             break;
     }
 }
 
-
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
-        g_eGameState = S_GAME;
+    if (g_dElapsedTime > splashScreenTime) // wait for set time to switch to game mode, else do nothing
+        g_eGameState = S_TEST;
 }
 
 void updateGame()       // gameplay logic
 {
+    
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     moveCharacter();    // moves the character, collision detection, physics, etc
                         // sound can be played here too.
+    
+}
+
+void playNormal()
+{
+    switch (NGameState)
+    {
+    case N_INIT:
+        set_spawn();
+        break;
+    case N_LEVEL:
+        playLevel();
+        break;
+    case N_NEXTLEVEL:
+        level_end();
+        level_start();
+        break;
+
+    }
+
+}
+
+void set_spawn()
+{
+    if (level == 1)
+    {
+        noC = 3;
+        noP = 0;
+        spd = 0.1;
+        cdtime = 5;
+        noW = 7;
+    }
+    else if (level < 6)
+    {
+        noC++;
+        spd += 0.0285;
+        cdtime -= 0.2857;
+    }
+    else if (level < 15)
+    {
+
+        spd += 0.0285;
+        cdtime -= 0.2857;
+        if (level % 2)
+        {
+            noC++;
+            noP = level - 5;
+        }
+    }
+    else
+    {
+        spd = 0.5;
+        cdtime = 1;
+        noP = 5;
+        noC = 15;
+    }
+
+    spawnNPC(false, noC, spd, cdtime * g_dDeltaTime);
+    spawnNPC(true, noP, spd, cdtime * g_dDeltaTime);
+    //spawnWall(noW);
+
+    NGameState = N_LEVEL;
+}
+
+void level_end()
+{
+    for (int i = 1; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr)
+        {
+            delete entities[i];
+            entities[i] = nullptr;
+        }
+    }
+
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+        {
+            delete projectile[p];
+            projectile[p] = nullptr;
+        }
+    }
+
+
+    if (powerup != nullptr)
+    {
+        delete powerup;
+        powerup = nullptr;
+    }
+
+}
+
+void level_start()
+{
+    level++;
+    player->resetHP();
+    NPC::resetnoHostile();
+    set_spawn();
+    clear = false;
+    NGameState = N_LEVEL;
+}
+
+void playLevel()
+{
+    if (lose == true)
+    {
+        level_end();
+        NGameState = N_INIT;
+        g_eGameState = S_MAINMENU;
+    }
+
+    updateGame();
+
+    if (NPC::getnoHostile() == noC + noP)
+    {
+        clear = true;
+        //print level clear screen here
+        NGameState = N_NEXTLEVEL;
+    }
+
+    if (player->get_HP() <= 0)
+    {
+        lose = true;
+        //print lose screen here  
+    }
 }
 
 void moveCharacter()
-{    
+{   
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y -= 1 * g_dDeltaTime;
+        //g_sChar.m_cLocation.Y--;
+        entities[0]->set_direction(1);
+        
     }
-    if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
+    else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X--;        
+        //g_sChar.m_cLocation.X--;     
+        entities[0]->set_direction(3);
     }
-    if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y++;        
+        //g_sChar.m_cLocation.Y++;       
+        entities[0]->set_direction(2);
     }
-    if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X++;        
+        //g_sChar.m_cLocation.X++;        
+        entities[0]->set_direction(4);
     }
-    if (g_skKeyEvent[K_SPACE].keyReleased)
+    else
     {
-        g_sChar.m_bActive = !g_sChar.m_bActive;        
+        entities[0]->set_direction(0);
     }
 
-   
+    if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
+    {
+        entities[0]->set_direction(0);
+    }
+    
+    if (g_skKeyEvent[K_SPACE].keyReleased)
+    {
+        for (int p = 0; p < particle_limit; p++)
+        {
+            if (projectile[p] == nullptr)
+            {
+
+                projectile[p] = new Projectile;
+                projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+                projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+                break;
+            }
+        }
+
+        //g_sChar.m_bActive = !g_sChar.m_bActive;
+        for (int n = 0; n < NPCLimit; n++)
+        {
+            if (NPCs[n] != nullptr)
+            {
+                if (NPCs[n]->type() == 'B')
+                {
+                    NPCs[n]->anger();
+                }
+            }
+        }
+    }
+
+    player->set_cooldown(player->get_cooldown() - 1);
+    entities[0]->update_pos(g_dDeltaTime); //sets pos of player
+    g_sChar.m_cLocation.Y = entities[0]->getposy(); //moves player
+    g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
+    
+    moveall(); //moves NPCs
+    check_collision();
+    limitprojectile(); //moves/updates projectiles
+    
+
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr) && occupied(projectile[p]->getpos())->type() == 'C')
+        {
+            for (int i = 0; i < NPCLimit; i++)
+            {
+                if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                {
+                    NPCs[i]->anger();
+                }
+            }
+        }
+    }
 }
+
 void processUserInput()
 {
     // quits the game if player hits the escape key
@@ -305,13 +582,16 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderSplashScreen();
+    case S_MAINMENU: renderMainMenu();
         break;
-    case S_GAME: renderGame();
+    case S_TEST: renderGame();
+        break;
+    case S_GAMEMODE1: renderGame();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
-    renderInputEvents();    // renders status of input events
+    if (checkInputs)
+        renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
@@ -355,14 +635,20 @@ void renderMap()
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
 
-    COORD c;
+   /* COORD c;
     for (int i = 0; i < 12; ++i)
     {
         c.X = 5 * i;
         c.Y = i + 1;
         colour(colors[i]);
         g_Console.writeToBuffer(c, " °±²Û", colors[i]);
-    }
+        
+    }*/
+
+    //renderWall();
+    renderNPC();
+    renderprojectile();
+    
 }
 
 void renderCharacter()
@@ -379,20 +665,25 @@ void renderCharacter()
 void renderFramerate()
 {
     COORD c;
-    // displays the framerate
     std::ostringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << 1.0 / g_dDeltaTime << "fps";
-    c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str());
-
+    // displays the framerate
+    if (checkFramerate)
+    {
+        ss << std::fixed << std::setprecision(3);
+        ss << 1.0 / g_dDeltaTime << "fps";
+        c.X = g_Console.getConsoleSize().X - 9;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str());
+    }
     // displays the elapsed time
-    ss.str("");
-    ss << g_dElapsedTime << "secs";
-    c.X = 0;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
+    if (checkTimeElapsed)
+    {
+        ss.str("");
+        ss << g_dElapsedTime << "secs";
+        c.X = 0;
+        c.Y = 0;
+        g_Console.writeToBuffer(c, ss.str(), 0x59);
+    }
 }
 
 // this is an example of how you would use the input events
@@ -468,4 +759,456 @@ void renderInputEvents()
     default:        
         break;
     }   
+}
+
+void Wall::renderWall()
+{//maybe?
+    COORD c;
+    int colour;
+    for (int i = 0; i < WallLimit; i++)
+    {
+        if (Walls[i] != nullptr)
+        {
+            c.X = Walls[i]->getposx();
+            c.Y = Walls[i]->getposy();
+
+            colour = 0x00;
+
+            g_Console.writeToBuffer(c, "W", colour);
+        }
+    }
+}
+
+void Wall::spawnWall(int no)                                                                            //function to spawn wall
+{
+    for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
+    {
+                                                                                                        //find random x and y coords of unused spaces on map
+        bool isSpaceNearPlayer = false; 																//bool to check if anything wants to spawn in around player
+
+        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true) 					//while pos is not available
+        {
+            wallPivotPoint.set_x(rand() % 80); 															//set x coordinate of temp variable as a number from 0 to 80
+            wallPivotPoint.set_y(rand() % 24); 														    //set y coordinate of temp variable as a number from 0 to 25
+
+            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41) 							//check if randomiser chose outside range of the 1 block diameter in x axis around player
+            {
+                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)					    //check if randomiser chose outside range of the 1 block diameter in y axis around player
+                {
+                    isSpaceNearPlayer = true;															//if not in range, set bool to true to end loop
+                }
+            }
+        };
+
+        for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
+        {
+            if (Walls[w] == nullptr)                                                                    //check for wall entity not assigned on map
+            {
+                Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
+                entities[w + 21] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
+                entities[w + 21]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
+                break;                                                                                  //break from current loop
+            }
+        }
+    }
+}
+
+void renderPowerUp()
+{
+
+}
+
+void spawnPowerUp()
+{
+    //powerup = new PowerUp(15 / g_dDeltaTime);
+}
+
+void renderNPC()
+{//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
+    
+    //only separated them cos didnt see the need for player to be in entities pointer array since we using ascii but if we change it ye thatll be good
+    //initially i changed Entities pointer array to NPCs bcos player was taken out and i could use NPC class functions only on NPC pointers unless virtual thingy
+    COORD c;
+    int colour;
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            c.X = NPCs[i]->getposx();
+            c.Y = NPCs[i]->getposy();
+
+            if (NPCs[i]->type() == 'B')
+            {
+                if (NPCs[i]->isHostile())
+                {
+                    colour = 0xC3;
+                }
+                else
+                {
+                    colour = 0xE5;
+                }
+ 
+            }
+            else
+            {
+                if (NPCs[i]->isHostile())
+                {
+                    colour = 0x4D;
+                }
+                else
+                {
+                    colour = 0xF6;
+                }
+            }
+
+            if (NPCs[i]->get_ftime() != 0)
+            {
+                colour = 0x3C;
+            }
+
+            g_Console.writeToBuffer(c, " ", colour);
+
+            
+        }
+    }
+    
+}
+
+void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
+{
+    for (int i = 0; i < no; i++)
+    {
+        Position temp;
+        do
+        {
+            temp.set_x(rand() % 80);
+            temp.set_y(rand() % 24);
+        } while (occupied(&temp) != nullptr); //while pos is not available
+
+        for (int n = 0; n < NPCLimit; n++)
+        {
+            if (NPCs[n] == nullptr)
+            {
+                if (isPolice)
+                {
+                    NPCs[n] = new Police(cooldowntime);
+                    entities[n + 1] = NPCs[n];
+                }
+                else
+                {
+                    NPCs[n] = new NPC(cooldowntime);
+                    entities[n + 1] = NPCs[n];
+                }
+                entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
+                NPCs[n]->set_speed(spd);
+                break;
+            }
+        }
+
+
+    }
+}
+
+void moveall()
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            if (NPCs[i]->isHostile() == false)
+            {
+                int tempcount = ((rand() % 3) + 5) / g_dDeltaTime;
+
+                if (NPCs[i]->get_count() < tempcount && NPCs[i]->isHostile() == false)
+                {
+                    NPCs[i]->set_count(NPCs[i]->get_count() + 1);
+
+                    if (NPCs[i]->get_count() > (0.7 * tempcount))
+                    {
+                        NPCs[i]->set_direction(0);
+                    }
+                }
+                else 
+                {
+
+                    NPCs[i]->set_count(0);
+
+                    
+                    int aaa = (rand() % 7) + 1;
+                    switch (aaa)
+                    {
+                    case 1: //Up
+                        NPCs[i]->set_direction(1);
+                        break;
+                    case 2: //Down
+                        NPCs[i]->set_direction(2);
+                        break;
+                    case 3: //Left
+                        NPCs[i]->set_direction(3);
+                        break;
+                    case 4: //Right
+                        NPCs[i]->set_direction(4);
+                        break;
+                    case 5: //Don't move
+                        NPCs[i]->set_direction(0);
+                        break;
+                    default: //(6 or 7) continue in same direction
+                        break;
+                    }
+
+                    
+                }
+
+                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i])
+                {
+
+                    NPCs[i]->set_direction(0);
+                }
+
+                
+            }
+            else if (NPCs[i]->get_ftime() != 0) //npc is hostile but on cooldown
+            {
+                NPCs[i]->set_direction(0);
+                NPCs[i]->set_count(NPCs[i]->get_count() - 1);
+                if (NPCs[i]->get_count() == 0)
+                {
+                    NPCs[i]->cooldownend();
+                }
+                
+            }
+            else //npc is hostile and not on cooldown
+            {
+                int diffinx = g_sChar.m_cLocation.X - (int)NPCs[i]->getposx();
+                int diffiny = g_sChar.m_cLocation.Y - (int)NPCs[i]->getposy();
+
+                if (abs(diffinx) > abs(diffiny))
+                {
+                    if (diffinx > 0)
+                    {
+                        NPCs[i]->set_direction(4);
+                    }
+                    else
+                    {
+                        NPCs[i]->set_direction(3);
+                    }
+                 
+                }
+                else if (abs(diffinx) == abs(diffiny))
+                {
+                    int a = (rand() % 2) + 1;
+                    switch (a)
+                    {
+                    case 1:
+                        if (diffinx > 0)
+                        {
+                            NPCs[i]->set_direction(4);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(3);
+                        }
+                        break;
+                    default:
+
+                        if (diffiny > 0)
+                        {
+                            NPCs[i]->set_direction(2);
+                        }
+                        else
+                        {
+                            NPCs[i]->set_direction(1);
+                        }
+                    }
+                }
+                else //up or down
+                {
+                    if (diffiny > 0)
+                    {
+                        NPCs[i]->set_direction(2);
+                    }
+                    else
+                    {
+                        NPCs[i]->set_direction(1);
+                    }
+                }
+                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
+                {
+                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W')
+                    {
+
+                        NPCs[i]->set_direction(0);
+                    }
+                }
+                            
+            }
+
+            NPCs[i]->update_pos(g_dDeltaTime);
+        }
+      
+    }
+}
+
+Entity* occupied(Position* pos)
+{
+    for (int i = 0; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr)
+        {
+            if ((int)entities[i]->getpos()->get_x() == (int)pos->get_x() && (int)entities[i]->getpos()->get_y() == (int)pos->get_y())
+            {
+                return entities[i];
+            }
+        }
+    }
+    return nullptr;
+}
+
+void initBoxMainMenu()
+{
+    //Object button()
+}
+
+void renderprojectile()
+{
+    COORD pr;
+    int colour;
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+        {
+
+            pr.X = projectile[p]->get_px();
+            pr.Y = projectile[p]->get_py();
+
+            colour = 0xA1;
+
+            g_Console.writeToBuffer(pr, " ", colour);
+        }
+    }
+}
+
+void renderBox(Object* box, int colour, std::string text = " ")
+{
+    COORD c;
+    char temp;
+    int i = 0;// for displaying text
+    c.Y = box->referencePosition()->get_y();
+    for (int y = 0; y < box->height(); y++)
+    {
+        c.X = box->referencePosition()->get_x();
+        for (int x = 0; x < box->length(); x++)
+        {
+            c.X++;
+            g_Console.writeToBuffer(c, temp = (x >= ((box->length() + 1) / 2) - 1 - text.length() / 2 && x < ((box->length() + 1) / 2) + text.length() / 2  && y == box->height() / 2) ? text[i++] : ' ', colour);
+        }
+        c.Y++;
+    }
+}
+
+void renderMainMenu()
+{
+    COORD c = g_Console.getConsoleSize();
+    Object title(71, 3, Position(c.X / 2, c.Y / 5));
+    renderBox(&title, 0x0F, gameName);
+
+    MMButton.move(c.X / 2, c.Y * 2 / 5);
+    MMButton2.move(c.X / 2, c.Y * 3 / 5);
+    MMButton3.move(c.X / 2, c.Y * 4 / 5);
+    MMButton4.move(c.X / 2, c.Y);
+
+    MMButtons[0] = &MMButton;
+    MMButtons[1] = &MMButton2;
+    MMButtons[2] = &MMButton3;
+    MMButtons[3] = &MMButton4;
+
+    renderBox(&MMButton, 0x04, gameMode1);
+    renderBox(&MMButton2, 0xA, gameMode2);
+    renderBox(&MMButton3, 0x0B, gameMode3);
+    renderBox(&MMButton4, 0x06, gameMode4);
+}
+
+void mainMenuWait()
+{
+    int clicked = checkButtonClicks(MMButtons, MMButtonCount);
+    switch (clicked)
+    {
+    case 0:
+        g_eGameState = S_GAMEMODE1;
+        break;
+    case 1:
+        g_eGameState = S_GAMEMODE2;
+        break;
+    case 2:
+        g_eGameState = S_GAMEMODE3;
+        break;
+    case 3:
+        g_eGameState = S_TEST;
+        break;
+    default:
+        break;
+    }
+}
+
+int checkButtonClicks(Object** buttons, int arrayLength)
+{
+    int mouseX, mouseY;
+    if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {// check when player left click 
+        mouseX = g_mouseEvent.mousePosition.X;
+        mouseY = g_mouseEvent.mousePosition.Y;
+        for (int i = 0; i < arrayLength; i++)
+        {//check all the objects in the given array
+            if (mouseX >= buttons[i]->referencePosition()->get_x() &&
+                mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
+                mouseY >= buttons[i]->referencePosition()->get_y() &&
+                mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
+            {// check if mouse is within this Object
+                return i;
+            }
+        }
+    }
+    return arrayLength;
+}
+
+void limitprojectile()
+{
+    for (int p = 0; p < particle_limit; p++)
+    {
+        if (projectile[p] != nullptr)
+        {
+            if (projectile[p]->get_spacecount() != 0)
+            {
+                projectile[p]->update_particle();
+                projectile[p]->set_spacecount(projectile[p]->get_spacecount()-1);
+            }
+            else
+            {
+                delete projectile[p];
+                projectile[p] = nullptr;
+            }
+        }
+    }
+}
+
+void check_collision()
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() == 0)
+            {
+                //timer += g_dDeltaTime;
+                //timer >3, run else dont;
+                NPCs[i]->cooldownstart();
+                NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                NPCs[i]->set_pos(player->getposx() - 3, player->getposy());
+                //player->set_pos(5, 20);
+                player->loseHP(NPCs[i]->get_damage());
+                //timer = 0;
+            }
+ 
+        }
+    }
 }

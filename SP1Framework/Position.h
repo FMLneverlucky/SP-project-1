@@ -2,11 +2,16 @@
 class Position
 {
 private:
-	int x;
-	int y;
+	float x;
+	float y;
 
 public:
-	int get_x(void);
-	int get_y(void);
+	Position();
+	Position(float x, float y);
+	~Position();
+	float get_x(void);
+	float get_y(void);
+	void set_x(float newx);
+	void set_y(float newy);
 };
 

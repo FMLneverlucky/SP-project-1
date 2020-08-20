@@ -6,5 +6,6 @@ class Police :
 public:
     Police();
     Police(int cd);
+    char type();
 };
 

@@ -56,8 +56,6 @@ const int WallLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-//Object box(5, 5, Position(3, 8));
-
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
 
@@ -88,7 +86,8 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     spawnWall(10);
-    spawnNPC(false, 5, 0.1, 3);
+    spawnNPC(false, 3, 0.1, 3);
+    spawnNPC(true, 2, 0.1, 3);
 
 }
 
@@ -375,7 +374,17 @@ void moveCharacter()
             
         }
 
-        g_sChar.m_bActive = !g_sChar.m_bActive;
+        //g_sChar.m_bActive = !g_sChar.m_bActive;
+        for (int n = 0; n < NPCLimit; n++)
+        {
+            if (NPCs[n] != nullptr)
+            {
+                if (NPCs[n]->type() == 'B')
+                {
+                    NPCs[n]->anger();
+                }
+            }
+        }
     }
 
  
@@ -388,27 +397,17 @@ void moveCharacter()
 
     for (int p = 0; p < particle_limit; p++)
     {
-        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr))
+        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr) && occupied(projectile[p]->getpos())->type() == 'C')
         {
-            if (occupied(projectile[p]->getpos())->type() == 'C')
+            for (int i = 0; i < NPCLimit; i++)
             {
-                for (int i = 0; i < NPCLimit; i++)
+                if (NPCs[i] == occupied(projectile[p]->getpos()))
                 {
-                    if (NPCs[i] != nullptr)
-                    {
-                        if (NPCs[i] == occupied(projectile[p]->getpos()))
-                        {
-                            NPCs[i]->anger();
-                        }
-                    }
+                    NPCs[i]->anger();
                 }
             }
-
         }
     }
-
- 
-
 }
 
 void processUserInput()
@@ -482,7 +481,7 @@ void renderMap()
         0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
     };
 
-    /*COORD c;
+   /* COORD c;
     for (int i = 0; i < 12; ++i)
     {
         c.X = 5 * i;
@@ -675,16 +674,34 @@ void renderNPC()
             c.X = NPCs[i]->getposx();
             c.Y = NPCs[i]->getposy();
 
-            if (NPCs[i]->isHostile())
+            if (NPCs[i]->type() == 'B')
             {
-                colour = 0x4D;
+                if (NPCs[i]->isHostile())
+                {
+                    colour = 0xC3;
+                }
+                else
+                {
+                    colour = 0xE5;
+                }
+
+                g_Console.writeToBuffer(c, " ", colour);
             }
             else
             {
-                colour = 0xF6;
+                if (NPCs[i]->isHostile())
+                {
+                    colour = 0x4D;
+                }
+                else
+                {
+                    colour = 0xF6;
+                }
+
+                g_Console.writeToBuffer(c, " ", colour);
             }
 
-            g_Console.writeToBuffer(c, "N", colour);
+            
         }
     }
     
@@ -700,8 +717,6 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
             temp.set_x(rand() % 80);
             temp.set_y(rand() % 24);
         } while (occupied(&temp) != nullptr); //while pos is not available
-
-
 
         for (int n = 0; n < NPCLimit; n++)
         {
@@ -811,7 +826,7 @@ void moveall()
                     {
                         NPCs[i]->set_direction(3);
                     }
-                                
+                 
                 }
                 else //up or down
                 {

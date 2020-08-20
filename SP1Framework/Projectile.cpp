@@ -80,7 +80,6 @@ void Projectile::direction(int m_x, int m_y)
 
 Position* Projectile::getpos()
 {
-	Position pos;
 	pos.set_x(x);
 	pos.set_y(y);
 	return &pos;

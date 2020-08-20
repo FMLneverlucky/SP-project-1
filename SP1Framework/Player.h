@@ -3,7 +3,5 @@
 class Player :
     public Entity
 {
-
-
 };
 

@@ -817,8 +817,8 @@ void moveall()
             }
             else //npc is hostile and not on cooldown
             {
-                int diffinx = g_sChar.m_cLocation.X - NPCs[i]->getposx();
-                int diffiny = g_sChar.m_cLocation.Y - NPCs[i]->getposy();
+                int diffinx = g_sChar.m_cLocation.X - (int)NPCs[i]->getposx();
+                int diffiny = g_sChar.m_cLocation.Y - (int)NPCs[i]->getposy();
 
                 if (abs(diffinx) > abs(diffiny))
                 {

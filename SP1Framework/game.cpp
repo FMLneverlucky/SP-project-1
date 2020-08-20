@@ -618,7 +618,7 @@ void spawnWall(int no) //function to spawn wall
     {
         //find random x and y on unused spaces
         Position temp; //declare temporary position class to hold coordinates for each wall entity
-        bool isSpaceNearPlayer;
+        bool isSpaceNearPlayer = false;
         do
         {
             

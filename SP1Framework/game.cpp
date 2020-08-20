@@ -837,11 +837,13 @@ void moveall()
                         NPCs[i]->set_direction(1);
                     }
                 }
-
-                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i] && occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() != 'P')
+                if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
                 {
-                    
-                    NPCs[i]->set_direction(0);
+                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W')
+                    {
+
+                        NPCs[i]->set_direction(0);
+                    }
                 }
                             
             }

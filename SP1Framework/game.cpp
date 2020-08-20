@@ -24,14 +24,23 @@ std::string gameMode2 = "GameMode2";
 std::string gameMode3 = "GameMode3";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 
+std::string quit = "quit";
+std::string resume = "resume";
+
 //MAINMENU
 Object* MMButtons[4];
 Object MMButton(gameMode1.length() + 2, 3);
 Object MMButton2(gameMode2.length() + 2, 3);
 Object MMButton3(gameMode3.length() + 2, 3);
 Object MMButton4(gameMode4.length() + 2, 3);
-int MMButtonCount = 4;
+const int MMButtonCount = 4; 
 
+//PAUSE MENU
+bool paused = false;
+Object* PMButtons[2];
+Object resumeButton(resume.length() + 2, 3, Position());
+Object quitButton(quit.length() + 2, 3, Position());
+const int PMButtonCount = 2;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -311,12 +320,18 @@ void splashScreenWait()    // waits for time to pass in splash screen
 
 void updateGame()       // gameplay logic
 {
-    
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
-    moveCharacter();    // moves the character, collision detection, physics, etc
-                        // sound can be played here too.
-    
+    //if (!paused)
+    //{
+        moveCharacter();    // moves the character, collision detection, physics, etc
+                            // sound can be played here too.
+    //}
+    //else
+    //{
+    //    pauseMenuWait();
+    //}
 }
+    
 
 void moveCharacter()
 {   
@@ -400,6 +415,7 @@ void processUserInput()
 {
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
+        //paused = paused ? false : true;
         g_bQuitGame = true;    
 }
 
@@ -457,6 +473,8 @@ void renderGame()
 {
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
+   /* if (paused)
+        renderPauseMenu();*/
 }
 
 void renderMap()
@@ -907,8 +925,7 @@ void renderMainMenu()
 
 void mainMenuWait()
 {
-    int clicked = checkButtonClicks(MMButtons, MMButtonCount);
-    switch (clicked)
+    switch (checkButtonClicks(MMButtons, MMButtonCount))
     {
     case 0:
         g_eGameState = S_GAMEMODE1;
@@ -921,6 +938,37 @@ void mainMenuWait()
         break;
     case 3:
         g_eGameState = S_TEST;
+        break;
+    default:
+        break;
+    }
+}
+
+void renderPauseMenu()
+{
+    COORD c = g_Console.getConsoleSize();
+    Object title(71, 3, Position(c.X / 2, c.Y / 6));
+    renderBox(&title, 0x0F, "Paused");
+
+    resumeButton.move(c.X / 2, c.Y * 2 / 4);
+    quitButton.move(c.X / 2, c.Y * 3 / 4);
+
+    PMButtons[0] = &resumeButton;
+    PMButtons[0] = &quitButton;
+
+    renderBox(&resumeButton, 0x0A, resume);
+    renderBox(&quitButton, 0x4, quit);
+}
+
+void pauseMenuWait()
+{
+    switch (checkButtonClicks(PMButtons, PMButtonCount))
+    {
+    case 0:
+        paused = false;
+        break;
+    case 1:
+        g_bQuitGame = true;
         break;
     default:
         break;

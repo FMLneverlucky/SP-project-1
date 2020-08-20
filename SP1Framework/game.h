@@ -50,7 +50,6 @@ enum EGAMESTATES
     S_GAMEMODE1,
     S_GAMEMODE2,
     S_GAMEMODE3,
-    S_PAUSEMENU,
     S_TEST,
     S_COUNT
 };
@@ -95,8 +94,10 @@ void limitprojectile();
 void check_collision();
 
 //UI, Map Objects
-void renderMainMenu(); //main menu.
-void mainMenuWait(); //init UI for main menu
+void renderMainMenu();// main menu.
+void mainMenuWait();// init UI for main menu
+void renderPauseMenu();// d
+void pauseMenuWait();
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
 int checkButtonClicks(Object**, int);// check if player clicked a button
 

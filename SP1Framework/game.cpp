@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "Projectile.h"
 #include "Wall.h"
+#include "PowerUp.h"
 
 //FOR TESTING
 bool checkInputs = false;
@@ -55,6 +56,9 @@ const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
+
+PowerUp* powerup = nullptr;
+
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -119,6 +123,18 @@ void shutdown( void )
             if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
                 delete projectile[p];
         }
+    }
+    for (int i = 0; i < WallLimit; i++)
+    {
+        if (Walls[i] != nullptr)
+        {
+            delete Walls[i];
+        }
+    }
+
+    if (powerup != nullptr)
+    {
+        delete powerup;
     }
 }
 
@@ -362,17 +378,21 @@ void moveCharacter()
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
+
+
         for (int p = 0; p < particle_limit; p++)
         {
             if (projectile[p] == nullptr)
             {
+
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 break;
             }
-            
         }
+
+
 
         //g_sChar.m_bActive = !g_sChar.m_bActive;
         for (int n = 0; n < NPCLimit; n++)
@@ -386,14 +406,16 @@ void moveCharacter()
             }
         }
     }
+    
 
- 
+    player->set_cooldown(player->get_cooldown() - 1);
     entities[0]->update_pos(g_dDeltaTime); //sets pos of player
     g_sChar.m_cLocation.Y = entities[0]->getposy(); //moves player
     g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
     moveall(); //moves NPCs
     limitprojectile(); //moves/updates projectiles
     check_collision();
+
 
     for (int p = 0; p < particle_limit; p++)
     {
@@ -660,6 +682,16 @@ void spawnWall(int no) //function to spawn wall
     }
 }
 
+void renderPowerUp()
+{
+
+}
+
+void spawnPowerUp()
+{
+    //powerup = new PowerUp(15 / g_dDeltaTime);
+}
+
 void renderNPC()
 {//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
     
@@ -817,8 +849,8 @@ void moveall()
             }
             else //npc is hostile and not on cooldown
             {
-                int diffinx = g_sChar.m_cLocation.X - NPCs[i]->getposx();
-                int diffiny = g_sChar.m_cLocation.Y - NPCs[i]->getposy();
+                int diffinx = g_sChar.m_cLocation.X - (int)NPCs[i]->getposx();
+                int diffiny = g_sChar.m_cLocation.Y - (int)NPCs[i]->getposy();
 
                 if (abs(diffinx) > abs(diffiny))
                 {

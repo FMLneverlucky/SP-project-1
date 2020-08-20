@@ -56,8 +56,6 @@ const int WallLimit = 10;
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
 
-//Object box(5, 5, Position(3, 8));
-
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
 
@@ -396,27 +394,17 @@ void moveCharacter()
 
     for (int p = 0; p < particle_limit; p++)
     {
-        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr))
+        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr) && occupied(projectile[p]->getpos())->type() == 'C')
         {
-            if (occupied(projectile[p]->getpos())->type() == 'C')
+            for (int i = 0; i < NPCLimit; i++)
             {
-                for (int i = 0; i < NPCLimit; i++)
+                if (NPCs[i] == occupied(projectile[p]->getpos()))
                 {
-                    if (NPCs[i] != nullptr)
-                    {
-                        if (NPCs[i] == occupied(projectile[p]->getpos()))
-                        {
-                            NPCs[i]->anger();
-                        }
-                    }
+                    NPCs[i]->anger();
                 }
             }
-
         }
     }
-
- 
-
 }
 
 void processUserInput()

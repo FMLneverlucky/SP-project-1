@@ -53,7 +53,7 @@ void NPC::set_speed(float spd)
 	speed = spd;
 }
 
-Position* NPC::new_pos(float dtime)
+Position* NPC::new_pos(double dtime)
 {
 	
 	tempp.set_x(pos.get_x());
@@ -103,7 +103,7 @@ int NPC::get_ftime()
 	return freezetime;
 }
 
-void NPC::update_pos(float dtime)
+void NPC::update_pos(double dtime)
 {
 	pos.set_x(new_pos(dtime)->get_x());
 	pos.set_y(new_pos(dtime)->get_y());

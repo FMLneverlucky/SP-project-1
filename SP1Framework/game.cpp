@@ -1002,11 +1002,25 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
     for (int i = 0; i < no; i++)
     {
         Position temp;
+        bool valid = true;
+
         do
         {
             temp.set_x(rand() % 80);
             temp.set_y(rand() % 24);
-        } while (occupied(&temp) != nullptr); //while pos is not available
+   
+            for (int i = 0; i < 9; i++)
+            {
+                if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
+                {
+                    valid = false;
+                }
+                else if (temp.get_x() == endPoint[i].get_x() && temp.get_y() == endPoint[i].get_y())
+                {
+                    valid = false;
+                }
+            }
+        } while (occupied(&temp) != nullptr && valid == false); //while pos is not available
 
         for (int n = 0; n < NPCLimit; n++)
         {
@@ -1024,6 +1038,7 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
                 }
                 entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
                 NPCs[n]->set_speed(spd);
+                NPCs[n]->set_count(2 / g_dDeltaTime);
                 break;
             }
         }
@@ -1102,8 +1117,8 @@ void moveall()
             }
             else //npc is hostile and not on cooldown
             {
-                int diffinx = g_sChar.m_cLocation.X - (int)NPCs[i]->getposx();
-                int diffiny = g_sChar.m_cLocation.Y - (int)NPCs[i]->getposy();
+                int diffinx = g_sChar.m_cLocation.X - static_cast<int>(NPCs[i]->getposx());
+                int diffiny = g_sChar.m_cLocation.Y - static_cast<int>(NPCs[i]->getposy());
 
                 if (abs(diffinx) > abs(diffiny))
                 {
@@ -1187,7 +1202,7 @@ Entity* occupied(Position* pos)
     {
         if (entities[i] != nullptr)
         {
-            if ((int)entities[i]->getpos()->get_x() == (int)pos->get_x() && (int)entities[i]->getpos()->get_y() == (int)pos->get_y())
+            if (static_cast<int>(entities[i]->getpos()->get_x()) == static_cast<int>(pos->get_x()) && static_cast<int>(entities[i]->getpos()->get_y()) == static_cast<int>(pos->get_y()))
             {
                 return entities[i];
             }

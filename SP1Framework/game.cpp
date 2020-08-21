@@ -394,7 +394,8 @@ void playNormal()
 
 void InitNormal()
 {
-    lose = true;
+    lose = false;
+    player->resetHP();
     noC = 3;
     noP = 0;
     spd = 0.1;

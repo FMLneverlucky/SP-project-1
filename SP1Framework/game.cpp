@@ -546,6 +546,7 @@ void moveCharacter()
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
+                projectile[p]->set_newpos(); 
                 break;
             }
         }
@@ -1273,7 +1274,7 @@ void limitprojectile()
         {
             if (projectile[p]->get_spacecount() != 0)
             {
-                projectile[p]->update_particle();
+                projectile[p]->update_particle(g_dDeltaTime);
                 projectile[p]->set_spacecount(projectile[p]->get_spacecount()-1);
             }
             else

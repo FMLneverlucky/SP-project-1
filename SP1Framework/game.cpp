@@ -68,7 +68,10 @@ Position endPoint[9];
 Position spawnPoint[9];
 
 //TEST
-double timer = 0;
+//double timer = 0;
+
+//map aesthetics
+int prevcol = 0x88;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -510,6 +513,8 @@ void level_start()
     set_spawn();
     clear = false;
     NGameState = N_LEVEL;
+    setBG();
+  
 }
 
 void playLevel()
@@ -656,6 +661,7 @@ void render()
     case S_TEST: renderGame();
         break;
     case S_GAMEMODE1: 
+        renderBG(prevcol);
         renderPoints();
         renderGame();
         
@@ -742,7 +748,7 @@ void renderCharacter()
     WORD charColor = 0x0C;
     if (g_sChar.m_bActive)
     {
-        charColor = 0x0A;
+        charColor = 0x09;
     }
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
 }
@@ -970,7 +976,7 @@ void renderNPC()
                 }
                 else
                 {
-                    colour = 0xE5;
+                    colour = 0x66;
                 }
             }
             else
@@ -1435,28 +1441,79 @@ void renderPoints()
 
     for (int i = 0; i < 9; i++)
     {
-        if (i != 4)
+        if (i == 1)
         {
-            colour = 0xDD;
+            colour = 0x30;
+            c.X = spawnPoint[i].get_x();
+            c.Y = spawnPoint[i].get_y();
+            g_Console.writeToBuffer(c, "S", colour);
+
+            colour = 0x90;
+            c.X = endPoint[i].get_x();
+            c.Y = endPoint[i].get_y();
+            g_Console.writeToBuffer(c, "E", colour);
+        }
+        else if (i != 4)
+        {
+            colour = 0x33;
             c.X = spawnPoint[i].get_x();
             c.Y = spawnPoint[i].get_y();
             g_Console.writeToBuffer(c, " ", colour);
 
-            colour = 0xBB;
+            colour = 0x99;
             c.X = endPoint[i].get_x();
             c.Y = endPoint[i].get_y();
             g_Console.writeToBuffer(c, " ", colour);
         }
     }
     
-    colour = 0xF3;
+    colour = 0x7F;
     c.X = endPoint[4].get_x();
     c.Y = endPoint[4].get_y();
-    g_Console.writeToBuffer(c, "E", colour);
+    g_Console.writeToBuffer(c, (char)254 , colour);
 
-    colour = 0xF5;
+    colour = 0x7F;
     c.X = spawnPoint[4].get_x();
     c.Y = spawnPoint[4].get_y();
-    g_Console.writeToBuffer(c, "S", colour);
+    g_Console.writeToBuffer(c, (char)254 , colour);
 
+}
+
+void setBG()
+{
+    int colour;
+    do
+    {
+        int a = rand() % 3;
+        switch (a)
+        {
+        case 0:
+            colour = 0x88;
+            break;
+        case 1:
+            colour = 0x55;
+            break;
+        case 2:
+            colour = 0xDD;
+            break;
+            
+
+        }
+    } while (prevcol == colour);
+
+    prevcol = colour;
+}
+
+void renderBG(int col)
+{
+    COORD c;
+    for (int x = 0; x < 80; x++)
+    {
+        for (int y = 0; y < 25; y++)
+        {
+            c.X = x;
+            c.Y = y;
+            g_Console.writeToBuffer(c, " ", col);
+        }
+    }
 }

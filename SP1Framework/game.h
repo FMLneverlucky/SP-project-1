@@ -104,6 +104,10 @@ void level_start();
 void renderPoints();
 void set_points();
 
+//aesthetics
+void setBG();
+void renderBG(int col);
+
 
 //NPCs 
 void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs

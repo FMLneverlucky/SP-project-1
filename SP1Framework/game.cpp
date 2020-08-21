@@ -1237,7 +1237,7 @@ void winLoseMenuWait()
         g_eGameState = S_MAINMENU;
         break;
     case 2:
-        //do win lose stuff;
+        //do win lose stuff; 
         break;
     default:
         break;

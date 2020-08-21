@@ -1,23 +1,7 @@
-#include "Wall.h"
-#include <stdlib.h>
 #include <iostream>
-
-//position things
-float Entity::getposx()
-{
-	return pos.get_x();
-}
-
-float Entity::getposy()
-{
-	return pos.get_y();
-}
-Position* Entity::getpos()
-{
-	return &pos;
-}
-
-
+#include <stdlib.h>
+#include "Wall.h"
+#include "Position.h"
 
 Wall::Wall()
 {
@@ -69,7 +53,7 @@ int Wall::setType()
 
 void Wall::typeI()
 {
-
+	
 }
 
 void Wall::typeJ()

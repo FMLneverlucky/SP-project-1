@@ -629,7 +629,7 @@ void renderInputEvents()
     }   
 }
 
-void Wall::renderWall()
+void renderWall()
 {//maybe?
     COORD c;
     int colour;
@@ -647,26 +647,66 @@ void Wall::renderWall()
     }
 }
 
-void Wall::spawnWall(int no)                                                                            //function to spawn wall
+void spawnWall(int no)                                                                                  //function to spawn wall
 {
     for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
     {
-                                                                                                        //find random x and y coords of unused spaces on map
+        /*if (setType() == I)
+        {
+            typeI();
+        }
+        
+        else if (setType() == J)
+        {
+            typeJ();
+        }
+
+        else if (setType() == L)
+        {
+            typeL();
+        }
+
+        else if (setType() == O)
+        {
+            typeO();
+        }
+
+        else if (setType() == S)
+        {
+            typeS();
+        }
+
+        else if (setType() == T)
+        {
+            typeT();
+        }
+
+        else if (setType() == Z)
+        {
+            typeZ();
+        }
+
+        else if (setType() == d)
+        {
+            typed();
+        }*/
+
+        Position temp;                                                                                  //find random x and y coords of unused spaces on map
         bool isSpaceNearPlayer = false; 																//bool to check if anything wants to spawn in around player
 
-        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true) 					//while pos is not available
+        while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true) 					            //while pos is not available
         {
-            wallPivotPoint.set_x(rand() % 80); 															//set x coordinate of temp variable as a number from 0 to 80
-            wallPivotPoint.set_y(rand() % 24); 														    //set y coordinate of temp variable as a number from 0 to 25
+            temp.set_x(rand() % 80); 															        //set x coordinate of temp variable as a number from 0 to 80
+            temp.set_y(rand() % 24); 														            //set y coordinate of temp variable as a number from 0 to 25
 
-            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41) 							//check if randomiser chose outside range of the 1 block diameter in x axis around player
+            if (temp.get_x() > 39 && temp.get_x() <= 41) 							                    //check if randomiser chose outside range of the 1 block diameter in x axis around player
             {
-                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)					    //check if randomiser chose outside range of the 1 block diameter in y axis around player
+                if (temp.get_y() > 12 && temp.get_y() <= 14)					                        //check if randomiser chose outside range of the 1 block diameter in y axis around player
                 {
                     isSpaceNearPlayer = true;															//if not in range, set bool to true to end loop
                 }
             }
-        };
+        }
 
         for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
         {
@@ -674,7 +714,7 @@ void Wall::spawnWall(int no)                                                    
             {
                 Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
                 entities[w + 11] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 11]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
+                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());                                  //set position of the temp wall entity to an element in the entity array
                 break;                                                                                  //break from current loop
             }
         }

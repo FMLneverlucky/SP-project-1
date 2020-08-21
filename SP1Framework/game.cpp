@@ -1297,8 +1297,6 @@ void check_collision()
                 //timer >3, run else dont;
                 NPCs[i]->cooldownstart();
                 NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
-                //NPCs[i]->set_pos(player->getposx() - 3, player->getposy());
-                //player->set_pos(5, 20);
                 player->loseHP(NPCs[i]->get_damage());
                 //timer = 0;
             }

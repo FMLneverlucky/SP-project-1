@@ -9,7 +9,7 @@ private:
     int freezetime;
     int damage;
     float speed;
-
+    static int noHostile;
     int counter;
 protected:
     int cooldown;
@@ -30,6 +30,8 @@ public:
     void update_pos(float dtime);
     void cooldownstart();
     void cooldownend();
+    static int getnoHostile();
+    static void resetnoHostile();
     Position* new_pos(float dtime);
 
 };

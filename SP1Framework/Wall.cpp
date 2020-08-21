@@ -1,8 +1,7 @@
-#include "Wall.h"
-#include <stdlib.h>
 #include <iostream>
-
-//position things
+#include <stdlib.h>
+#include "Wall.h"
+#include "Position.h"
 
 Wall::Wall()
 {
@@ -54,7 +53,7 @@ int Wall::setType()
 
 void Wall::typeI()
 {
-
+	
 }
 
 void Wall::typeJ()

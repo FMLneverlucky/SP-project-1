@@ -1,4 +1,5 @@
 #include "NPC.h"
+int NPC::noHostile = 0;
 
 NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(cd)
 {
@@ -24,6 +25,7 @@ void NPC::anger()
 {
 	angry = true;
 	counter = 0;
+	noHostile++;
 }
 
 void NPC::set_count(int a)
@@ -115,4 +117,14 @@ void NPC::cooldownstart()
 void NPC::cooldownend()
 {
 	freezetime = 0;
+}
+
+int NPC::getnoHostile()
+{
+	return noHostile;
+}
+
+void NPC::resetnoHostile()
+{
+	noHostile = 0;
 }

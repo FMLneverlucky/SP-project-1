@@ -50,7 +50,6 @@ enum EGAMESTATES
     S_GAMEMODE1,
     S_GAMEMODE2,
     S_GAMEMODE3,
-    S_PAUSEMENU,
     S_TEST,
     S_COUNT
 };
@@ -60,6 +59,13 @@ struct SGameChar
 {
     COORD m_cLocation;
     bool  m_bActive;
+};
+
+enum NormalMode
+{
+    N_INIT,
+    N_LEVEL,
+    N_NEXTLEVEL
 };
 
 void init        ( void );      // initialize your variables, allocate memory, etc
@@ -81,9 +87,16 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+//Normal Mode
+void playNormal();
+void playLevel();
+void set_spawn();
+void level_end();
+void level_start();
+
 //Walls
-void spawnWall(int no);
-void renderWall();
+//void spawnWall(int no);
+//void renderWall();
 
 //NPCs 
 void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs
@@ -99,8 +112,13 @@ void spawnPowerUp();
 void renderPowerUp();
 
 //UI, Map Objects
-void renderMainMenu(); //main menu.
-void mainMenuWait(); //init UI for main menu
+void renderMainMenu();// main menu.
+void mainMenuWait();// init UI for main menu
+void renderPauseMenu();// d
+void pauseMenuWait();
+void renderWinLoseMenu(bool);
+void winLoseMenuWait();
+
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
 int checkButtonClicks(Object**, int);// check if player clicked a button
 
@@ -111,9 +129,7 @@ void buttonHoldPress(EKEYS key);
 void buttonHoldRelease(EKEYS key); 
 int getButtonHold();
 
-
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 
-
 
 #endif // _GAME_H

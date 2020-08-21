@@ -64,6 +64,8 @@ int noP; //no. of Police
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
+Position endPoint[9];
+Position spawnPoint[9];
 
 //TEST
 double timer = 0;
@@ -79,7 +81,7 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[31] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* entities[31] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 31;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -113,7 +115,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
-    entities[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -123,7 +125,7 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     //spawnWall(10);
-    spawnNPC(false, 3, 0.1, 3);
+    //spawnNPC(false, 3, 0.1, 3);
     //spawnNPC(true, 2, 0.1, 3);
 }
 
@@ -376,7 +378,7 @@ void playNormal()
     switch (NGameState)
     {
     case N_INIT:
-        set_spawn();
+        InitNormal();
         break;
     case N_LEVEL:
         playLevel();
@@ -390,17 +392,26 @@ void playNormal()
 
 }
 
+void InitNormal()
+{
+    lose = true;
+    noC = 3;
+    noP = 0;
+    spd = 0.1;
+    cdtime = 5;
+    noW = 7;
+    spawnNPC(false, noC, spd, cdtime);
+    spawnNPC(true, noP, spd, cdtime);
+    set_points();
+    //spawnWall(noW);
+    
+    NGameState = N_LEVEL;
+}
+ 
 void set_spawn()
 {
-    if (level == 1)
-    {
-        noC = 3;
-        noP = 0;
-        spd = 0.1;
-        cdtime = 5;
-        noW = 7;
-    }
-    else if (level < 6)
+    
+    if (level < 6)
     {
         noC++;
         spd += 0.0285;
@@ -408,7 +419,6 @@ void set_spawn()
     }
     else if (level < 15)
     {
-
         spd += 0.0285;
         cdtime -= 0.2857;
         if (level % 2)
@@ -425,21 +435,51 @@ void set_spawn()
         noC = 15;
     }
 
-    spawnNPC(false, noC, spd, cdtime * g_dDeltaTime);
-    spawnNPC(true, noP, spd, cdtime * g_dDeltaTime);
+    spawnNPC(false, noC, spd, cdtime);
+    spawnNPC(true, noP, spd, cdtime);
     //spawnWall(noW);
+    set_points();
+}
 
-    NGameState = N_LEVEL;
+void set_points()
+{
+    spawnPoint[4].set_x(g_sChar.m_cLocation.X);
+    spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
+
+    Position tempp;
+    do
+    {
+        tempp.set_x((rand() % 78) + 1);
+        tempp.set_y((rand() % 22) + 1);
+
+    } while (occupied(&tempp) != nullptr);
+    endPoint[4].set_x(tempp.get_x());
+    endPoint[4].set_y(tempp.get_y());
+
+    for (int i = -1; i < 2; i++)
+    {
+        spawnPoint[1 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() - 1);
+        spawnPoint[7 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() + 1);
+    
+        endPoint[1 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() - 1);
+        endPoint[7 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() + 1);
+      
+        spawnPoint[3].set_pos(spawnPoint[4].get_x() - 1, spawnPoint[4].get_y());
+        spawnPoint[5].set_pos(spawnPoint[4].get_x() + 1, spawnPoint[4].get_y());
+        endPoint[3].set_pos(endPoint[4].get_x() - 1, endPoint[4].get_y());
+        endPoint[5].set_pos(endPoint[4].get_x() + 1, endPoint[4].get_y());
+
+    }
 }
 
 void level_end()
 {
-    for (int i = 1; i < entityLimit; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (entities[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            delete entities[i];
-            entities[i] = nullptr;
+            delete NPCs[i];
+            NPCs[i] = nullptr;
         }
     }
 
@@ -473,16 +513,10 @@ void level_start()
 
 void playLevel()
 {
-    if (lose == true)
-    {
-        level_end();
-        NGameState = N_INIT;
-        g_eGameState = S_MAINMENU;
-    }
-
+    
     updateGame();
 
-    if (NPC::getnoHostile() == noC + noP)
+    if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
         clear = true;
         //print level clear screen here
@@ -492,6 +526,9 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
+        level_end();
+        NGameState = N_INIT;
+        g_eGameState = S_MAINMENU;
         //print lose screen here  
     }
 }
@@ -565,9 +602,9 @@ void moveCharacter()
     }
 
     player->set_cooldown(player->get_cooldown() - 1);
-    entities[0]->update_pos(g_dDeltaTime); //sets pos of player
-    g_sChar.m_cLocation.Y = entities[0]->getposy(); //moves player
-    g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
+    player->update_pos(g_dDeltaTime); //sets pos of player
+    g_sChar.m_cLocation.Y = player->getposy(); //moves player
+    g_sChar.m_cLocation.X = player->getposx(); //moves player
     
     moveall(); //moves NPCs
     check_collision();
@@ -583,6 +620,9 @@ void moveCharacter()
                 if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
                 {
                     NPCs[i]->anger();
+                    NPCs[i]->cooldownstart();
+                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                    
                 }
             }
         }
@@ -614,7 +654,10 @@ void render()
         break;
     case S_TEST: renderGame();
         break;
-    case S_GAMEMODE1: renderGame();
+    case S_GAMEMODE1: 
+        renderPoints();
+        renderGame();
+        
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -655,6 +698,16 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
     if (paused)
         renderPauseMenu();
+    /*if (lose)
+    {
+        renderWinLoseMenu(false);
+    }
+    if (clear)
+    {
+        renderWinLoseMenu(true);
+    }*/
+
+    
 }
 
 void renderMap()
@@ -676,6 +729,7 @@ void renderMap()
     }*/
 
     //renderWall();
+    //renderPoints();
     renderNPC();
     renderprojectile();
     
@@ -877,7 +931,6 @@ void renderNPC()
                 {
                     colour = 0xE5;
                 }
- 
             }
             else
             {
@@ -891,10 +944,10 @@ void renderNPC()
                 }
             }
 
-            if (NPCs[i]->get_ftime() != 0)
+           /* if (NPCs[i]->get_ftime() != 0)
             {
                 colour = 0x3C;
-            }
+            }*/
 
             g_Console.writeToBuffer(c, " ", colour);
 
@@ -1073,6 +1126,15 @@ void moveall()
                             
             }
 
+            if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= spawnPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= spawnPoint[7].get_y() + 1 && (NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= spawnPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= spawnPoint[1].get_y()))
+            {
+                NPCs[i]->set_direction(0);
+            }
+            if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= endPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= endPoint[7].get_y() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= endPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= endPoint[1].get_y())
+            {
+                NPCs[i]->set_direction(0);
+            }
+
             NPCs[i]->update_pos(g_dDeltaTime);
         }
       
@@ -1225,6 +1287,7 @@ void renderWinLoseMenu(bool win)
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
+    
 }
 
 void winLoseMenuWait()
@@ -1299,9 +1362,45 @@ void check_collision()
                 NPCs[i]->cooldownstart();
                 NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                 player->loseHP(NPCs[i]->get_damage());
+                player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                g_sChar.m_cLocation.Y = player->getposy(); 
+                g_sChar.m_cLocation.X = player->getposx(); 
                 //timer = 0;
             }
  
         }
     }
+}
+
+void renderPoints()
+{
+    COORD c;
+    int colour;
+
+    for (int i = 0; i < 9; i++)
+    {
+        if (i != 4)
+        {
+            colour = 0xDD;
+            c.X = spawnPoint[i].get_x();
+            c.Y = spawnPoint[i].get_y();
+            g_Console.writeToBuffer(c, " ", colour);
+
+            colour = 0xBB;
+            c.X = endPoint[i].get_x();
+            c.Y = endPoint[i].get_y();
+            g_Console.writeToBuffer(c, " ", colour);
+        }
+    }
+    
+    colour = 0xF3;
+    c.X = endPoint[4].get_x();
+    c.Y = endPoint[4].get_y();
+    g_Console.writeToBuffer(c, "E", colour);
+
+    colour = 0xF5;
+    c.X = spawnPoint[4].get_x();
+    c.Y = spawnPoint[4].get_y();
+    g_Console.writeToBuffer(c, "S", colour);
+
 }

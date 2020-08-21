@@ -88,15 +88,22 @@ void renderToScreen();      // dump the contents of the buffer to the screen, on
 void renderInputEvents();   // renders the status of input events
 
 //Normal Mode
+void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
 void level_end();
 void level_start();
 
+
 //Walls
 //void spawnWall(int no);
 //void renderWall();
+
+//spawnendpoints
+void renderPoints();
+void set_points();
+
 
 //NPCs 
 void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs

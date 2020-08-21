@@ -116,6 +116,9 @@ void renderMainMenu();// main menu.
 void mainMenuWait();// init UI for main menu
 void renderPauseMenu();// d
 void pauseMenuWait();
+void renderWinLoseMenu(bool);
+void winLoseMenuWait();
+
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
 int checkButtonClicks(Object**, int);// check if player clicked a button
 

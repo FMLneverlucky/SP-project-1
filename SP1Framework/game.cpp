@@ -24,7 +24,11 @@ std::string gameMode1 = "GameMode1";
 std::string gameMode2 = "GameMode2";
 std::string gameMode3 = "GameMode3";
 std::string gameMode4 = "Click This"; // for game test. not for final product
-
+std::string winMessage = "HACKS REPORTED";
+std::string loseMessage = "GGEZ Uninstall";
+std::string continueMessage = "Next Level";
+std::string restartMessage = "Redo Level";
+std::string mainMenuMessage = "Main Menu";
 std::string quit = "quit";
 std::string resume = "resume";
 
@@ -39,9 +43,17 @@ const int MMButtonCount = 4;
 //PAUSE MENU
 bool paused = false;
 Object* PMButtons[2];
-Object resumeButton(resume.length() + 2, 3, Position());
-Object quitButton(quit.length() + 2, 3, Position());
+Object resumeButton(resume.length() + 2, 3);
+Object quitButton(quit.length() + 2, 3);
 const int PMButtonCount = 2;
+
+//WIN/LOSE SCREEN
+Object* WLButtons[3];
+Object continueButton(continueMessage.length() + 2, 3);
+Object restartButton(restartMessage.length() + 2, 3);
+Object mainMenuButton(restartMessage.length() + 2, 3);
+const int WLButtonCount = 3;
+
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
 int level = 1; //level no.
@@ -1135,7 +1147,7 @@ void renderMainMenu()
     MMButtons[3] = &MMButton4;
 
     renderBox(&MMButton, 0x04, gameMode1);
-    renderBox(&MMButton2, 0xA, gameMode2);
+    renderBox(&MMButton2, 0x0A, gameMode2);
     renderBox(&MMButton3, 0x0B, gameMode3);
     renderBox(&MMButton4, 0x06, gameMode4);
 }
@@ -1186,6 +1198,46 @@ void pauseMenuWait()
         break;
     case 1:
         g_bQuitGame = true;
+        break;
+    default:
+        break;
+    }
+}
+
+//set true for win screen, false for lose screen
+void renderWinLoseMenu(bool win)
+{
+    COORD c = g_Console.getConsoleSize();
+    std::string* message = win ? &winMessage : &loseMessage;
+    Object title(71, 3, Position(c.X / 2, c.Y / 3));
+    renderBox(&title, 0x0F, *message);
+
+    continueButton.move(c.X * 3 / 4, c.Y * 2 / 3);
+    restartButton.move(c.X * 3 / 4, c.Y * 2 / 3);
+    mainMenuButton.move(c.X * 2 / 4, c.Y * 2 / 3);
+    quitButton.move(c.X / 4, c.Y * 2 / 3);
+
+    WLButtons[0] = &quitButton;
+    WLButtons[1] = &mainMenuButton;
+    WLButtons[2] = win ? &continueButton : &restartButton;
+
+    renderBox(WLButtons[0], 0x04, quit);
+    renderBox(WLButtons[1], 0x0A, mainMenuMessage);
+    renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
+}
+
+void winLoseMenuWait()
+{
+    switch (checkButtonClicks(WLButtons, WLButtonCount))
+    {
+    case 0:
+        g_bQuitGame = true;
+        break;
+    case 1:
+        g_eGameState = S_MAINMENU;
+        break;
+    case 2:
+        //do win lose stuff;
         break;
     default:
         break;

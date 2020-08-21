@@ -4,23 +4,20 @@
 
 //position things
 
-
-
-
 Wall::Wall()
 {
 	
-};
+}
 
 Wall::~Wall()
 {
 
-};
+}
 
 char Wall::type()
 {																					//this function is for checking what type of entity it is (since entity pointer cannot tell)
 	return 'W';																		//this is the virtual function from entity
-};																					//create another gettype or smt if u meant to use this for diff types of wall; as in 3x1 2x2 and so on
+}																				//create another gettype or smt if u meant to use this for diff types of wall; as in 3x1 2x2 and so on
 
 int Wall::setType()
 {
@@ -98,7 +95,7 @@ void Wall::typed()
 void Wall::update_pos(float dtime)
 {
 
-};
+}
 
 Position* Wall::new_pos(float dtime)
 {

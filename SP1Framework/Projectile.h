@@ -20,12 +20,14 @@ class Projectile
 	face dir;
 	int spacecount;
 	Position pos;
-	
+	Position newpos;
+
 public:
 	Projectile();
 	~Projectile();
 	void set_ppos(int px, int py);
-	void update_particle();
+	void set_newpos();
+	void update_particle(float delta);
 	int get_px(void);
 	int get_py(void);
 	void set_spacecount(int fc);

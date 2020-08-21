@@ -349,8 +349,13 @@ void splashScreenWait()    // waits for time to pass in splash screen
 void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
-    moveCharacter();    // moves the character, collision detection, physics, etc
-                        // sound can be played here too.
+    if (!paused)
+        moveCharacter();    // moves the character, collision detection, physics, etc
+                            // sound can be played here too.
+    else
+    {
+        pauseMenuWait();
+    }                
     
 }
 
@@ -575,8 +580,8 @@ void processUserInput()
 {
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        //paused = paused ? false : true;
-        g_bQuitGame = true;    
+        paused = paused ? false : true;
+        //g_bQuitGame = true;    
 }
 
 //--------------------------------------------------------------
@@ -635,8 +640,8 @@ void renderGame()
 {
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
-   /* if (paused)
-        renderPauseMenu();*/
+    if (paused)
+        renderPauseMenu();
 }
 
 void renderMap()
@@ -1076,11 +1081,6 @@ Entity* occupied(Position* pos)
     return nullptr;
 }
 
-void initBoxMainMenu()
-{
-    //Object button()
-}
-
 void renderprojectile()
 {
     COORD pr;
@@ -1171,10 +1171,10 @@ void renderPauseMenu()
     quitButton.move(c.X / 2, c.Y * 3 / 4);
 
     PMButtons[0] = &resumeButton;
-    PMButtons[0] = &quitButton;
+    PMButtons[1] = &quitButton;
 
     renderBox(&resumeButton, 0x0A, resume);
-    renderBox(&quitButton, 0x4, quit);
+    renderBox(&quitButton, 0x04, quit);
 }
 
 void pauseMenuWait()

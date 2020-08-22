@@ -92,8 +92,8 @@ void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
-void level_end();
-void level_start();
+void level_set();
+
 
 
 //Walls

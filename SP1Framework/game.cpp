@@ -56,7 +56,7 @@ const int WLButtonCount = 3;
 
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
-int level = 1; //level no.
+int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
 int noC; //no. of civilian
@@ -388,8 +388,7 @@ void playNormal()
         playLevel();
         break;
     case N_NEXTLEVEL:
-        level_end();
-        level_start();
+        level_set();
         break;
 
     }
@@ -399,24 +398,26 @@ void playNormal()
 void InitNormal()
 {
     lose = false;
-    player->resetHP();
-    noC = 3;
-    noP = 0;
-    spd = 0.1;
-    cdtime = 5;
-    noW = 7;
-    spawnNPC(false, noC, spd, cdtime);
-    spawnNPC(true, noP, spd, cdtime);
-    set_points();
+    level = 0;
+    level_set();
+    
+    
     //spawnWall(noW);
     
     NGameState = N_LEVEL;
 }
  
-void set_spawn()
+void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end points
 {
-    
-    if (level < 6)
+    if (level == 1)
+    {
+        noC = 3;
+        noP = 0;
+        spd = 0.1;
+        cdtime = 5;
+        noW = 7;
+    }
+    else if (level < 6)
     {
         noC++;
         spd += 0.0285;
@@ -477,7 +478,7 @@ void set_points()
     }
 }
 
-void level_end()
+void level_set() //deletes everyth,
 {
     for (int i = 0; i < NPCLimit; i++)
     {
@@ -503,20 +504,18 @@ void level_end()
         delete powerup;
         powerup = nullptr;
     }
-
-}
-
-void level_start()
-{
-    level++;
+    
     player->resetHP();
     NPC::resetnoHostile();
+    level++;
+ 
     set_spawn();
+    setBG();
     clear = false;
     NGameState = N_LEVEL;
-    setBG();
-  
+    
 }
+
 
 void playLevel()
 {
@@ -533,8 +532,9 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
-        level_end();
         highestLVL = level;
+        level_set();
+        
         NGameState = N_INIT;
         g_eGameState = S_MAINMENU;
         //print lose screen here  
@@ -602,7 +602,7 @@ void moveCharacter()
         {
             if (NPCs[n] != nullptr)
             {
-                if (NPCs[n]->type() == 'B')
+                if (NPCs[n]->type() == 'B' && NPCs[n]->isHostile() == false)
                 {
                     NPCs[n]->anger();
                 }

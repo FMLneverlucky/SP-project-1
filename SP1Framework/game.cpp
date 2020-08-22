@@ -61,7 +61,7 @@ Object NPCremaining(1, 1);
 
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
-int level = 1; //level no.
+int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
 int noC; //no. of civilian
@@ -69,9 +69,15 @@ int noP; //no. of Police
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
+Position endPoint[9];
+Position spawnPoint[9];
+int highestLVL;
 
 //TEST
-double timer = 0;
+//double timer = 0;
+
+//map aesthetics
+int prevcol = 0x88;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -84,7 +90,7 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[31] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* entities[31] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 31;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -119,7 +125,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
-    entities[0]->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -129,7 +135,7 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     //spawnWall(10);
-    spawnNPC(false, 3, 0.1, 3);
+    //spawnNPC(false, 3, 0.1, 3);
     //spawnNPC(true, 2, 0.1, 3);
 }
 
@@ -382,20 +388,31 @@ void playNormal()
     switch (NGameState)
     {
     case N_INIT:
-        set_spawn();
+        InitNormal();
         break;
     case N_LEVEL:
         playLevel();
         break;
     case N_NEXTLEVEL:
-        level_end();
-        level_start();
+        level_set();
         break;
 
     }
 }
 
-void set_spawn()
+void InitNormal()
+{
+    lose = false;
+    level = 0;
+    level_set();
+    
+    
+    //spawnWall(noW);
+    
+    NGameState = N_LEVEL;
+}
+ 
+void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end points
 {
     if (level == 1)
     {
@@ -413,7 +430,6 @@ void set_spawn()
     }
     else if (level < 15)
     {
-
         spd += 0.0285;
         cdtime -= 0.2857;
         if (level % 2)
@@ -430,21 +446,51 @@ void set_spawn()
         noC = 15;
     }
 
-    spawnNPC(false, noC, spd, cdtime * g_dDeltaTime);
-    spawnNPC(true, noP, spd, cdtime * g_dDeltaTime);
+    spawnNPC(false, noC, spd, cdtime);
+    spawnNPC(true, noP, spd, cdtime);
     //spawnWall(noW);
-
-    NGameState = N_LEVEL;
+    set_points();
 }
 
-void level_end()
+void set_points()
 {
-    for (int i = 1; i < entityLimit; i++)
+    spawnPoint[4].set_x(g_sChar.m_cLocation.X);
+    spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
+
+    Position tempp;
+    do
     {
-        if (entities[i] != nullptr)
+        tempp.set_x((rand() % 78) + 1);
+        tempp.set_y((rand() % 22) + 1);
+
+    } while (occupied(&tempp) != nullptr);
+    endPoint[4].set_x(tempp.get_x());
+    endPoint[4].set_y(tempp.get_y());
+
+    for (int i = -1; i < 2; i++)
+    {
+        spawnPoint[1 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() - 1);
+        spawnPoint[7 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() + 1);
+    
+        endPoint[1 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() - 1);
+        endPoint[7 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() + 1);
+      
+        spawnPoint[3].set_pos(spawnPoint[4].get_x() - 1, spawnPoint[4].get_y());
+        spawnPoint[5].set_pos(spawnPoint[4].get_x() + 1, spawnPoint[4].get_y());
+        endPoint[3].set_pos(endPoint[4].get_x() - 1, endPoint[4].get_y());
+        endPoint[5].set_pos(endPoint[4].get_x() + 1, endPoint[4].get_y());
+
+    }
+}
+
+void level_set() //deletes everyth,
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
         {
-            delete entities[i];
-            entities[i] = nullptr;
+            delete NPCs[i];
+            NPCs[i] = nullptr;
         }
     }
 
@@ -463,31 +509,25 @@ void level_end()
         delete powerup;
         powerup = nullptr;
     }
-
-}
-
-void level_start()
-{
-    level++;
+    
     player->resetHP();
     NPC::resetnoHostile();
+    level++;
+ 
     set_spawn();
+    setBG();
     clear = false;
     NGameState = N_LEVEL;
+    
 }
+
 
 void playLevel()
 {
-    if (lose == true)
-    {
-        level_end();
-        NGameState = N_INIT;
-        g_eGameState = S_MAINMENU;
-    }
-
+    
     updateGame();
 
-    if (NPC::getnoHostile() == noC + noP)
+    if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
         clear = true;
         //print level clear screen here
@@ -497,6 +537,11 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
+        highestLVL = level;
+        level_set();
+        
+        NGameState = N_INIT;
+        g_eGameState = S_MAINMENU;
         //print lose screen here  
     }
 }
@@ -552,6 +597,7 @@ void moveCharacter()
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos(); 
+                projectile[p]->set_pcooldown(100);
                 break;
             }
         }
@@ -561,7 +607,7 @@ void moveCharacter()
         {
             if (NPCs[n] != nullptr)
             {
-                if (NPCs[n]->type() == 'B')
+                if (NPCs[n]->type() == 'B' && NPCs[n]->isHostile() == false)
                 {
                     NPCs[n]->anger();
                 }
@@ -570,9 +616,9 @@ void moveCharacter()
     }
 
     player->set_cooldown(player->get_cooldown() - 1);
-    entities[0]->update_pos(g_dDeltaTime); //sets pos of player
-    g_sChar.m_cLocation.Y = entities[0]->getposy(); //moves player
-    g_sChar.m_cLocation.X = entities[0]->getposx(); //moves player
+    player->update_pos(g_dDeltaTime); //sets pos of player
+    g_sChar.m_cLocation.Y = player->getposy(); //moves player
+    g_sChar.m_cLocation.X = player->getposx(); //moves player
     
     moveall(); //moves NPCs
     check_collision();
@@ -588,6 +634,9 @@ void moveCharacter()
                 if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
                 {
                     NPCs[i]->anger();
+                    NPCs[i]->cooldownstart();
+                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                    
                 }
             }
         }
@@ -619,7 +668,11 @@ void render()
         break;
     case S_TEST: renderGame();
         break;
-    case S_GAMEMODE1: renderGame();
+    case S_GAMEMODE1: 
+        renderBG(prevcol);
+        renderPoints();
+        renderGame();
+        
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -660,6 +713,16 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
     if (paused)
         renderPauseMenu();
+    /*if (lose)
+    {
+        renderWinLoseMenu(false);
+    }
+    if (clear)
+    {
+        renderWinLoseMenu(true);
+    }*/
+
+    
 }
 
 void renderMap()
@@ -681,6 +744,7 @@ void renderMap()
     }*/
 
     //renderWall();
+    //renderPoints();
     renderNPC();
     renderprojectile();
     
@@ -692,7 +756,7 @@ void renderCharacter()
     WORD charColor = 0x0C;
     if (g_sChar.m_bActive)
     {
-        charColor = 0x0A;
+        charColor = 0x09;
     }
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
 }
@@ -796,7 +860,7 @@ void renderInputEvents()
     }   
 }
 
-void Wall::renderWall()
+void renderWall()
 {//maybe?
     COORD c;
     int colour;
@@ -814,34 +878,74 @@ void Wall::renderWall()
     }
 }
 
-void Wall::spawnWall(int no)                                                                            //function to spawn wall
+void spawnWall(int no)                                                                                  //function to spawn wall
 {
     for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
     {
-                                                                                                        //find random x and y coords of unused spaces on map
+        /*if (setType() == I)
+        {
+            typeI();
+        }
+        
+        else if (setType() == J)
+        {
+            typeJ();
+        }
+
+        else if (setType() == L)
+        {
+            typeL();
+        }
+
+        else if (setType() == O)
+        {
+            typeO();
+        }
+
+        else if (setType() == S)
+        {
+            typeS();
+        }
+
+        else if (setType() == T)
+        {
+            typeT();
+        }
+
+        else if (setType() == Z)
+        {
+            typeZ();
+        }
+
+        else if (setType() == d)
+        {
+            typed();
+        }*/
+
+        Position temp;                                                                                  //find random x and y coords of unused spaces on map
         bool isSpaceNearPlayer = false; 																//bool to check if anything wants to spawn in around player
 
-        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true) 					//while pos is not available
+        while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true) 					            //while pos is not available
         {
-            wallPivotPoint.set_x(rand() % 80); 															//set x coordinate of temp variable as a number from 0 to 80
-            wallPivotPoint.set_y(rand() % 24); 														    //set y coordinate of temp variable as a number from 0 to 25
+            temp.set_x(rand() % 80); 															        //set x coordinate of temp variable as a number from 0 to 80
+            temp.set_y(rand() % 24); 														            //set y coordinate of temp variable as a number from 0 to 25
 
-            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41) 							//check if randomiser chose outside range of the 1 block diameter in x axis around player
+            if (temp.get_x() > 39 && temp.get_x() <= 41) 							                    //check if randomiser chose outside range of the 1 block diameter in x axis around player
             {
-                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)					    //check if randomiser chose outside range of the 1 block diameter in y axis around player
+                if (temp.get_y() > 12 && temp.get_y() <= 14)					                        //check if randomiser chose outside range of the 1 block diameter in y axis around player
                 {
                     isSpaceNearPlayer = true;															//if not in range, set bool to true to end loop
                 }
             }
-        };
+        }
 
         for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
         {
             if (Walls[w] == nullptr)                                                                    //check for wall entity not assigned on map
             {
                 Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
-                entities[w + 21] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 21]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
+                entities[w + 11] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
+                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());                                  //set position of the temp wall entity to an element in the entity array
                 break;                                                                                  //break from current loop
             }
         }
@@ -880,9 +984,8 @@ void renderNPC()
                 }
                 else
                 {
-                    colour = 0xE5;
+                    colour = 0x66;
                 }
- 
             }
             else
             {
@@ -896,10 +999,10 @@ void renderNPC()
                 }
             }
 
-            if (NPCs[i]->get_ftime() != 0)
+           /* if (NPCs[i]->get_ftime() != 0)
             {
                 colour = 0x3C;
-            }
+            }*/
 
             g_Console.writeToBuffer(c, " ", colour);
 
@@ -914,11 +1017,25 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
     for (int i = 0; i < no; i++)
     {
         Position temp;
+        bool valid = true;
+
         do
         {
             temp.set_x(rand() % 80);
             temp.set_y(rand() % 24);
-        } while (occupied(&temp) != nullptr); //while pos is not available
+   
+            for (int i = 0; i < 9; i++)
+            {
+                if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
+                {
+                    valid = false;
+                }
+                else if (temp.get_x() == endPoint[i].get_x() && temp.get_y() == endPoint[i].get_y())
+                {
+                    valid = false;
+                }
+            }
+        } while (occupied(&temp) != nullptr && valid == false); //while pos is not available
 
         for (int n = 0; n < NPCLimit; n++)
         {
@@ -936,6 +1053,7 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
                 }
                 entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
                 NPCs[n]->set_speed(spd);
+                NPCs[n]->set_count(2 / g_dDeltaTime);
                 break;
             }
         }
@@ -1014,8 +1132,8 @@ void moveall()
             }
             else //npc is hostile and not on cooldown
             {
-                int diffinx = g_sChar.m_cLocation.X - (int)NPCs[i]->getposx();
-                int diffiny = g_sChar.m_cLocation.Y - (int)NPCs[i]->getposy();
+                int diffinx = g_sChar.m_cLocation.X - static_cast<int>(NPCs[i]->getposx());
+                int diffiny = g_sChar.m_cLocation.Y - static_cast<int>(NPCs[i]->getposy());
 
                 if (abs(diffinx) > abs(diffiny))
                 {
@@ -1078,6 +1196,15 @@ void moveall()
                             
             }
 
+            if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= spawnPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= spawnPoint[7].get_y() + 1 && (NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= spawnPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= spawnPoint[1].get_y()))
+            {
+                NPCs[i]->set_direction(0);
+            }
+            if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= endPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= endPoint[7].get_y() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= endPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= endPoint[1].get_y())
+            {
+                NPCs[i]->set_direction(0);
+            }
+
             NPCs[i]->update_pos(g_dDeltaTime);
         }
       
@@ -1090,7 +1217,7 @@ Entity* occupied(Position* pos)
     {
         if (entities[i] != nullptr)
         {
-            if ((int)entities[i]->getpos()->get_x() == (int)pos->get_x() && (int)entities[i]->getpos()->get_y() == (int)pos->get_y())
+            if (static_cast<int>(entities[i]->getpos()->get_x()) == static_cast<int>(pos->get_x()) && static_cast<int>(entities[i]->getpos()->get_y()) == static_cast<int>(pos->get_y()))
             {
                 return entities[i];
             }
@@ -1227,6 +1354,7 @@ void renderWinLoseMenu(bool win)
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
+    
 }
 
 void winLoseMenuWait()
@@ -1280,13 +1408,17 @@ void limitprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            if (projectile[p]->get_spacecount() != 0)
+            if ((projectile[p]->get_pcooldown() != 0))
             {
-                projectile[p]->update_particle(g_dDeltaTime);
-                projectile[p]->set_spacecount(projectile[p]->get_spacecount()-1);
+                projectile[p]->set_pcooldown(projectile[p]->get_pcooldown() - 1);
+                if (projectile[p]->get_spacecount() != 0)
+                {
+                    projectile[p]->update_particle(g_dDeltaTime);
+                    projectile[p]->set_spacecount(projectile[p]->get_spacecount() - 1);
+                }
             }
             else
-            {
+            {   
                 delete projectile[p];
                 projectile[p] = nullptr;
             }
@@ -1307,9 +1439,96 @@ void check_collision()
                 NPCs[i]->cooldownstart();
                 NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                 player->loseHP(NPCs[i]->get_damage());
+                player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                g_sChar.m_cLocation.Y = player->getposy(); 
+                g_sChar.m_cLocation.X = player->getposx(); 
                 //timer = 0;
             }
  
+        }
+    }
+}
+
+void renderPoints()
+{
+    COORD c;
+    int colour;
+
+    for (int i = 0; i < 9; i++)
+    {
+        if (i == 1)
+        {
+            colour = 0x30;
+            c.X = spawnPoint[i].get_x();
+            c.Y = spawnPoint[i].get_y();
+            g_Console.writeToBuffer(c, "S", colour);
+
+            colour = 0x90;
+            c.X = endPoint[i].get_x();
+            c.Y = endPoint[i].get_y();
+            g_Console.writeToBuffer(c, "E", colour);
+        }
+        else if (i != 4)
+        {
+            colour = 0x33;
+            c.X = spawnPoint[i].get_x();
+            c.Y = spawnPoint[i].get_y();
+            g_Console.writeToBuffer(c, " ", colour);
+
+            colour = 0x99;
+            c.X = endPoint[i].get_x();
+            c.Y = endPoint[i].get_y();
+            g_Console.writeToBuffer(c, " ", colour);
+        }
+    }
+    
+    colour = 0x7F;
+    c.X = endPoint[4].get_x();
+    c.Y = endPoint[4].get_y();
+    g_Console.writeToBuffer(c, (char)254 , colour);
+
+    colour = 0x7F;
+    c.X = spawnPoint[4].get_x();
+    c.Y = spawnPoint[4].get_y();
+    g_Console.writeToBuffer(c, (char)254 , colour);
+
+}
+
+void setBG()
+{
+    int colour;
+    do
+    {
+        int a = rand() % 3;
+        switch (a)
+        {
+        case 0:
+            colour = 0x88;
+            break;
+        case 1:
+            colour = 0x55;
+            break;
+        case 2:
+            colour = 0xDD;
+            break;
+            
+
+        }
+    } while (prevcol == colour);
+
+    prevcol = colour;
+}
+
+void renderBG(int col)
+{
+    COORD c;
+    for (int x = 0; x < 80; x++)
+    {
+        for (int y = 0; y < 25; y++)
+        {
+            c.X = x;
+            c.Y = y;
+            g_Console.writeToBuffer(c, " ", col);
         }
     }
 }

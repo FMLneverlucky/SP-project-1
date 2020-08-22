@@ -14,7 +14,7 @@ char Player::type()
 	return 'P';
 }
 
-Position* Player::new_pos(float dtime)
+Position* Player::new_pos(double dtime)
 {
 	tempp.set_x(this->pos.get_x());
 	tempp.set_y(this->pos.get_y());
@@ -52,7 +52,7 @@ Position* Player::new_pos(float dtime)
 	return &tempp;
 }
 
-void Player::update_pos(float dtime)
+void Player::update_pos(double dtime)
 {
 	pos.set_x(new_pos(dtime)->get_x());
 	pos.set_y(new_pos(dtime)->get_y());

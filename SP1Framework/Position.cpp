@@ -34,3 +34,9 @@ void Position::set_y(float newy)
 {
 	y = newy;
 }
+
+void Position::set_pos(float x, float y)
+{
+	this->x = x;
+	this->y = y;
+}

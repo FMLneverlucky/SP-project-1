@@ -38,10 +38,6 @@ public:
     void Wall::typed();
 
     //updates for walls in game as entity
-    void update_pos(float dtime);
-    Position* new_pos(float dtime);
-
-    //wall spawning
-    void spawnWall(int no);
-    void renderWall();
+    void update_pos(double dtime);
+    Position* new_pos(double dtime);
 };

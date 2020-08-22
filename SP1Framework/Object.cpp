@@ -34,6 +34,14 @@ void Object::move(float x, float y)
 	pos.set_x(x);
 	pos.set_y(y);
 }
+void Object::resize(int x, int y) 
+{
+	referencePosition();
+	sizeX = x;
+	sizeY = y;
+	pos.set_x(referencePos.get_x() - x / 2.0);
+	pos.set_y(referencePos.get_y() - y / 2.0);
+}
 void Object::scale(int x, int y)
 {
 	sizeX *= x;
@@ -67,7 +75,7 @@ Position* Object::position()
 }
 Position* Object::referencePosition()
 {
-	referencePos.set_x(pos.get_x() - (this->sizeX / 2.0));
-	referencePos.set_y(pos.get_y() - (this->sizeY / 2.0));
+	referencePos.set_x(pos.get_x() - (sizeX / 2.0));
+	referencePos.set_y(pos.get_y() - (sizeY / 2.0));
 	return &referencePos;
 }

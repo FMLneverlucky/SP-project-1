@@ -1,7 +1,7 @@
 #include "Player.h"
-Player::Player() : HP(5), cooldown(0)
+Player::Player() : maxHP(5), cooldown(0)
 {
-
+	HP = maxHP;
 }
 
 Player::~Player()
@@ -61,6 +61,11 @@ void Player::update_pos(float dtime)
 int Player::get_HP()
 {
 	return HP;
+}
+
+int Player::get_maxHP()
+{
+	return maxHP;
 }
 
 void Player::resetHP()

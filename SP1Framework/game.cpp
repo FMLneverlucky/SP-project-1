@@ -54,6 +54,11 @@ Object restartButton(restartMessage.length() + 2, 3);
 Object mainMenuButton(restartMessage.length() + 2, 3);
 const int WLButtonCount = 3;
 
+//HUD
+Object healthBar(1, 1);
+Object coughBar(1, 1);
+Object NPCremaining(1, 1);
+
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
 int level = 1; //level no.
@@ -95,6 +100,7 @@ PowerUp* powerup = nullptr;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
+COORD consoleSize = g_Console.getConsoleSize();
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -387,7 +393,6 @@ void playNormal()
         break;
 
     }
-
 }
 
 void set_spawn()
@@ -1133,14 +1138,13 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 5));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 5));
     renderBox(&title, 0x0F, gameName);
 
-    MMButton.move(c.X / 2, c.Y * 2 / 5);
-    MMButton2.move(c.X / 2, c.Y * 3 / 5);
-    MMButton3.move(c.X / 2, c.Y * 4 / 5);
-    MMButton4.move(c.X / 2, c.Y);
+    MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 5);
+    MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 5);
+    MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 5);
+    MMButton4.move(consoleSize.X / 2, consoleSize.Y);
 
     MMButtons[0] = &MMButton;
     MMButtons[1] = &MMButton2;
@@ -1176,12 +1180,11 @@ void mainMenuWait()
 
 void renderPauseMenu()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 6));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 6));
     renderBox(&title, 0x0F, "Paused");
 
-    resumeButton.move(c.X / 2, c.Y * 2 / 4);
-    quitButton.move(c.X / 2, c.Y * 3 / 4);
+    resumeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
+    quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
     PMButtons[0] = &resumeButton;
     PMButtons[1] = &quitButton;
@@ -1208,15 +1211,14 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    COORD c = g_Console.getConsoleSize();
     std::string* message = win ? &winMessage : &loseMessage;
-    Object title(71, 3, Position(c.X / 2, c.Y / 3));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
     renderBox(&title, 0x0F, *message);
 
-    continueButton.move(c.X * 3 / 4, c.Y * 2 / 3);
-    restartButton.move(c.X * 3 / 4, c.Y * 2 / 3);
-    mainMenuButton.move(c.X * 2 / 4, c.Y * 2 / 3);
-    quitButton.move(c.X / 4, c.Y * 2 / 3);
+    continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
+    restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
+    mainMenuButton.move(consoleSize.X * 2 / 4, consoleSize.Y * 2 / 3);
+    quitButton.move(consoleSize.X / 4, consoleSize.Y * 2 / 3);
 
     WLButtons[0] = &quitButton;
     WLButtons[1] = &mainMenuButton;
@@ -1243,6 +1245,12 @@ void winLoseMenuWait()
     default:
         break;
     }
+}
+
+void renderHUD()
+{
+    //healthBar.resize(player->get_maxHP(), 1);
+    //healthBar.move(consoleSize.X)
 }
 
 int checkButtonClicks(Object** buttons, int arrayLength)

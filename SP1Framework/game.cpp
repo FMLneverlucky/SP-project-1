@@ -547,6 +547,7 @@ void moveCharacter()
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos(); 
+                projectile[p]->set_pcooldown(100);
                 break;
             }
         }
@@ -1312,13 +1313,17 @@ void limitprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            if (projectile[p]->get_spacecount() != 0)
+            if ((projectile[p]->get_pcooldown() != 0))
             {
-                projectile[p]->update_particle(g_dDeltaTime);
-                projectile[p]->set_spacecount(projectile[p]->get_spacecount()-1);
+                projectile[p]->set_pcooldown(projectile[p]->get_pcooldown() - 1);
+                if (projectile[p]->get_spacecount() != 0)
+                {
+                    projectile[p]->update_particle(g_dDeltaTime);
+                    projectile[p]->set_spacecount(projectile[p]->get_spacecount() - 1);
+                }
             }
             else
-            {
+            {   
                 delete projectile[p];
                 projectile[p] = nullptr;
             }

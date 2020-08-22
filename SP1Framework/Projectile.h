@@ -16,24 +16,31 @@ enum face
 
 class Projectile
 {
-	float x, y;
+	double x, y;
 	face dir;
 	int spacecount;
+	int p_cooldown;
 	Position pos;
 	Position newpos;
 
 public:
 	Projectile();
 	~Projectile();
-	void set_ppos(int px, int py);
+
+	void set_ppos(double px, double py);
+	double get_px(void);
+	double get_py(void);
+
 	void set_newpos();
-	void update_particle(float delta);
-	int get_px(void);
-	int get_py(void);
+	void direction(int m_x, int m_y);
+	void update_particle(double delta);
+
 	void set_spacecount(int fc);
 	int get_spacecount();
+
+	int get_pcooldown();
+	void set_pcooldown(int pc);
 	
-	void direction(int m_x, int m_y);
 	Position* getpos();
 };
 

@@ -91,12 +91,12 @@ void Wall::typed()
 
 }
 
-void Wall::update_pos(float dtime)
+void Wall::update_pos(double dtime)
 {
 
 }
 
-Position* Wall::new_pos(float dtime)
+Position* Wall::new_pos(double dtime)
 {
 	Position p;
 	return &p;

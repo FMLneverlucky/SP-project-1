@@ -13,9 +13,9 @@ public:
     int get_HP();
     void resetHP();
     void loseHP(int ack);
-    void update_pos(float dtime);
+    void update_pos(double dtime);
     void set_cooldown(int a);
     int get_cooldown();
-    Position* new_pos(float dtime);
+    Position* new_pos(double dtime);
 };
 

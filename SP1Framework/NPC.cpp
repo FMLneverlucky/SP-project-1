@@ -63,7 +63,7 @@ Position* NPC::new_pos(double dtime)
 	switch (direction)
 	{
 	case UP:
-		if (pos.get_y() > 0)
+		if (pos.get_y() > 1)
 		{
 			tempp.set_y(pos.get_y() - (10 * speed * dtime));
 		}

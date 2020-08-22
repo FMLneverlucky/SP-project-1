@@ -456,7 +456,7 @@ void set_points()
     do
     {
         tempp.set_x((rand() % 78) + 1);
-        tempp.set_y((rand() % 22) + 1);
+        tempp.set_y((rand() % 21) + 2);
 
     } while (occupied(&tempp) != nullptr);
     endPoint[4].set_x(tempp.get_x());
@@ -546,7 +546,7 @@ void moveCharacter()
 {   
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
+    if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
     {
         //Beep(1440, 30);
         //g_sChar.m_cLocation.Y--;
@@ -923,7 +923,7 @@ void spawnWall(int no)                                                          
         while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true) 					            //while pos is not available
         {
             temp.set_x(rand() % 80); 															        //set x coordinate of temp variable as a number from 0 to 80
-            temp.set_y(rand() % 24); 														            //set y coordinate of temp variable as a number from 0 to 25
+            temp.set_y((rand() % 23) + 1); 														            //set y coordinate of temp variable as a number from 0 to 25
 
             if (temp.get_x() > 39 && temp.get_x() <= 41) 							                    //check if randomiser chose outside range of the 1 block diameter in x axis around player
             {
@@ -1017,7 +1017,7 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
         do
         {
             temp.set_x(rand() % 80);
-            temp.set_y(rand() % 24);
+            temp.set_y((rand() % 23) + 1);
    
             for (int i = 0; i < 9; i++)
             {
@@ -1030,7 +1030,7 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
                     valid = false;
                 }
             }
-        } while (occupied(&temp) != nullptr && valid == false); //while pos is not available
+        } while (occupied(&temp) != nullptr || valid == false); //while pos is not available
 
         for (int n = 0; n < NPCLimit; n++)
         {
@@ -1516,7 +1516,7 @@ void renderBG(int col)
     COORD c;
     for (int x = 0; x < 80; x++)
     {
-        for (int y = 0; y < 25; y++)
+        for (int y = 1; y < 25; y++)
         {
             c.X = x;
             c.Y = y;

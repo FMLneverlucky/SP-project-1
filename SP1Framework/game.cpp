@@ -20,9 +20,9 @@ float splashScreenTime = 0.5;
 
 //UI NAMES
 std::string gameName = "A Very Fun Game";
-std::string gameMode1 = "GameMode1";
-std::string gameMode2 = "GameMode2";
-std::string gameMode3 = "GameMode3";
+std::string gameMode1 = "Normal";
+std::string gameMode2 = "Endless (under consturction)";
+std::string gameMode3 = "Time Challenge (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
@@ -54,8 +54,9 @@ Object restartButton(restartMessage.length() + 2, 3);
 Object mainMenuButton(restartMessage.length() + 2, 3);
 const int WLButtonCount = 3;
 
-//NORMAL MODE
+//USAGE FOR GAME MODEs
 NormalMode NGameState = N_INIT;
+EndlessMode EGameState = E_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
@@ -67,12 +68,13 @@ int noW; //no of walls
 Position endPoint[9];
 Position spawnPoint[9];
 int highestLVL;
+int totalhostile = 0;
 
 //TEST
 //double timer = 0;
 
 //map aesthetics
-int prevcol = 0x88;
+int prevcol = 0x00;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -215,6 +217,8 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
         break;
     case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
         break;
+    case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
+        break;
     }
 }
 
@@ -243,6 +247,8 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
     case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
         break;
     case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+        break;
+    case S_GAMEMODE2: gameplayMouseHandler(mouseEvent);
         break;
     }
 }
@@ -355,6 +361,7 @@ void update(double dt)
             break;
         case S_GAMEMODE1: playNormal();
             break;
+        case S_GAMEMODE2: playEndless();
     }
 }
 
@@ -541,6 +548,45 @@ void playLevel()
     }
 }
     
+void playEndless()
+{
+    switch (EGameState)
+    {
+    case E_INIT:
+        InitEndless();
+        break;
+    case E_PLAY:
+        enterEndless();
+        break;
+    }
+}
+
+void InitEndless()
+{
+    lose = false;
+    totalhostile = 0;
+    player->resetHP();
+    NPC::resetnoHostile;
+    EGameState = E_PLAY;
+}
+
+void enterEndless()
+{
+    if (NPCs[NPCLimit - 1] == nullptr) //Limit not reached yet;; aka can spawn more
+    {
+        //spawn NPCs according to idk what?
+    }
+
+    updateGame();
+
+    if (player->get_HP() == 0)
+    {
+        lose = true;
+        totalhostile = NPC::getnoHostile();
+        EGameState = E_INIT;
+        g_eGameState = S_MAINMENU;
+    }
+}
 
 void moveCharacter()
 {   
@@ -659,13 +705,18 @@ void render()
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_MAINMENU: renderMainMenu();
+    case S_MAINMENU: 
+        renderBG(0x00);
+        renderMainMenu();
         break;
     case S_TEST: renderGame();
         break;
     case S_GAMEMODE1: 
         renderBG(prevcol);
         renderPoints();
+        renderGame();
+    case S_GAMEMODE2:
+        renderBG(0x88); //dk what colour for now
         renderGame();
         
         break;
@@ -1262,7 +1313,7 @@ void renderMainMenu()
 {
     COORD c = g_Console.getConsoleSize();
     Object title(71, 3, Position(c.X / 2, c.Y / 5));
-    renderBox(&title, 0x0F, gameName);
+    renderBox(&title, 0x8F, gameName);
 
     MMButton.move(c.X / 2, c.Y * 2 / 5);
     MMButton2.move(c.X / 2, c.Y * 3 / 5);
@@ -1274,10 +1325,10 @@ void renderMainMenu()
     MMButtons[2] = &MMButton3;
     MMButtons[3] = &MMButton4;
 
-    renderBox(&MMButton, 0x04, gameMode1);
-    renderBox(&MMButton2, 0x0A, gameMode2);
-    renderBox(&MMButton3, 0x0B, gameMode3);
-    renderBox(&MMButton4, 0x06, gameMode4);
+    renderBox(&MMButton, 0x78, gameMode1);
+    renderBox(&MMButton2, 0x78, gameMode2);
+    renderBox(&MMButton3, 0x78, gameMode3);
+    renderBox(&MMButton4, 0x78, gameMode4);
 }
 
 void mainMenuWait()
@@ -1522,5 +1573,9 @@ void renderBG(int col)
             c.Y = y;
             g_Console.writeToBuffer(c, " ", col);
         }
+
+        c.Y = 0;
+        g_Console.writeToBuffer(c, " ", 0x00);
+
     }
 }

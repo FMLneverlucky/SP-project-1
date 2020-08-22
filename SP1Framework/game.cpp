@@ -66,6 +66,7 @@ int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
 Position endPoint[9];
 Position spawnPoint[9];
+int highestLVL;
 
 //TEST
 //double timer = 0;
@@ -533,6 +534,7 @@ void playLevel()
     {
         lose = true;
         level_end();
+        highestLVL = level;
         NGameState = N_INIT;
         g_eGameState = S_MAINMENU;
         //print lose screen here  

@@ -3,18 +3,12 @@ Object::Object(int sizeX = 1, int sizeY = 1)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
-	pos.set_x(0);
-	pos.set_y(0);
-	pivot.set_x(0);
-	pivot.set_y(0);
 }
 Object::Object(int sizeX, int sizeY, Position pos)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
 	this->pos = pos;
-	pivot.set_x(0);
-	pivot.set_y(0);
 }
 Object::Object(int sizeX, int sizeY, Position pos, Position pivot)
 {

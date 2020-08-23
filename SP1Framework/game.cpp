@@ -58,10 +58,14 @@ const int WLButtonCount = 3;
 Object healthBar(1, 1);
 Object coughBar(1, 1);
 Object NPCremaining(1, 1);
+int currentHP;
+int cooldownLength;
+bool showHUD = true;
 
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
 EndlessMode EGameState = E_INIT;
+Test TGameState = T_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
@@ -216,17 +220,18 @@ void getInput( void )
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 {    
-    switch (g_eGameState)
-    {
-    case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
-        break;
-    case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
-        break;
-    case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
-        break;
-    case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
-        break;
-    }
+    //switch (g_eGameState)
+    //{
+    //case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
+    //    break;
+    //case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
+    //    break;
+    //case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
+    //    break;
+    //case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
+    //    break;
+    //}
+    gameplayKBHandler(keyboardEvent);
 }
 
 //--------------------------------------------------------------
@@ -364,7 +369,7 @@ void update(double dt)
     {
         case S_MAINMENU: mainMenuWait(); // game logic for the splash screen
             break;
-        case S_TEST: updateGame(); // gameplay logic when we are in the game
+        case S_TEST: testStates(); // gameplay logic when we are in the game
             break;
         case S_GAMEMODE1: playNormal();
             break;
@@ -391,6 +396,39 @@ void updateGame()       // gameplay logic
     
 }
 
+void testStates()
+{
+    switch (TGameState)
+    {
+    case T_INIT:
+        initTest();
+        break;
+    case T_PLAY:
+        playTest();
+        break;
+    case T_END:
+        endTest();
+        break;
+    }
+}
+//Initialise variables and objects for test area here
+void initTest()
+{
+    renderHUD();
+    TGameState = T_PLAY;
+}
+//The logic for test area
+void playTest()
+{
+    updateGame();
+    updateHUD();
+}
+//Extra state to test "end" game scenarios
+void endTest()
+{
+
+}
+
 void playNormal()
 {
     switch (NGameState)
@@ -404,7 +442,6 @@ void playNormal()
     case N_NEXTLEVEL:
         level_set();
         break;
-
     }
 }
 
@@ -715,7 +752,8 @@ void render()
         renderBG(0x00);
         renderMainMenu();
         break;
-    case S_TEST: renderGame();
+    case S_TEST: 
+        renderGame();
         break;
     case S_GAMEMODE1: 
         renderBG(prevcol);
@@ -767,6 +805,8 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
     if (paused)
         renderPauseMenu();
+    else
+        updateHUD();
     /*if (lose)
     {
         renderWinLoseMenu(false);
@@ -1439,8 +1479,20 @@ void winLoseMenuWait()
 
 void renderHUD()
 {
-    //healthBar.resize(player->get_maxHP(), 1);
-    //healthBar.move(consoleSize.X)
+    healthBar.resize(player->get_maxHP(), 1);
+    healthBar.move(0, 0);
+    coughBar.resize(5, 1);
+    coughBar.move(consoleSize.X / 2, consoleSize.Y * 8 / 10);
+}
+
+void updateHUD()
+{
+    
+    if (showHUD)
+    {
+        renderBox(&healthBar, 0x04);
+        renderBox(&coughBar, 0x02);
+    }
 }
 
 int checkButtonClicks(Object** buttons, int arrayLength)

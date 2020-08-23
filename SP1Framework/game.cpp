@@ -566,7 +566,6 @@ void level_set() //deletes everyth,
     
 }
 
-
 void playLevel()
 {
     
@@ -1101,7 +1100,7 @@ void renderNPC()
             {
                 colour = 0x3C;
             }*/
-            if (c.X < 79 && c.Y < 24 && c.X > -1 && c.Y > 0)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
@@ -1186,7 +1185,6 @@ void moveall()
 
                     NPCs[i]->set_count(0);
 
-                    
                     int aaa = (rand() % 7) + 1;
                     switch (aaa)
                     {
@@ -1339,7 +1337,7 @@ void renderprojectile()
             pr.Y = static_cast<int>(projectile[p]->get_py()) - static_cast<int>(player->getposy()) + 12;
 
             colour = 0xA1;
-            if (pr.X <= 79 && pr.Y <= 24 && pr.X >= 0 && pr.Y >= 1)
+            if (checkifinscreen(pr))
             {
                 g_Console.writeToBuffer(pr, " ", colour);
             }
@@ -1575,7 +1573,7 @@ void renderPoints()
             colour = 0x30;
             c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, "S", colour);
             }
@@ -1583,7 +1581,7 @@ void renderPoints()
             colour = 0x90;
             c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, "E", colour);
             }
@@ -1593,7 +1591,7 @@ void renderPoints()
             colour = 0x33;
             c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
@@ -1601,7 +1599,7 @@ void renderPoints()
             colour = 0x99;
             c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
@@ -1611,7 +1609,7 @@ void renderPoints()
     colour = 0x7F;
     c.X = endPoint[4].get_x() - static_cast<int>(player->getposx()) + 40;
     c.Y = endPoint[4].get_y() - static_cast<int>(player->getposy()) + 12;
-    if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+    if (checkifinscreen(c))
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
@@ -1619,7 +1617,7 @@ void renderPoints()
     colour = 0x7F;
     c.X = spawnPoint[4].get_x() - static_cast<int>(player->getposx()) + 40;
     c.Y = spawnPoint[4].get_y() - static_cast<int>(player->getposy()) + 12;
-    if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+    if (checkifinscreen(c))
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
@@ -1664,7 +1662,7 @@ void renderBG(int col)
                 c.X = x - static_cast<int>(player->getposx()) + 40;
                 c.Y = y - static_cast<int>(player->getposy()) + 12;
 
-                if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+                if (checkifinscreen(c))
                 {
                     g_Console.writeToBuffer(c, " ", 0x00);
                 }
@@ -1677,7 +1675,7 @@ void renderBG(int col)
             {
                 c.X = x - static_cast<int>(player->getposx()) + 40;
                 c.Y = y - static_cast<int>(player->getposy()) + 12;
-                if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+                if (checkifinscreen(c))
                 {
                     g_Console.writeToBuffer(c, " ", col);
                 }
@@ -1687,26 +1685,19 @@ void renderBG(int col)
             c.X = x - static_cast<int>(player->getposx()) + 40;
             c.Y = 0 - static_cast<int>(player->getposy()) + 12;
 
-            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", 0x00);
             }
 
             c.Y = 25 - static_cast<int>(player->getposy()) + 12;
 
-            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", 0x00);
             }
 
-
-            //for variables
-            c.X = x;
-            c.Y = 0;
-            g_Console.writeToBuffer(c, " ", 0x00);
         }
-
-        
 
     }
 
@@ -1724,4 +1715,14 @@ void setallrpos()
         }
     }
     
+}
+
+bool checkifinscreen(COORD c)
+{
+    if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 0)
+    {
+        return true;
+    }
+
+    return false;
 }

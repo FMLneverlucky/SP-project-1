@@ -117,6 +117,7 @@ void set_points();
 void setBG();
 void renderBG(int col);
 void setallrpos();
+bool checkifinscreen(COORD c);
 
 
 //NPCs 

@@ -1,4 +1,5 @@
 #include "Wall.h"
+#include <stdlib.h>
 
 //position things
 
@@ -27,25 +28,25 @@ int Wall::setType()
 	switch (x)
 	{
 	case 1:
-		return 'R';
+		nextWall = I;
 		break;
 	case 2:
-		return 'O';
+		nextWall = J;
 		break;
 	case 3:
-		return 'Y';
+		nextWall = L;
 		break;
 	case 4:
-		return 'G';
+		nextWall = O;
 		break;
 	case 5:
-		return 'L';
+		nextWall = S;
 		break;
 	case 6:
-		return 'B';
+		nextWall = T;
 		break;
 	case 7:
-		return 'P';
+		nextWall = Z;
 		break;
 	default:
 		nextWall = d;
@@ -54,45 +55,45 @@ int Wall::setType()
 	}
 }
 
-void Wall::typeI()
-{
-
-}
-
-void Wall::typeJ()
-{
-
-}
-
-void Wall::typeL()
-{
-
-}
-
-void Wall::typeO()
-{
-
-}
-
-void Wall::typeS()
-{
-
-}
-
-void Wall::typeT()
-{
-
-}
-
-void Wall::typeZ()
-{
-
-}
-
-void Wall::typed()
-{
-
-}
+//void Wall::typeI()
+//{
+//
+//}
+//
+//void Wall::typeJ()
+//{
+//
+//}
+//
+//void Wall::typeL()
+//{
+//
+//}
+//
+//void Wall::typeO()
+//{
+//
+//}
+//
+//void Wall::typeS()
+//{
+//
+//}
+//
+//void Wall::typeT()
+//{
+//
+//}
+//
+//void Wall::typeZ()
+//{
+//
+//}
+//
+//void Wall::typed()
+//{
+//
+//}
 
 void Wall::update_pos(float dtime)
 {

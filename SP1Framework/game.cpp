@@ -58,14 +58,14 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[31] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* entities[41] = { new Player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int entityLimit = 31;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 20;
 
-Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int WallLimit = 10;
+Wall* Walls[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const int WallLimit = 5;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
 int particle_limit = 3;
@@ -101,9 +101,9 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    //spawnWall(10);
-    //spawnNPC(false, 3, 0.1, 3);
-    //spawnNPC(true, 2, 0.1, 3);
+    spawnWall(5);
+    spawnNPC(false, 3, 0.1, 3);
+    spawnNPC(true, 2, 0.1, 3);
 }
 
 //--------------------------------------------------------------
@@ -401,7 +401,7 @@ void set_spawn()
 
     spawnNPC(false, noC, spd, cdtime * g_dDeltaTime);
     spawnNPC(true, noP, spd, cdtime * g_dDeltaTime);
-    //spawnWall(noW);
+    spawnWall(noW);
 
     NGameState = N_LEVEL;
 }
@@ -643,7 +643,7 @@ void renderMap()
         
     }*/
 
-    //renderWall();
+    renderWall();
     renderNPC();
     renderprojectile();
     
@@ -759,11 +759,11 @@ void renderInputEvents()
     }   
 }
 
-void Wall::renderWall()
+void renderWall()
 {//maybe?
     COORD c;
     int colour;
-    for (int i = 0; i < WallLimit; i++)
+    for (int i = 0; i < WallLimit*4; i++)
     {
         if (Walls[i] != nullptr)
         {
@@ -777,34 +777,143 @@ void Wall::renderWall()
     }
 }
 
-void Wall::spawnWall(int no)                                                                            //function to spawn wall
+void spawnWall(int no)                                                                            //function to spawn wall
 {
     for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
-    {
-        //find random x and y on unused spaces
-        Position temp; //declare temporary position class to hold coordinates for each wall entity
+    {//find random x and y on unused spaces
+        Wall nextWall;
+        Position wallPivotPoint, wall2, wall3, wall4; //declare temporary position class to hold coordinates for each wall entity
         bool isSpaceNearPlayer;
         do
         {
             
-            temp.set_x(rand() % 80); //set x coordinate of temp variable as a number from 0 to 80
-            temp.set_y(rand() % 24); //set y coordinate of temp variable as a number from 0 to 25
-            if (temp.get_x() > 39 && temp.get_x() <= 41)
+            wallPivotPoint.set_x(rand() % 80); //set x coordinate of temp variable as a number from 0 to 80
+            wallPivotPoint.set_y(rand() % 24); //set y coordinate of temp variable as a number from 0 to 25
+            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41)
             {
-                if (temp.get_y() > 12 && temp.get_y() <= 14)
+                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)
                 {
                     isSpaceNearPlayer = true;
                 }
             }
-        } while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true); //while pos is not available
+        } while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true); //while pos is not available
+
+        if (nextWall.setType() == I)
+        {
+            wall2.set_x(wallPivotPoint.get_x());
+            wall2.set_y(wallPivotPoint.get_y() + 1);
+
+            wall3.set_x(wallPivotPoint.get_x());
+            wall3.set_y(wallPivotPoint.get_y() + 2);
+
+            wall4.set_x(wallPivotPoint.get_x());
+            wall4.set_y(wallPivotPoint.get_y() + 3);
+        }
+
+        else if (nextWall.setType() == J)
+        {
+            wall2.set_x(wallPivotPoint.get_x());
+            wall2.set_y(wallPivotPoint.get_y() + 1);
+
+            wall3.set_x(wallPivotPoint.get_x());
+            wall3.set_y(wallPivotPoint.get_y() + 2);
+
+            wall4.set_x(wallPivotPoint.get_x() - 1);
+            wall4.set_y(wallPivotPoint.get_y() + 2);
+        }
+
+        else if (nextWall.setType() == L)
+        {
+            wall2.set_x(wallPivotPoint.get_x());
+            wall2.set_y(wallPivotPoint.get_y() + 1);
+
+            wall3.set_x(wallPivotPoint.get_x());
+            wall3.set_y(wallPivotPoint.get_y() + 2);
+
+            wall4.set_x(wallPivotPoint.get_x() + 1);
+            wall4.set_y(wallPivotPoint.get_y() + 2);
+        }
+
+        else if (nextWall.setType() == O)
+        {
+            wall2.set_x(wallPivotPoint.get_x());
+            wall2.set_y(wallPivotPoint.get_y() + 1);
+
+            wall3.set_x(wallPivotPoint.get_x() + 1);
+            wall3.set_y(wallPivotPoint.get_y());
+
+            wall4.set_x(wallPivotPoint.get_x() + 1);
+            wall4.set_y(wallPivotPoint.get_y() + 1);
+        }
+
+        else if (nextWall.setType() == S)
+        {
+            wall2.set_x(wallPivotPoint.get_x() - 1);
+            wall2.set_y(wallPivotPoint.get_y());
+
+            wall3.set_x(wallPivotPoint.get_x() - 1);
+            wall3.set_y(wallPivotPoint.get_y() + 1);
+
+            wall4.set_x(wallPivotPoint.get_x() - 2);
+            wall4.set_y(wallPivotPoint.get_y() + 1);
+        }
+
+        else if (nextWall.setType() == T)
+        {
+            wall2.set_x(wallPivotPoint.get_x() + 1);
+            wall2.set_y(wallPivotPoint.get_y());
+
+            wall3.set_x(wallPivotPoint.get_x() + 2);
+            wall3.set_y(wallPivotPoint.get_y());
+
+            wall4.set_x(wallPivotPoint.get_x() + 1);
+            wall4.set_y(wallPivotPoint.get_y() + 1);
+        }
+
+        else if (nextWall.setType() == Z)
+        {
+            wall2.set_x(wallPivotPoint.get_x() + 1);
+            wall2.set_y(wallPivotPoint.get_y());
+
+            wall3.set_x(wallPivotPoint.get_x() + 1);
+            wall3.set_y(wallPivotPoint.get_y() + 1);
+
+            wall4.set_x(wallPivotPoint.get_x() + 2);
+            wall4.set_y(wallPivotPoint.get_y() + 1);
+        }
+
+        else if (nextWall.setType() == d)
+        {
+            return;
+        }
 
         for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
         {
             if (Walls[w] == nullptr)                                                                    //check for wall entity not assigned on map
             {
                 Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
-                entities[w + 21] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 21]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
+                entities[w + 20] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
+                entities[w + 20]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
+                if (Walls[w + 5] == nullptr)
+                {
+                    Walls[w + 5] = new Wall;
+                    entities[w + 25] = Walls[w + 5];
+                    entities[w + 25]->set_pos(wall2.get_x(), wall2.get_y());
+                }
+
+                if (Walls[w + 10] == nullptr)
+                {
+                    Walls[w + 10] = new Wall;
+                    entities[w + 30] = Walls[w + 10];
+                    entities[w + 30]->set_pos(wall3.get_x(), wall3.get_y());
+                }
+
+                if (Walls[w + 15] == nullptr)
+                {
+                    Walls[w + 15] = new Wall;
+                    entities[w + 35] = Walls[w + 15];
+                    entities[w + 35]->set_pos(wall2.get_x(), wall2.get_y());
+                }
                 break;                                                                                  //break from current loop
             }
         }

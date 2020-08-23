@@ -3,13 +3,14 @@
 
 enum types
 {
-    red,
-    orange,
-    yellow,
-    green,
-    light_blue,
-    blue,
-    purple,
+    I,
+    J,
+    L,
+    O,
+    S,
+    T,
+    Z,
+    d
 };
 
 class Wall :
@@ -24,6 +25,7 @@ public:
     Wall();
     ~Wall();
     char type();
+    int setType();
     void update_pos(float dtime);
     Position* new_pos(float dtime);
 };

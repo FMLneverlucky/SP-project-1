@@ -68,6 +68,12 @@ enum NormalMode
     N_NEXTLEVEL
 };
 
+enum EndlessMode
+{
+    E_INIT,
+    E_PLAY
+};
+
 void init        ( void );      // initialize your variables, allocate memory, etc
 void getInput    ( void );      // get input from player
 void update      ( double dt ); // update the game and the state of the game
@@ -87,12 +93,15 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
-//Normal Mode
+//Game Modes
 void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
 void level_set();
+void playEndless();
+void InitEndless();
+void enterEndless();
 
 
 
@@ -107,6 +116,7 @@ void set_points();
 //aesthetics
 void setBG();
 void renderBG(int col);
+void setallrpos();
 
 
 //NPCs 

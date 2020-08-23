@@ -116,6 +116,8 @@ void set_points();
 //aesthetics
 void setBG();
 void renderBG(int col);
+void setallrpos();
+bool checkifinscreen(COORD c);
 
 
 //NPCs 

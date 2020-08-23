@@ -121,6 +121,7 @@ void init( void )
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
+    
     player->set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
@@ -715,6 +716,7 @@ void render()
         renderBG(prevcol);
         renderPoints();
         renderGame();
+        break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
         renderGame();
@@ -755,6 +757,7 @@ void renderSplashScreen()  // renders the splash screen
 
 void renderGame()
 {
+    setallrpos();
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
     if (paused)
@@ -804,7 +807,11 @@ void renderCharacter()
     {
         charColor = 0x09;
     }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
+    COORD c;
+    c.X = player->getrposx();
+    c.Y = player->getrposy();
+    //g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
+    g_Console.writeToBuffer(c, (char)1, charColor);
 }
 
 void renderFramerate()
@@ -1019,8 +1026,8 @@ void renderNPC()
     {
         if (NPCs[i] != nullptr)
         {
-            c.X = NPCs[i]->getposx();
-            c.Y = NPCs[i]->getposy();
+            c.X = NPCs[i]->getrposx();
+            c.Y = NPCs[i]->getrposy();
 
             if (NPCs[i]->type() == 'B')
             {
@@ -1049,8 +1056,10 @@ void renderNPC()
             {
                 colour = 0x3C;
             }*/
-
-            g_Console.writeToBuffer(c, " ", colour);
+            if (c.X < 79 && c.Y < 24 && c.X > -1 && c.Y > 0)
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
 
             
         }
@@ -1281,12 +1290,14 @@ void renderprojectile()
         if (projectile[p] != nullptr)
         {
 
-            pr.X = projectile[p]->get_px();
-            pr.Y = projectile[p]->get_py();
+            pr.X = static_cast<int>(projectile[p]->get_px()) - static_cast<int>(player->getposx()) + 40;
+            pr.Y = static_cast<int>(projectile[p]->get_py()) - static_cast<int>(player->getposy()) + 12;
 
             colour = 0xA1;
-
-            g_Console.writeToBuffer(pr, " ", colour);
+            if (pr.X <= 79 && pr.Y <= 24 && pr.X >= 0 && pr.Y >= 1)
+            {
+                g_Console.writeToBuffer(pr, " ", colour);
+            }
         }
     }
 }
@@ -1502,38 +1513,56 @@ void renderPoints()
         if (i == 1)
         {
             colour = 0x30;
-            c.X = spawnPoint[i].get_x();
-            c.Y = spawnPoint[i].get_y();
-            g_Console.writeToBuffer(c, "S", colour);
+            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            {
+                g_Console.writeToBuffer(c, "S", colour);
+            }
 
             colour = 0x90;
-            c.X = endPoint[i].get_x();
-            c.Y = endPoint[i].get_y();
-            g_Console.writeToBuffer(c, "E", colour);
+            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            {
+                g_Console.writeToBuffer(c, "E", colour);
+            }
         }
         else if (i != 4)
         {
             colour = 0x33;
-            c.X = spawnPoint[i].get_x();
-            c.Y = spawnPoint[i].get_y();
-            g_Console.writeToBuffer(c, " ", colour);
+            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
 
             colour = 0x99;
-            c.X = endPoint[i].get_x();
-            c.Y = endPoint[i].get_y();
-            g_Console.writeToBuffer(c, " ", colour);
+            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
         }
     }
     
     colour = 0x7F;
-    c.X = endPoint[4].get_x();
-    c.Y = endPoint[4].get_y();
-    g_Console.writeToBuffer(c, (char)254 , colour);
+    c.X = endPoint[4].get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = endPoint[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+    {
+        g_Console.writeToBuffer(c, (char)254, colour);
+    }
 
     colour = 0x7F;
-    c.X = spawnPoint[4].get_x();
-    c.Y = spawnPoint[4].get_y();
-    g_Console.writeToBuffer(c, (char)254 , colour);
+    c.X = spawnPoint[4].get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = spawnPoint[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+    {
+        g_Console.writeToBuffer(c, (char)254, colour);
+    }
 
 }
 
@@ -1565,17 +1594,74 @@ void setBG()
 void renderBG(int col)
 {
     COORD c;
-    for (int x = 0; x < 80; x++)
+    for (int x = -1; x < 81; x++)
     {
-        for (int y = 1; y < 25; y++)
+    
+        if (x == -1 || x == 80)
         {
+            for (int y = 0; y < 26; y++) //for surrounding playarea walls vertically
+            {
+                c.X = x - static_cast<int>(player->getposx()) + 40;
+                c.Y = y - static_cast<int>(player->getposy()) + 12;
+
+                if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+                {
+                    g_Console.writeToBuffer(c, " ", 0x00);
+                }
+            }
+        }
+        else
+        {
+
+            for (int y = 1; y < 25; y++) //for playarea bg
+            {
+                c.X = x - static_cast<int>(player->getposx()) + 40;
+                c.Y = y - static_cast<int>(player->getposy()) + 12;
+                if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+                {
+                    g_Console.writeToBuffer(c, " ", col);
+                }
+            }
+
+            //for surrounding playarea walls horizontally
+            c.X = x - static_cast<int>(player->getposx()) + 40;
+            c.Y = 0 - static_cast<int>(player->getposy()) + 12;
+
+            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            {
+                g_Console.writeToBuffer(c, " ", 0x00);
+            }
+
+            c.Y = 25 - static_cast<int>(player->getposy()) + 12;
+
+            if (c.X <= 79 && c.Y <= 24 && c.X >= 0 && c.Y >= 1)
+            {
+                g_Console.writeToBuffer(c, " ", 0x00);
+            }
+
+
+            //for variables
             c.X = x;
-            c.Y = y;
-            g_Console.writeToBuffer(c, " ", col);
+            c.Y = 0;
+            g_Console.writeToBuffer(c, " ", 0x00);
         }
 
-        c.Y = 0;
-        g_Console.writeToBuffer(c, " ", 0x00);
+        
 
     }
+
+}
+
+void setallrpos()
+{
+    for (int i = 1; i < entityLimit; i++)
+    {
+        player->set_rpos(40, 12);
+        if (entities[i] != nullptr)
+        {
+            entities[i]->set_rpos((int)entities[i]->getposx() - (int)player->getposx() + 40, (int)entities[i]->getposy() - (int)player->getposy() + 12);
+
+        }
+    }
+    
 }

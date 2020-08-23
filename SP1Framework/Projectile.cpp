@@ -40,46 +40,46 @@ void Projectile::direction(int m_x, int m_y)
 	newpos.set_x(x);
 	newpos.set_y(y);
 
-	if ((m_x < x) && ((x - m_x) > (y - m_y)) && ((x - m_x) > (m_y - y)))
+	if ((m_x < 40) && ((40 - m_x) > (12 - m_y)) && ((40 - m_x) > (m_y - 12)))
 	{
 		dir = left;
 		spacecount = 20;
 	}
 
-	else if ((m_x < x) && (m_y < y))
+	else if ((m_x < 40) && (m_y < 12))
 	{
 		dir = top_left;
 		spacecount = 15;
 	}
 
-	else if ((m_x > x) && ((m_x - x) > (y - m_y)) && ((m_x - x) > (m_y - y)))
+	else if ((m_x > 40) && ((m_x - 40) > (12 - m_y)) && ((m_x - 12) > (m_y - 40)))
 	{
 		dir = right;
 		newpos.set_x(x + 1);
 		spacecount = 20;
 	}
 
-	else if ((m_x > x) && (m_y < y))
+	else if ((m_x > 40) && (m_y < 12))
 	{
 		dir = top_right;
 		newpos.set_x(x + 1);
 		spacecount = 15;
 	}
 
-	else if ((m_x > x) && (m_y > y))
+	else if ((m_x > 40) && (m_y > 12))
 	{
 		dir = btm_right;
 		spacecount = 20;
 	}
 
-	else if ((m_x < x) && (m_y > y))
+	else if ((m_x < 40) && (m_y > 12))
 	{
 		dir = btm_left;
 		newpos.set_y(y + 1);
 		spacecount = 15;
 	}
 
-	else if (m_y < y)
+	else if (m_y < 12)
 	{
 		dir = down;
 		newpos.set_y(y + 1);

@@ -715,6 +715,7 @@ void render()
         renderBG(prevcol);
         renderPoints();
         renderGame();
+        break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
         renderGame();

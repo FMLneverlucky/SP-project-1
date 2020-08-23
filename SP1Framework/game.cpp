@@ -256,7 +256,6 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
             buttonHoldRelease(key);
     }    
 }
-
 bool heldKey[6] = {false, false, false, false, false, false};
 void buttonHoldPress(EKEYS key)
 {
@@ -478,9 +477,8 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        //g_sChar.m_cLocation.Y--;
         entities[0]->set_direction(1);
-        
+        //g_sChar.m_cLocation.Y = 13;
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
@@ -783,22 +781,22 @@ void Wall::spawnWall(int no)                                                    
 {
     for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
     {
-                                                                                                        //find random x and y coords of unused spaces on map
-        bool isSpaceNearPlayer = false; 																//bool to check if anything wants to spawn in around player
-
-        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true) 					//while pos is not available
+        //find random x and y on unused spaces
+        Position temp; //declare temporary position class to hold coordinates for each wall entity
+        bool isSpaceNearPlayer;
+        do
         {
-            wallPivotPoint.set_x(rand() % 80); 															//set x coordinate of temp variable as a number from 0 to 80
-            wallPivotPoint.set_y(rand() % 24); 														    //set y coordinate of temp variable as a number from 0 to 25
-
-            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41) 							//check if randomiser chose outside range of the 1 block diameter in x axis around player
+            
+            temp.set_x(rand() % 80); //set x coordinate of temp variable as a number from 0 to 80
+            temp.set_y(rand() % 24); //set y coordinate of temp variable as a number from 0 to 25
+            if (temp.get_x() > 39 && temp.get_x() <= 41)
             {
-                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)					    //check if randomiser chose outside range of the 1 block diameter in y axis around player
+                if (temp.get_y() > 12 && temp.get_y() <= 14)
                 {
-                    isSpaceNearPlayer = true;															//if not in range, set bool to true to end loop
+                    isSpaceNearPlayer = true;
                 }
             }
-        };
+        } while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true); //while pos is not available
 
         for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
         {

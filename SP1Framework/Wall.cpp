@@ -1,6 +1,4 @@
 #include "Wall.h"
-#include <stdlib.h>
-#include <iostream>
 
 //position things
 
@@ -29,30 +27,31 @@ int Wall::setType()
 	switch (x)
 	{
 	case 1:
-		nextWall = I;
+		return 'R';
 		break;
 	case 2:
-		nextWall = J;
+		return 'O';
 		break;
 	case 3:
-		nextWall = L;
+		return 'Y';
 		break;
 	case 4:
-		nextWall = O;
+		return 'G';
 		break;
 	case 5:
-		nextWall = S;
+		return 'L';
 		break;
 	case 6:
-		nextWall = T;
+		return 'B';
 		break;
 	case 7:
-		nextWall = Z;
+		return 'P';
 		break;
 	default:
 		nextWall = d;
+
+		return nextWall;
 	}
-	return nextWall;
 }
 
 void Wall::typeI()

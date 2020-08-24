@@ -87,13 +87,23 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[61] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 31;
+Entity* entities[61] = { player, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }; //6 rows
+const int entityLimit = 61;
 
-NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 20;
 
-Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
@@ -791,7 +801,7 @@ void renderMap()
         
     }*/
 
-    //renderWall();
+    renderWall();
     //renderPoints();
     renderNPC();
     renderprojectile();
@@ -937,7 +947,7 @@ void spawnWall(int no)                                                          
 
         Wall nextWall;                                                                                  //declared here for conditional statement when using the setType() function later on
         Position wallPivotPoint, wall2, wall3, wall4;                                                   //declare temporary position class to hold coordinates for each wall entity and accompanying wall entities later
-        bool isSpaceNearPlayer;                                                                         //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+        bool isSpaceNearPlayer = false;                                                                         //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
 
         while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true);                    //while position on map is unavailable
         {

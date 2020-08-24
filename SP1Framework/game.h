@@ -108,20 +108,23 @@ void level_set();
 void playEndless();
 void InitEndless();
 void enterEndless();
+void renderPoints();
+void set_points();
+void setsafezone();
+void rendersafezone();
+
 //Testing area
 void testStates();
 void initTest();
 void playTest();
 void endTest();
 
-
 //Walls
-//void spawnWall(int no);
-//void renderWall();
+void spawnWall(int no);
+void renderWall();
 
 //spawnendpoints
-void renderPoints();
-void set_points();
+
 
 //aesthetics
 void setBG();

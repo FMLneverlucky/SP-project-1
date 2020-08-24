@@ -76,8 +76,11 @@ int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
 Position endPoint[9];
 Position spawnPoint[9];
+Position safezone[9];
 int highestLVL;
 int totalhostile = 0;
+
+int tempcounter;
 
 //TEST
 //double timer = 0;
@@ -96,13 +99,23 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[31] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 31;
+Entity* entities[61] = { player, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }; //6 rows
+const int entityLimit = 61;
 
-NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 20;
 
-Wall* Walls[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
@@ -374,6 +387,7 @@ void update(double dt)
         case S_GAMEMODE1: playNormal();
             break;
         case S_GAMEMODE2: playEndless();
+            break;
     }
 }
 
@@ -493,7 +507,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noP = 5;
         noC = 15;
     }
-
+    set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
     //spawnWall(noW);
@@ -502,8 +516,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
 
 void set_points()
 {
-    spawnPoint[4].set_x(g_sChar.m_cLocation.X);
-    spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
+    spawnPoint[4].set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
 
     Position tempp;
     do
@@ -515,14 +528,15 @@ void set_points()
     endPoint[4].set_x(tempp.get_x());
     endPoint[4].set_y(tempp.get_y());
 
+
     for (int i = -1; i < 2; i++)
     {
         spawnPoint[1 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() - 1);
         spawnPoint[7 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() + 1);
-    
+
         endPoint[1 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() - 1);
         endPoint[7 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() + 1);
-      
+
         spawnPoint[3].set_pos(spawnPoint[4].get_x() - 1, spawnPoint[4].get_y());
         spawnPoint[5].set_pos(spawnPoint[4].get_x() + 1, spawnPoint[4].get_y());
         endPoint[3].set_pos(endPoint[4].get_x() - 1, endPoint[4].get_y());
@@ -578,7 +592,6 @@ void playLevel()
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
         clear = true;
-        //print level clear screen here
         NGameState = N_NEXTLEVEL;
     }
 
@@ -612,15 +625,24 @@ void InitEndless()
     lose = false;
     totalhostile = 0;
     player->resetHP();
-    NPC::resetnoHostile;
+    NPC::resetnoHostile();
+    tempcounter = 0;
+    
+    setsafezone();
+
+    spawnNPC(false, 5, 0.5, 1);
+    spawnNPC(true, 1, 0.5, 1);
+
     EGameState = E_PLAY;
 }
 
 void enterEndless()
 {
-    if (NPCs[NPCLimit - 1] == nullptr) //Limit not reached yet;; aka can spawn more
+    tempcounter++;
+    if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
-        //spawn NPCs according to idk what?
+        spawnNPC(false, 1, 0.5, 1);
+        tempcounter = 0;
     }
 
     updateGame();
@@ -629,9 +651,96 @@ void enterEndless()
     {
         lose = true;
         totalhostile = NPC::getnoHostile();
+        for (int i = 0; i < NPCLimit; i++)
+        {
+            if (NPCs[i] != nullptr)
+            {
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
+
+        for (int p = 0; p < particle_limit; p++)
+        {
+            if (projectile[p] != nullptr)
+            {
+                delete projectile[p];
+                projectile[p] = nullptr;
+            }
+        }
+
+
+        if (powerup != nullptr)
+        {
+            delete powerup;
+            powerup = nullptr;
+        }
         EGameState = E_INIT;
         g_eGameState = S_MAINMENU;
     }
+
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            COORD npcpos;
+            npcpos.X = NPCs[i]->getposx() - static_cast<int>(player->getposx()) + 40;
+            npcpos.Y = NPCs[i]->getposy() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(npcpos) == false)
+            {
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
+    }
+}
+
+void setsafezone()
+{
+    safezone[4].set_pos(40, 12);
+
+    for (int i = -1; i < 2; i++)
+    {
+        safezone[1 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() - 1);
+        safezone[7 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() + 1);
+
+        safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
+        safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
+        
+
+    }
+}
+
+void rendersafezone()
+{
+    COORD c;
+    int colour;
+
+    for (int i = 0; i < 9; i++)
+    {
+       
+        if (i != 4)
+        {
+
+            colour = 0xFF;
+            c.X = safezone[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = safezone[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
+
+        }
+    }
+
+    colour = 0x7F;
+    c.X = safezone[4].get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = safezone[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    if (checkifinscreen(c))
+    {
+        g_Console.writeToBuffer(c, (char)254, colour);
+    }
+
 }
 
 void moveCharacter()
@@ -765,6 +874,7 @@ void render()
         break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
+        rendersafezone();
         renderGame();
         
         break;
@@ -840,7 +950,7 @@ void renderMap()
         
     }*/
 
-    //renderWall();
+    renderWall();
     //renderPoints();
     renderNPC();
     renderprojectile();
@@ -965,89 +1075,67 @@ void renderWall()
 {//maybe?
     COORD c;
     int colour;
-    for (int i = 0; i < WallLimit; i++)
+    for (int i = 0; i < WallLimit*4; i++)
     {
         if (Walls[i] != nullptr)
         {
-            c.X = Walls[i]->getposx();
-            c.Y = Walls[i]->getposy();
+            c.X = Walls[i]->getposx() - player->getposx() + 40;
+            c.Y = Walls[i]->getposy() - player->getposy() + 12;
 
             colour = 0x00;
 
-            g_Console.writeToBuffer(c, "W", colour);
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, "W", colour);
+            }
         }
     }
 }
 
-void spawnWall(int no)                                                                                  //function to spawn wall
+void spawnWall(int no)                                                                                                              //function to spawn wall
 {
-    for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
-    {
-        /*if (setType() == I)
-        {
-            typeI();
-        }
-        
-        else if (setType() == J)
-        {
-            typeJ();
-        }
+    for (int j = 0; j < no; j++)                                                                                                    //for loop to cycle the spawning of each wall
+    {   //find random x and y on unused spaces
+        bool isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+        bool isSpaceOccupied = false;
 
-        else if (setType() == L)
+        for (int w = 0; w < WallLimit; w++)                                                                                         // for loop to set positions on map for each wall entity
         {
-            typeL();
-        }
-
-        else if (setType() == O)
-        {
-            typeO();
-        }
-
-        else if (setType() == S)
-        {
-            typeS();
-        }
-
-        else if (setType() == T)
-        {
-            typeT();
-        }
-
-        else if (setType() == Z)
-        {
-            typeZ();
-        }
-
-        else if (setType() == d)
-        {
-            typed();
-        }*/
-
-        Position temp;                                                                                  //find random x and y coords of unused spaces on map
-        bool isSpaceNearPlayer = false; 																//bool to check if anything wants to spawn in around player
-
-        while ((occupied(&temp) != nullptr) && isSpaceNearPlayer == true) 					            //while pos is not available
-        {
-            temp.set_x(rand() % 80); 															        //set x coordinate of temp variable as a number from 0 to 80
-            temp.set_y((rand() % 23) + 1); 														            //set y coordinate of temp variable as a number from 0 to 25
-
-            if (temp.get_x() > 39 && temp.get_x() <= 41) 							                    //check if randomiser chose outside range of the 1 block diameter in x axis around player
+            if (Walls[w] == nullptr)                                                                                                //checks if wall entity is unassigned on map
             {
-                if (temp.get_y() > 12 && temp.get_y() <= 14)					                        //check if randomiser chose outside range of the 1 block diameter in y axis around player
+                Walls[w] = new Wall;
+
+                do
                 {
-                    isSpaceNearPlayer = true;															//if not in range, set bool to true to end loop
-                }
-            }
-        }
+                    int Pivotx = (rand() % 80);                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
+                    int Pivoty = (rand() % 24);                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+                    Walls[w]->setPos(Pivotx, Pivoty);
+                    Walls[w]->setPosForAll();
+                    for (int i = 1; i < 5; i++)
+                    {
+                        if (Walls[w]->getPos(i)->get_x() > 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+                        {
+                            if (Walls[w]->getPos(i)->get_y() > 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                            {
+                                isSpaceNearPlayer = true;                                                                           //if chosen coords are not near spawn zone, second condition is true for loop to stop
+                            }
+                        }
 
-        for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
-        {
-            if (Walls[w] == nullptr)                                                                    //check for wall entity not assigned on map
-            {
-                Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
-                entities[w + 11] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 11]->set_pos(temp.get_x(), temp.get_y());                                  //set position of the temp wall entity to an element in the entity array
-                break;                                                                                  //break from current loop
+                        if (occupied(Walls[w]->getPos(i)) != nullptr)
+                        {
+                            isSpaceOccupied = true;
+                        }
+                    }
+                }while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
+
+
+                for (int i = 1; i < 5; i++)
+                {
+                    Walls[w + WallLimit*i] = new Wall;                                                                              //set element of array as new object under wall class
+                    entities[w + 20 + WallLimit*i] = Walls[w + WallLimit*i];                                                        //set element from wall array to corresponding element on entity array
+                    entities[w + 20 + WallLimit*i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
+                }
+                break;
             }
         }
     }
@@ -1126,7 +1214,18 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
         {
             temp.set_x(rand() % 80);
             temp.set_y((rand() % 23) + 1);
-   
+          
+            if (g_eGameState == S_GAMEMODE2)
+            {
+                COORD t;
+                t.X = temp.get_x() - player->getposx() + 40;
+                t.Y = temp.get_y() - player->getposy() + 12;
+                if (checkifinscreen(t) == false)
+                {
+                    valid = false;
+                }
+            }
+            
             for (int i = 0; i < 9; i++)
             {
                 if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
@@ -1604,14 +1703,7 @@ void renderPoints()
     {
         if (i == 1)
         {
-            colour = 0x30;
-            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(c))
-            {
-                g_Console.writeToBuffer(c, "S", colour);
-            }
-
+  
             colour = 0x90;
             c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
@@ -1619,9 +1711,26 @@ void renderPoints()
             {
                 g_Console.writeToBuffer(c, "E", colour);
             }
+
+            colour = 0x30;
+            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, "S", colour);
+            }
         }
         else if (i != 4)
         {
+  
+            colour = 0x99;
+            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
+
             colour = 0x33;
             c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
@@ -1630,13 +1739,6 @@ void renderPoints()
                 g_Console.writeToBuffer(c, " ", colour);
             }
 
-            colour = 0x99;
-            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(c))
-            {
-                g_Console.writeToBuffer(c, " ", colour);
-            }
         }
     }
     

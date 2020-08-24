@@ -1,19 +1,23 @@
 #include "NPC.h"
 int NPC::noHostile = 0;
+int NPC::total = 0;
 
 NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(cd)
 {
 	//normal civilians use this
+	total++;
 }
 
 NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(5), freezetime(0), cooldown(1)
 {
 	//police use this
+	total++;
 }
 
 NPC::~NPC()
 {
-	//no codes yet
+	
+	total--;
 }
 
 bool NPC::isHostile()
@@ -127,4 +131,9 @@ int NPC::getnoHostile()
 void NPC::resetnoHostile()
 {
 	noHostile = 0;
+}
+
+int NPC::gettotal()
+{
+	return total;
 }

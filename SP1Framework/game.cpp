@@ -482,7 +482,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noP = 0;
         spd = 0.1;
         cdtime = 5;
-        noW = 7;
+        noW = 10;
     }
     else if (level < 6)
     {
@@ -558,14 +558,14 @@ void level_set() //deletes everyth
         }
     }
 
-    //for (int w = 0; w < 40; w++)
-    //{
-    //    if (Walls[w] != nullptr)
-    //    {
-    //        delete Walls[w];
-    //        Walls[w] = nullptr;
-    //    }
-    //}
+    for (int w = 0; w < 40; w++)
+    {
+        if (Walls[w] != nullptr)
+        {
+            delete Walls[w];
+            Walls[w] = nullptr;
+        }
+    }
 
     for (int p = 0; p < particle_limit; p++)
     {
@@ -641,8 +641,9 @@ void InitEndless()
     
     setsafezone();
 
+    spawnWall(10);
     spawnNPC(false, 5, 0.5, 1);
-    spawnNPC(true, 1, 0.5, 1);
+    //spawnNPC(true, 1, 0.5, 1);
 
     EGameState = E_PLAY;
 }
@@ -733,7 +734,7 @@ void rendersafezone()
         if (i != 4)
         {
 
-            colour = 0xFF;
+            colour = 0xBB;
             c.X = safezone[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = safezone[i].get_y() - static_cast<int>(player->getposy()) + 12;
             if (checkifinscreen(c))
@@ -761,36 +762,38 @@ void moveCharacter()
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
     {
         //Beep(1440, 30);
-        //g_sChar.m_cLocation.Y--;
-        entities[0]->set_direction(1);
+        player->set_direction(1);
         
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
-        //g_sChar.m_cLocation.X--;     
-        entities[0]->set_direction(3);
+        player->set_direction(3);
     }
     else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
-        //Beep(1440, 30);
-        //g_sChar.m_cLocation.Y++;       
-        entities[0]->set_direction(2);
+        //Beep(1440, 30);     
+        player->set_direction(2);
     }
     else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
-        //Beep(1440, 30);
-        //g_sChar.m_cLocation.X++;        
-        entities[0]->set_direction(4);
+        //Beep(1440, 30);    
+        player->set_direction(4);
     }
     else
     {
-        entities[0]->set_direction(0);
+        player->set_direction(0);
     }
 
+
+    //conditions such that player cannot move:: got wall etc
     if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
     {
-        entities[0]->set_direction(0);
+        player->set_direction(0);
+    }
+    if (!insafezone(player->getpos()) && g_eGameState == S_GAMEMODE2 && insafezone(player->new_pos(g_dDeltaTime)))
+    {
+        player->set_direction(0);
     }
     
     if (g_skKeyEvent[K_SPACE].keyReleased)
@@ -1123,9 +1126,10 @@ void spawnWall(int no)                                                          
                     isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 80);                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-                    int Pivoty = (rand() % 24);                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
+                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
+                    
                     Walls[w]->setPosForAll();
                     for (int i = 0; i < 4; i++)
                     {
@@ -1415,13 +1419,24 @@ void moveall()
                             
             }
 
-            if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= spawnPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= spawnPoint[7].get_y() + 1 && (NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= spawnPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= spawnPoint[1].get_y()))
+            switch (g_eGameState)
             {
-                NPCs[i]->set_direction(0);
-            }
-            if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= endPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= endPoint[7].get_y() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= endPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= endPoint[1].get_y())
-            {
-                NPCs[i]->set_direction(0);
+            case S_GAMEMODE1:
+                if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= spawnPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= spawnPoint[7].get_y() + 1 && (NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= spawnPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= spawnPoint[1].get_y()))
+                {
+                    NPCs[i]->set_direction(0);
+                }
+                if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= endPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= endPoint[7].get_y() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= endPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= endPoint[1].get_y())
+                {
+                    NPCs[i]->set_direction(0);
+                }
+                break;
+            case S_GAMEMODE2:
+                if (insafezone(NPCs[i]->new_pos(g_dDeltaTime)))
+                {
+                    NPCs[i]->set_direction(0);
+                }
+                break;
             }
 
             NPCs[i]->update_pos(g_dDeltaTime);
@@ -1702,7 +1717,16 @@ void check_collision()
                 NPCs[i]->cooldownstart();
                 NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                 player->loseHP(NPCs[i]->get_damage());
-                player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                switch (g_eGameState)
+                {
+                case S_GAMEMODE1:
+                    player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                    break;
+                case S_GAMEMODE2:
+                    player->set_pos(safezone[4].get_x(), safezone[4].get_y());
+                    break;
+                }
+                
                 g_sChar.m_cLocation.Y = player->getposy(); 
                 g_sChar.m_cLocation.X = player->getposx(); 
                 //timer = 0;
@@ -1878,5 +1902,14 @@ bool checkifinscreen(COORD c)
         return true;
     }
 
+    return false;
+}
+
+bool insafezone(Position* pos)
+{
+    if (static_cast<int>(pos->get_x()) <= 41 && static_cast<int>(pos->get_x()) >= 39 && static_cast<int>(pos->get_y()) <= 13 && static_cast<int>(pos->get_y() >= 11))
+    {
+        return true;
+    }
     return false;
 }

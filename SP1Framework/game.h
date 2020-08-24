@@ -112,6 +112,7 @@ void renderPoints();
 void set_points();
 void setsafezone();
 void rendersafezone();
+bool insafezone(Position* pos);
 
 //Testing area
 void testStates();
@@ -122,8 +123,6 @@ void endTest();
 //Walls
 void spawnWall(int no);
 void renderWall();
-
-//spawnendpoints
 
 
 //aesthetics

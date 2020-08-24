@@ -42,7 +42,9 @@ void Wall::setPosForAll()
             wall3.set_y(wallPivot.get_y() + 2);                                                    //setting y coord of third wall using previous pivot point as reference
 
             wall4.set_x(wallPivot.get_x());                                                        //setting x coord of fourth wall using previous pivot point as reference
-            wall4.set_y(wallPivot.get_y() + 3);                                                    //setting y coord of fourth wall using previous pivot point as reference
+            wall4.set_y(wallPivot.get_y() + 3);
+            
+            break;
         }
 
         case 2:                                                                                         //checks if next wall is 'J' piece
@@ -55,6 +57,7 @@ void Wall::setPosForAll()
 
             wall4.set_x(wallPivot.get_x() - 1);
             wall4.set_y(wallPivot.get_y() + 2);
+            break;
         }
 
         case 3:                                                                                         //checks if next wall is 'L' piece
@@ -67,6 +70,7 @@ void Wall::setPosForAll()
 
             wall4.set_x(wallPivot.get_x() + 1);
             wall4.set_y(wallPivot.get_y() + 2);
+            break;
         }
 
         case 4:                                                                                         //checks if next wall is 'O' piece
@@ -79,6 +83,7 @@ void Wall::setPosForAll()
 
             wall4.set_x(wallPivot.get_x() + 1);
             wall4.set_y(wallPivot.get_y() + 1);
+            break;
         }
 
         case 5:                                                                                         //checks if next wall is 'S' piece
@@ -91,6 +96,7 @@ void Wall::setPosForAll()
 
             wall4.set_x(wallPivot.get_x() - 2);
             wall4.set_y(wallPivot.get_y() + 1);
+            break;
         }
 
         case 6:                                                                                         //checks if next wall is 'T' piece
@@ -103,6 +109,7 @@ void Wall::setPosForAll()
 
             wall4.set_x(wallPivot.get_x() + 1);
             wall4.set_y(wallPivot.get_y() + 1);
+            break;
         }
 
         case 7:                                                                                         //checks if next wall is 'z' piece
@@ -115,6 +122,7 @@ void Wall::setPosForAll()
 
             wall4.set_x(wallPivot.get_x() + 2);
             wall4.set_y(wallPivot.get_y() + 1);
+            break;
         }
 
         default:                                                                                        //checks if next wall is a default 1x1 piece

@@ -70,6 +70,8 @@ Position spawnPoint[9];
 int highestLVL;
 int totalhostile = 0;
 
+int tempcounter;
+
 //TEST
 //double timer = 0;
 
@@ -363,6 +365,7 @@ void update(double dt)
         case S_GAMEMODE1: playNormal();
             break;
         case S_GAMEMODE2: playEndless();
+            break;
     }
 }
 
@@ -448,27 +451,30 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noP = 5;
         noC = 15;
     }
-
+    set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
     //spawnWall(noW);
-    set_points();
+    
 }
 
 void set_points()
 {
-    spawnPoint[4].set_x(g_sChar.m_cLocation.X);
-    spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
-
-    Position tempp;
-    do
+    if (g_eGameState == S_GAMEMODE1)
     {
-        tempp.set_x((rand() % 78) + 1);
-        tempp.set_y((rand() % 21) + 2);
+        spawnPoint[4].set_x(g_sChar.m_cLocation.X);
+        spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
 
-    } while (occupied(&tempp) != nullptr);
-    endPoint[4].set_x(tempp.get_x());
-    endPoint[4].set_y(tempp.get_y());
+        Position tempp;
+        do
+        {
+            tempp.set_x((rand() % 78) + 1);
+            tempp.set_y((rand() % 21) + 2);
+
+        } while (occupied(&tempp) != nullptr);
+        endPoint[4].set_x(tempp.get_x());
+        endPoint[4].set_y(tempp.get_y());
+    }
 
     for (int i = -1; i < 2; i++)
     {
@@ -532,7 +538,6 @@ void playLevel()
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
         clear = true;
-        //print level clear screen here
         NGameState = N_NEXTLEVEL;
     }
 
@@ -566,15 +571,26 @@ void InitEndless()
     lose = false;
     totalhostile = 0;
     player->resetHP();
-    NPC::resetnoHostile;
+    NPC::resetnoHostile();
+    tempcounter = 0;
+    
+    spawnPoint[4].set_pos(40, 12);
+    endPoint[4].set_pos(40, 12);
+    set_points();
+
+    spawnNPC(false, 5, 0.5, 1);
+    spawnNPC(true, 1, 0.5, 1);
+
     EGameState = E_PLAY;
 }
 
 void enterEndless()
 {
-    if (NPCs[NPCLimit - 1] == nullptr) //Limit not reached yet;; aka can spawn more
+    tempcounter++;
+    if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
-        //spawn NPCs according to idk what?
+        spawnNPC(false, 1, 0.5, 1);
+        tempcounter = 0;
     }
 
     updateGame();
@@ -583,8 +599,47 @@ void enterEndless()
     {
         lose = true;
         totalhostile = NPC::getnoHostile();
+        for (int i = 0; i < NPCLimit; i++)
+        {
+            if (NPCs[i] != nullptr)
+            {
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
+
+        for (int p = 0; p < particle_limit; p++)
+        {
+            if (projectile[p] != nullptr)
+            {
+                delete projectile[p];
+                projectile[p] = nullptr;
+            }
+        }
+
+
+        if (powerup != nullptr)
+        {
+            delete powerup;
+            powerup = nullptr;
+        }
         EGameState = E_INIT;
         g_eGameState = S_MAINMENU;
+    }
+
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            COORD npcpos;
+            npcpos.X = NPCs[i]->getposx() - static_cast<int>(player->getposx()) + 40;
+            npcpos.Y = NPCs[i]->getposy() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(npcpos) == false)
+            {
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
     }
 }
 
@@ -718,6 +773,7 @@ void render()
         break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
+        renderPoints();
         renderGame();
         
         break;
@@ -1077,7 +1133,18 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
         {
             temp.set_x(rand() % 80);
             temp.set_y((rand() % 23) + 1);
-   
+          
+            if (g_eGameState == S_GAMEMODE2)
+            {
+                COORD t;
+                t.X = temp.get_x() - player->getposx() + 40;
+                t.Y = temp.get_y() - player->getposy() + 12;
+                if (checkifinscreen(t) == false)
+                {
+                    valid = false;
+                }
+            }
+            
             for (int i = 0; i < 9; i++)
             {
                 if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
@@ -1510,14 +1577,7 @@ void renderPoints()
     {
         if (i == 1)
         {
-            colour = 0x30;
-            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(c))
-            {
-                g_Console.writeToBuffer(c, "S", colour);
-            }
-
+  
             colour = 0x90;
             c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
@@ -1525,9 +1585,26 @@ void renderPoints()
             {
                 g_Console.writeToBuffer(c, "E", colour);
             }
+
+            colour = 0x30;
+            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, "S", colour);
+            }
         }
         else if (i != 4)
         {
+  
+            colour = 0x99;
+            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
+
             colour = 0x33;
             c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
@@ -1536,13 +1613,6 @@ void renderPoints()
                 g_Console.writeToBuffer(c, " ", colour);
             }
 
-            colour = 0x99;
-            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(c))
-            {
-                g_Console.writeToBuffer(c, " ", colour);
-            }
         }
     }
     

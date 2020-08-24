@@ -462,11 +462,13 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noP = 5;
         noC = 15;
     }
+
+    spawnWall(noW);
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    //spawnWall(noW);
-    set_points();
+    
+    
 }
 
 void set_points()
@@ -500,7 +502,7 @@ void set_points()
     }
 }
 
-void level_set() //deletes everyth,
+void level_set() //deletes everyth
 {
     for (int i = 0; i < NPCLimit; i++)
     {
@@ -510,6 +512,15 @@ void level_set() //deletes everyth,
             NPCs[i] = nullptr;
         }
     }
+
+    //for (int w = 0; w < 40; w++)
+    //{
+    //    if (Walls[w] != nullptr)
+    //    {
+    //        delete Walls[w];
+    //        Walls[w] = nullptr;
+    //    }
+    //}
 
     for (int p = 0; p < particle_limit; p++)
     {
@@ -605,12 +616,12 @@ void enterEndless()
     {
         lose = true;
         totalhostile = NPC::getnoHostile();
-        for (int i = 0; i < NPCLimit; i++)
+        for (int i = 1; i < entityLimit; i++)
         {
-            if (NPCs[i] != nullptr)
+            if (entities[i] != nullptr)
             {
-                delete NPCs[i];
-                NPCs[i] = nullptr;
+                delete entities[i];
+                entities[i] = nullptr;
             }
         }
 
@@ -901,10 +912,11 @@ void renderMap()
         
     }*/
 
-    renderWall();
+    
     //renderPoints();
     renderNPC();
     renderprojectile();
+    renderWall();
     
 }
 
@@ -1030,8 +1042,8 @@ void renderWall()
     {
         if (Walls[i] != nullptr)
         {
-            c.X = Walls[i]->getposx() - player->getposx() + 40;
-            c.Y = Walls[i]->getposy() - player->getposy() + 12;
+            c.X = Walls[i]->getposx() - static_cast<int>(player->getposx()) + 40;
+            c.Y = Walls[i]->getposy() - static_cast<int>(player->getposy()) + 12;
 
             colour = 0x00;
 
@@ -1047,44 +1059,50 @@ void spawnWall(int no)                                                          
 {
     for (int j = 0; j < no; j++)                                                                                                    //for loop to cycle the spawning of each wall
     {   //find random x and y on unused spaces
-        bool isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
-        bool isSpaceOccupied = false;
+        bool isSpaceNearPlayer;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+        bool isSpaceOccupied;
 
         for (int w = 0; w < WallLimit; w++)                                                                                         // for loop to set positions on map for each wall entity
         {
             if (Walls[w] == nullptr)                                                                                                //checks if wall entity is unassigned on map
             {
                 Walls[w] = new Wall;
+                entities[w + 20] = Walls[w];
 
                 do
                 {
+                    isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+                    isSpaceOccupied = false;
+
                     int Pivotx = (rand() % 80);                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
                     int Pivoty = (rand() % 24);                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     Walls[w]->setPosForAll();
-                    for (int i = 1; i < 5; i++)
+                    for (int i = 0; i < 4; i++)
                     {
                         if (Walls[w]->getPos(i)->get_x() > 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
                         {
                             if (Walls[w]->getPos(i)->get_y() > 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
                             {
-                                isSpaceNearPlayer = true;                                                                           //if chosen coords are not near spawn zone, second condition is true for loop to stop
+                                isSpaceNearPlayer = true;
+                                break;//if chosen coords are not near spawn zone, second condition is true for loop to stop
                             }
                         }
 
-                        if (occupied(Walls[w]->getPos(i)) != nullptr)
+                        if (occupied(Walls[w]->getPos(i)) != nullptr && occupied(Walls[w]->getPos(i)) != Walls[w])
                         {
                             isSpaceOccupied = true;
+                            break;
                         }
                     }
-                }while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
+                } while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
 
 
-                for (int i = 1; i < 5; i++)
+                for (int i = 1; i < 4; i++)
                 {
-                    Walls[w + WallLimit*i] = new Wall;                                                                              //set element of array as new object under wall class
-                    entities[w + 20 + WallLimit*i] = Walls[w + WallLimit*i];                                                        //set element from wall array to corresponding element on entity array
-                    entities[w + 20 + WallLimit*i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
+                    Walls[w + WallLimit * i] = new Wall;                                                                              //set element of array as new object under wall class
+                    entities[w + 20 + WallLimit * i] = Walls[w + WallLimit * i];                                                        //set element from wall array to corresponding element on entity array
+                    entities[w + 20 + WallLimit * i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
                 }
                 break;
             }

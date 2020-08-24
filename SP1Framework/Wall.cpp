@@ -21,7 +21,11 @@ char Wall::type()
 void Wall::setPos(int x, int y)
 {
     wallPivot.set_x(x);                                                          //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-    wallPivot.set_y(y);                                                          //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+    wallPivot.set_y(y);         
+    pos.set_x(x);
+    pos.set_y(y);
+    
+    
 }
 
 void Wall::setPosForAll()
@@ -124,16 +128,16 @@ Position* Wall::getPos(int x)
 {
     switch (x)
     {
-    case 1:
+    case 0:
         return &wallPivot;
 
-    case 2:
+    case 1:
         return &wall2;
 
-    case 3:
+    case 2:
         return &wall3;
         
-    case 4:
+    case 3:
         return &wall4;
     };
 }

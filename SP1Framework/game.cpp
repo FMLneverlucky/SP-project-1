@@ -67,6 +67,7 @@ int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
 Position endPoint[9];
 Position spawnPoint[9];
+Position safezone[9];
 int highestLVL;
 int totalhostile = 0;
 
@@ -470,30 +471,27 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
 
 void set_points()
 {
-    if (g_eGameState == S_GAMEMODE1)
+    spawnPoint[4].set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+
+    Position tempp;
+    do
     {
-        spawnPoint[4].set_x(g_sChar.m_cLocation.X);
-        spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
+        tempp.set_x((rand() % 78) + 1);
+        tempp.set_y((rand() % 21) + 2);
 
-        Position tempp;
-        do
-        {
-            tempp.set_x((rand() % 78) + 1);
-            tempp.set_y((rand() % 21) + 2);
+    } while (occupied(&tempp) != nullptr);
+    endPoint[4].set_x(tempp.get_x());
+    endPoint[4].set_y(tempp.get_y());
 
-        } while (occupied(&tempp) != nullptr);
-        endPoint[4].set_x(tempp.get_x());
-        endPoint[4].set_y(tempp.get_y());
-    }
 
     for (int i = -1; i < 2; i++)
     {
         spawnPoint[1 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() - 1);
         spawnPoint[7 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() + 1);
-    
+
         endPoint[1 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() - 1);
         endPoint[7 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() + 1);
-      
+
         spawnPoint[3].set_pos(spawnPoint[4].get_x() - 1, spawnPoint[4].get_y());
         spawnPoint[5].set_pos(spawnPoint[4].get_x() + 1, spawnPoint[4].get_y());
         endPoint[3].set_pos(endPoint[4].get_x() - 1, endPoint[4].get_y());
@@ -584,9 +582,7 @@ void InitEndless()
     NPC::resetnoHostile();
     tempcounter = 0;
     
-    spawnPoint[4].set_pos(40, 12);
-    endPoint[4].set_pos(40, 12);
-    set_points();
+    setsafezone();
 
     spawnNPC(false, 5, 0.5, 1);
     spawnNPC(true, 1, 0.5, 1);
@@ -651,6 +647,54 @@ void enterEndless()
             }
         }
     }
+}
+
+void setsafezone()
+{
+    safezone[4].set_pos(40, 12);
+
+    for (int i = -1; i < 2; i++)
+    {
+        safezone[1 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() - 1);
+        safezone[7 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() + 1);
+
+        safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
+        safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
+        
+
+    }
+}
+
+void rendersafezone()
+{
+    COORD c;
+    int colour;
+
+    for (int i = 0; i < 9; i++)
+    {
+       
+        if (i != 4)
+        {
+
+            colour = 0xFF;
+            c.X = safezone[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = safezone[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
+
+        }
+    }
+
+    colour = 0x7F;
+    c.X = safezone[4].get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = safezone[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    if (checkifinscreen(c))
+    {
+        g_Console.writeToBuffer(c, (char)254, colour);
+    }
+
 }
 
 void moveCharacter()
@@ -783,7 +827,7 @@ void render()
         break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
-        renderPoints();
+        rendersafezone();
         renderGame();
         
         break;
@@ -986,12 +1030,15 @@ void renderWall()
     {
         if (Walls[i] != nullptr)
         {
-            c.X = Walls[i]->getposx();
-            c.Y = Walls[i]->getposy();
+            c.X = Walls[i]->getposx() - player->getposx() + 40;
+            c.Y = Walls[i]->getposy() - player->getposy() + 12;
 
             colour = 0x00;
 
-            g_Console.writeToBuffer(c, "W", colour);
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, "W", colour);
+            }
         }
     }
 }
@@ -1005,7 +1052,7 @@ void spawnWall(int no)                                                          
         Position wallPivotPoint, wall2, wall3, wall4;                                                   //declare temporary position class to hold coordinates for each wall entity and accompanying wall entities later
         bool isSpaceNearPlayer = false;                                                                         //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
 
-        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true);                    //while position on map is unavailable
+        while ((occupied(&wallPivotPoint) != nullptr) || isSpaceNearPlayer == false)                    //while position on map is unavailable
         {
 
             wallPivotPoint.set_x(rand() % 80);                                                          //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80

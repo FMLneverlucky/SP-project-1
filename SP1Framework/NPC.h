@@ -10,6 +10,7 @@ private:
     int damage;
     float speed;
     static int noHostile;
+    static int total;
     int counter;
 protected:
     int cooldown;
@@ -32,6 +33,7 @@ public:
     void cooldownend();
     static int getnoHostile();
     static void resetnoHostile();
+    static int gettotal();
     Position* new_pos(double dtime);
 
 };

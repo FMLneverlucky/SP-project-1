@@ -54,9 +54,18 @@ Object restartButton(restartMessage.length() + 2, 3);
 Object mainMenuButton(restartMessage.length() + 2, 3);
 const int WLButtonCount = 3;
 
-//USAGE FOR GAME MODEs
+//HUD
+Object healthBar(1, 1);
+Object coughBar(1, 1);
+Object NPCremaining(1, 1);
+int currentHP;
+int cooldownLength;
+bool showHUD = true;
+
+//NORMAL MODE
 NormalMode NGameState = N_INIT;
 EndlessMode EGameState = E_INIT;
+Test TGameState = T_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
@@ -116,6 +125,7 @@ PowerUp* powerup = nullptr;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
+COORD consoleSize = g_Console.getConsoleSize();
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -223,17 +233,18 @@ void getInput( void )
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 {    
-    switch (g_eGameState)
-    {
-    case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
-        break;
-    case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
-        break;
-    case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
-        break;
-    case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
-        break;
-    }
+    //switch (g_eGameState)
+    //{
+    //case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
+    //    break;
+    //case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
+    //    break;
+    //case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
+    //    break;
+    //case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
+    //    break;
+    //}
+    gameplayKBHandler(keyboardEvent);
 }
 
 //--------------------------------------------------------------
@@ -371,7 +382,7 @@ void update(double dt)
     {
         case S_MAINMENU: mainMenuWait(); // game logic for the splash screen
             break;
-        case S_TEST: updateGame(); // gameplay logic when we are in the game
+        case S_TEST: testStates(); // gameplay logic when we are in the game
             break;
         case S_GAMEMODE1: playNormal();
             break;
@@ -390,13 +401,48 @@ void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     if (!paused)
+    {
         moveCharacter();    // moves the character, collision detection, physics, etc
-                            // sound can be played here too.
+        showHUD = true;                   // sound can be played here too.
+    }
     else
     {
         pauseMenuWait();
+        showHUD = false;
     }                
     
+}
+
+void testStates()
+{
+    switch (TGameState)
+    {
+    case T_INIT:
+        initTest();
+        break;
+    case T_PLAY:
+        playTest();
+        break;
+    case T_END:
+        endTest();
+        break;
+    }
+}
+//Initialise variables and objects for test area here
+void initTest()
+{
+    initHUD();
+    TGameState = T_PLAY;
+}
+//The logic for test area
+void playTest()
+{
+    updateGame();
+}
+//Extra state to test "end" game scenarios
+void endTest()
+{
+
 }
 
 void playNormal()
@@ -412,9 +458,7 @@ void playNormal()
     case N_NEXTLEVEL:
         level_set();
         break;
-
     }
-
 }
 
 void InitNormal()
@@ -422,6 +466,7 @@ void InitNormal()
     lose = false;
     level = 0;
     level_set();
+    initHUD();
     
     
     //spawnWall(noW);
@@ -553,6 +598,7 @@ void playLevel()
 {
     
     updateGame();
+    renderHUD();
 
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
@@ -829,7 +875,8 @@ void render()
         renderBG(0x00);
         renderMainMenu();
         break;
-    case S_TEST: renderGame();
+    case S_TEST: 
+        renderGame();
         break;
     case S_GAMEMODE1: 
         renderBG(prevcol);
@@ -882,6 +929,8 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
     if (paused)
         renderPauseMenu();
+    else
+        renderHUD();
     /*if (lose)
     {
         renderWinLoseMenu(false);
@@ -1437,14 +1486,13 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 5));
-    renderBox(&title, 0x8F, gameName);
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 5));
+    renderBox(&title, 0x0F, gameName);
 
-    MMButton.move(c.X / 2, c.Y * 2 / 5);
-    MMButton2.move(c.X / 2, c.Y * 3 / 5);
-    MMButton3.move(c.X / 2, c.Y * 4 / 5);
-    MMButton4.move(c.X / 2, c.Y);
+    MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 5);
+    MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 5);
+    MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 5);
+    MMButton4.move(consoleSize.X / 2, consoleSize.Y);
 
     MMButtons[0] = &MMButton;
     MMButtons[1] = &MMButton2;
@@ -1480,12 +1528,11 @@ void mainMenuWait()
 
 void renderPauseMenu()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 6));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 6));
     renderBox(&title, 0x0F, "Paused");
 
-    resumeButton.move(c.X / 2, c.Y * 2 / 4);
-    quitButton.move(c.X / 2, c.Y * 3 / 4);
+    resumeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
+    quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
     PMButtons[0] = &resumeButton;
     PMButtons[1] = &quitButton;
@@ -1512,15 +1559,14 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    COORD c = g_Console.getConsoleSize();
     std::string* message = win ? &winMessage : &loseMessage;
-    Object title(71, 3, Position(c.X / 2, c.Y / 3));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
     renderBox(&title, 0x0F, *message);
 
-    continueButton.move(c.X * 3 / 4, c.Y * 2 / 3);
-    restartButton.move(c.X * 3 / 4, c.Y * 2 / 3);
-    mainMenuButton.move(c.X * 2 / 4, c.Y * 2 / 3);
-    quitButton.move(c.X / 4, c.Y * 2 / 3);
+    continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
+    restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
+    mainMenuButton.move(consoleSize.X * 2 / 4, consoleSize.Y * 2 / 3);
+    quitButton.move(consoleSize.X / 4, consoleSize.Y * 2 / 3);
 
     WLButtons[0] = &quitButton;
     WLButtons[1] = &mainMenuButton;
@@ -1543,12 +1589,60 @@ void winLoseMenuWait()
         g_eGameState = S_MAINMENU;
         break;
     case 2:
-        //do win lose stuff;
+        //do win lose stuff; 
         break;
     default:
         break;
     }
 }
+
+void initHUD()
+{
+    currentHP = player->get_maxHP();
+    cooldownLength = 0;
+    healthBar.resize(20, 1);
+    healthBar.move((healthBar.length() - 1) / 2, 0);
+    healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
+    coughBar.resize(30, 1);
+    coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+    coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+}
+
+void renderHUD()
+{
+
+    if (player->get_HP() != currentHP)
+    {
+        currentHP = player->get_HP();
+        healthBar.resize(20, 1);
+        healthBar.move((healthBar.length() - 1) / 2, 0);
+        healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
+        healthBar.scale((float)currentHP / player->get_maxHP(), 1);
+    }
+    if (player->get_cooldown() > 0)
+    {
+        coughBar.resize(30, 1);
+        coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+        coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+        coughBar.scale(1 / player->get_cooldown(), 1);
+    }
+
+    if (showHUD)
+    {
+        renderBox(&healthBar, 0x40);
+        renderBox(&coughBar, 0x20);
+    }
+}
+
+//void updateHUD()
+//{
+//    
+//    if (showHUD)
+//    {
+//        renderBox(&healthBar, 0x04);
+//        renderBox(&coughBar, 0x02);
+//    }
+//}
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {

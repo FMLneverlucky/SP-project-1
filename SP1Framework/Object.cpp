@@ -3,18 +3,12 @@ Object::Object(int sizeX = 1, int sizeY = 1)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
-	pos.set_x(0);
-	pos.set_y(0);
-	pivot.set_x(0);
-	pivot.set_y(0);
 }
 Object::Object(int sizeX, int sizeY, Position pos)
 {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
 	this->pos = pos;
-	pivot.set_x(0);
-	pivot.set_y(0);
 }
 Object::Object(int sizeX, int sizeY, Position pos, Position pivot)
 {
@@ -34,12 +28,20 @@ void Object::move(float x, float y)
 	pos.set_x(x);
 	pos.set_y(y);
 }
-void Object::scale(int x, int y)
+void Object::resize(int x, int y) 
+{
+	referencePosition();
+	sizeX = x;
+	sizeY = y;
+	pos.set_x(referencePos.get_x() - x / 2.0);
+	pos.set_y(referencePos.get_y() - y / 2.0);
+}
+void Object::scale(float x, float y)
 {
 	sizeX *= x;
 	sizeY *= y;
-	pos.set_x(pos.get_x() + (pos.get_x() - pivot.get_x()) * x);
-	pos.set_y(pos.get_y() + (pos.get_y() - pivot.get_y()) * y);
+	pos.set_x(pos.get_x() + (pos.get_x() - pivot.get_x()) * (x - 1));
+	pos.set_y(pos.get_y() + (pos.get_y() - pivot.get_y()) * (y - 1));
 }
 void Object::translate(float x, float y)
 {
@@ -67,7 +69,7 @@ Position* Object::position()
 }
 Position* Object::referencePosition()
 {
-	referencePos.set_x(pos.get_x() - (this->sizeX / 2.0));
-	referencePos.set_y(pos.get_y() - (this->sizeY / 2.0));
+	referencePos.set_x(pos.get_x() - (sizeX / 2.0));
+	referencePos.set_y(pos.get_y() - (sizeY / 2.0));
 	return &referencePos;
 }

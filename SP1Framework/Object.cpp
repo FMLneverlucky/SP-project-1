@@ -36,12 +36,12 @@ void Object::resize(int x, int y)
 	pos.set_x(referencePos.get_x() - x / 2.0);
 	pos.set_y(referencePos.get_y() - y / 2.0);
 }
-void Object::scale(int x, int y)
+void Object::scale(float x, float y)
 {
 	sizeX *= x;
 	sizeY *= y;
-	pos.set_x(pos.get_x() + (pos.get_x() - pivot.get_x()) * x);
-	pos.set_y(pos.get_y() + (pos.get_y() - pivot.get_y()) * y);
+	pos.set_x(pos.get_x() + (pos.get_x() - pivot.get_x()) * (x - 1));
+	pos.set_y(pos.get_y() + (pos.get_y() - pivot.get_y()) * (y - 1));
 }
 void Object::translate(float x, float y)
 {

@@ -150,8 +150,9 @@ void renderPauseMenu();// d
 void pauseMenuWait();
 void renderWinLoseMenu(bool);
 void winLoseMenuWait();
-void renderHUD();// renders HUD. init ONCE
-void updateHUD();
+void initHUD();//init ONCE
+void renderHUD();// renders HUD
+//void updateHUD();
 
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
 int checkButtonClicks(Object**, int);// check if player clicked a button

@@ -387,11 +387,14 @@ void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     if (!paused)
+    {
         moveCharacter();    // moves the character, collision detection, physics, etc
-                            // sound can be played here too.
+        showHUD = true;                   // sound can be played here too.
+    }
     else
     {
         pauseMenuWait();
+        showHUD = false;
     }                
     
 }
@@ -414,14 +417,13 @@ void testStates()
 //Initialise variables and objects for test area here
 void initTest()
 {
-    renderHUD();
+    initHUD();
     TGameState = T_PLAY;
 }
 //The logic for test area
 void playTest()
 {
     updateGame();
-    updateHUD();
 }
 //Extra state to test "end" game scenarios
 void endTest()
@@ -450,6 +452,7 @@ void InitNormal()
     lose = false;
     level = 0;
     level_set();
+    initHUD();
     
     
     //spawnWall(noW);
@@ -570,6 +573,7 @@ void playLevel()
 {
     
     updateGame();
+    renderHUD();
 
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
@@ -805,7 +809,7 @@ void renderGame()
     if (paused)
         renderPauseMenu();
     else
-        updateHUD();
+        renderHUD();
     /*if (lose)
     {
         renderWinLoseMenu(false);
@@ -1475,23 +1479,53 @@ void winLoseMenuWait()
     }
 }
 
-void renderHUD()
+void initHUD()
 {
-    healthBar.resize(player->get_maxHP(), 1);
-    healthBar.move(0, 0);
-    coughBar.resize(5, 1);
-    coughBar.move(consoleSize.X / 2, consoleSize.Y * 8 / 10);
+    currentHP = player->get_maxHP();
+    cooldownLength = 0;
+    healthBar.resize(20, 1);
+    healthBar.move((healthBar.length() - 1) / 2, 0);
+    healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
+    coughBar.resize(30, 1);
+    coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+    coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
 }
 
-void updateHUD()
+void renderHUD()
 {
-    
+
+    if (player->get_HP() != currentHP)
+    {
+        currentHP = player->get_HP();
+        healthBar.resize(20, 1);
+        healthBar.move((healthBar.length() - 1) / 2, 0);
+        healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
+        healthBar.scale(currentHP / player->get_maxHP(), 1);
+    }
+    if (player->get_cooldown() > 0)
+    {
+        coughBar.resize(30, 1);
+        coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+        coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+        coughBar.scale(1 / player->get_cooldown(), 1);
+    }
+
     if (showHUD)
     {
-        renderBox(&healthBar, 0x04);
-        renderBox(&coughBar, 0x02);
+        renderBox(&healthBar, 0x40);
+        renderBox(&coughBar, 0x20);
     }
 }
+
+//void updateHUD()
+//{
+//    
+//    if (showHUD)
+//    {
+//        renderBox(&healthBar, 0x04);
+//        renderBox(&coughBar, 0x02);
+//    }
+//}
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {

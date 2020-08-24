@@ -1599,7 +1599,7 @@ void renderHUD()
         healthBar.resize(20, 1);
         healthBar.move((healthBar.length() - 1) / 2, 0);
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
-        healthBar.scale(currentHP / player->get_maxHP(), 1);
+        healthBar.scale((float)currentHP / player->get_maxHP(), 1);
     }
     if (player->get_cooldown() > 0)
     {

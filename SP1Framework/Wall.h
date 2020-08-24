@@ -18,24 +18,16 @@ class Wall :
 
 {
 protected:
-    Position wallPivotPoint;
+    Position wallPivot, wall2, wall3, wall4;
     types nextWall;
 
 public:
     Wall();
     ~Wall();
     char type();
-
-    //diff walls
-    int setType();
-    void Wall::typeI();
-    void Wall::typeJ();
-    void Wall::typeL();
-    void Wall::typeO();
-    void Wall::typeS();
-    void Wall::typeT();
-    void Wall::typeZ();
-    void Wall::typed();
+    void setPos(int x, int y);
+    void setPosForAll();
+    Position* getPos(int x);
 
     //updates for walls in game as entity
     void update_pos(double dtime);

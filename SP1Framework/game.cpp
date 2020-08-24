@@ -141,7 +141,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    spawnWall(10);
+    //spawnWall(10);
     //spawnNPC(false, 3, 0.1, 3);
     //spawnNPC(true, 2, 0.1, 3);
 }
@@ -461,7 +461,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
 
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    //spawnWall(noW);
+    spawnWall(noW);
     set_points();
 }
 
@@ -930,8 +930,8 @@ void renderWall()
     {
         if (Walls[i] != nullptr)
         {
-            c.X = Walls[i]->getposx();
-            c.Y = Walls[i]->getposy();
+            c.X = Walls[i]->getposx()-player->getposx()+40;
+            c.Y = Walls[i]->getposy() - player->getposx() + 12;
 
             colour = 0x00;
 
@@ -940,146 +940,50 @@ void renderWall()
     }
 }
 
-void spawnWall(int no)                                                                                  //function to spawn wall
+void spawnWall(int no)                                                                                                              //function to spawn wall
 {
-    for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
+    for (int j = 0; j < no; j++)                                                                                                    //for loop to cycle the spawning of each wall
     {   //find random x and y on unused spaces
+        bool isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+        bool isSpaceOccupied = false;
 
-        Wall nextWall;                                                                                  //declared here for conditional statement when using the setType() function later on
-        Position wallPivotPoint, wall2, wall3, wall4;                                                   //declare temporary position class to hold coordinates for each wall entity and accompanying wall entities later
-        bool isSpaceNearPlayer = false;                                                                         //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
-
-        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true);                    //while position on map is unavailable
+        for (int w = 0; w < WallLimit; w++)                                                                                         // for loop to set positions on map for each wall entity
         {
-
-            wallPivotPoint.set_x(rand() % 80);                                                          //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-            wallPivotPoint.set_y(rand() % 24);                                                          //set y coordinate of variable, wallPivotPoint, as a number from 0 to 25
-            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41)                            //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+            if (Walls[w] == nullptr)                                                                                                //checks if wall entity is unassigned on map
             {
-                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)                        //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                Walls[w] = new Wall;
+
+                do
                 {
-                    isSpaceNearPlayer = true;                                                           //if chosen coords are not near spawn zone, second condition is true for loop to stop
-                }
-            }
-        }
+                    int Pivotx = (rand() % 80);                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
+                    int Pivoty = (rand() % 24);                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+                    Walls[w]->setPos(Pivotx, Pivoty);
+                    Walls[w]->setPosForAll();
+                    for (int i = 1; i < 5; i++)
+                    {
+                        if (Walls[w]->getPos(i)->get_x() > 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+                        {
+                            if (Walls[w]->getPos(i)->get_y() > 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                            {
+                                isSpaceNearPlayer = true;                                                                           //if chosen coords are not near spawn zone, second condition is true for loop to stop
+                            }
+                        }
 
-        if (nextWall.setType() == I)                                                                    //checks if the next wall type is a 'I' or line piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());                                                        //setting x coord of second wall using previous pivot point as reference
-            wall2.set_y(wallPivotPoint.get_y() + 1);                                                    //setting y coord of second wall using previous pivot point as reference
+                        if (occupied(Walls[w]->getPos(i)) != nullptr)
+                        {
+                            isSpaceOccupied = true;
+                        }
+                    }
+                }while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
 
-            wall3.set_x(wallPivotPoint.get_x());                                                        //setting x coord of third wall using previous pivot point as reference
-            wall3.set_y(wallPivotPoint.get_y() + 2);                                                    //setting y coord of third wall using previous pivot point as reference
 
-            wall4.set_x(wallPivotPoint.get_x());                                                        //setting x coord of fourth wall using previous pivot point as reference
-            wall4.set_y(wallPivotPoint.get_y() + 3);                                                    //setting y coord of fourth wall using previous pivot point as reference
-        }
-
-        else if (nextWall.setType() == J)                                                               //checks if next wall is 'J' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());
-            wall2.set_y(wallPivotPoint.get_y() + 1);
-
-            wall3.set_x(wallPivotPoint.get_x());
-            wall3.set_y(wallPivotPoint.get_y() + 2);
-
-            wall4.set_x(wallPivotPoint.get_x() - 1);
-            wall4.set_y(wallPivotPoint.get_y() + 2);
-        }
-
-        else if (nextWall.setType() == L)                                                               //checks if next wall is 'L' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());
-            wall2.set_y(wallPivotPoint.get_y() + 1);
-
-            wall3.set_x(wallPivotPoint.get_x());
-            wall3.set_y(wallPivotPoint.get_y() + 2);
-
-            wall4.set_x(wallPivotPoint.get_x() + 1);
-            wall4.set_y(wallPivotPoint.get_y() + 2);
-        }
-
-        else if (nextWall.setType() == O)                                                               //checks if next wall is 'O' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());
-            wall2.set_y(wallPivotPoint.get_y() + 1);
-
-            wall3.set_x(wallPivotPoint.get_x() + 1);
-            wall3.set_y(wallPivotPoint.get_y());
-
-            wall4.set_x(wallPivotPoint.get_x() + 1);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == S)                                                               //checks if next wall is 'S' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x() - 1);
-            wall2.set_y(wallPivotPoint.get_y());
-
-            wall3.set_x(wallPivotPoint.get_x() - 1);
-            wall3.set_y(wallPivotPoint.get_y() + 1);
-
-            wall4.set_x(wallPivotPoint.get_x() - 2);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == T)                                                               //checks if next wall is 'T' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x() + 1);
-            wall2.set_y(wallPivotPoint.get_y());
-
-            wall3.set_x(wallPivotPoint.get_x() + 2);
-            wall3.set_y(wallPivotPoint.get_y());
-
-            wall4.set_x(wallPivotPoint.get_x() + 1);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == Z)                                                               //checks if next wall is 'z' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x() + 1);
-            wall2.set_y(wallPivotPoint.get_y());
-
-            wall3.set_x(wallPivotPoint.get_x() + 1);
-            wall3.set_y(wallPivotPoint.get_y() + 1);
-
-            wall4.set_x(wallPivotPoint.get_x() + 2);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == d)                                                               //checks if next wall is a default 1x1 piece
-        {
-            return;
-        }
-
-        for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
-        {
-            if (Walls[w] == nullptr)                                                                    //checks if wall entity is unassigned on map
-            {
-                Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
-                entities[w + 20] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 20]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
-                if (Walls[w + WallLimit] == nullptr)                                                    //checks if second accompanying wall is unassigned
+                for (int i = 1; i < 5; i++)
                 {
-                    Walls[w + WallLimit] = new Wall;
-                    entities[w + 20 + WallLimit] = Walls[w + WallLimit];
-                    entities[w + 20 + WallLimit]->set_pos(wall2.get_x(), wall2.get_y());
+                    Walls[w + WallLimit*i] = new Wall;                                                                              //set element of array as new object under wall class
+                    entities[w + 20 + WallLimit*i] = Walls[w + WallLimit*i];                                                        //set element from wall array to corresponding element on entity array
+                    entities[w + 20 + WallLimit*i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
                 }
-
-                if (Walls[w + WallLimit*2] == nullptr)                                                  //checks if third accompanying wall is unassigned
-                {
-                    Walls[w + WallLimit * 2] = new Wall;
-                    entities[w + 20 + WallLimit * 2] = Walls[w + WallLimit * 2];
-                    entities[w + 20 + WallLimit * 2]->set_pos(wall3.get_x(), wall3.get_y());
-                }
-
-                if (Walls[w + WallLimit * 3] == nullptr)                                                //checks if fourth accompanying wall is unassigned
-                {
-                    Walls[w + WallLimit * 3] = new Wall;
-                    entities[w + 20 + WallLimit * 3] = Walls[w + WallLimit * 3];
-                    entities[w + 20 + WallLimit * 3]->set_pos(wall2.get_x(), wall2.get_y());
-                }
-                break;                                                                                  //break from current loop
+                break;
             }
         }
     }

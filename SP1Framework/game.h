@@ -106,8 +106,8 @@ void enterEndless();
 
 
 //Walls
-//void spawnWall(int no);
-//void renderWall();
+void spawnWall(int no);
+void renderWall();
 
 //spawnendpoints
 void renderPoints();

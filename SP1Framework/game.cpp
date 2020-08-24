@@ -21,7 +21,7 @@ float splashScreenTime = 0.5;
 //UI NAMES
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
-std::string gameMode2 = "Endless (under consturction)";
+std::string gameMode2 = "Endless";
 std::string gameMode3 = "Time Challenge (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
@@ -173,20 +173,29 @@ void shutdown( void )
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < entityLimit; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (entities[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            delete entities[i];
+            delete NPCs[i];
         }
     }
+
+    for (int w = 0; w < 40; w++)
+    {
+        if (Walls[w] != nullptr)
+        {
+            delete Walls[w];
+        }
+    }
+
 
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
         {
-            if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
-                delete projectile[p];
+            
+            delete projectile[p];
         }
     }
     
@@ -195,6 +204,8 @@ void shutdown( void )
     {
         delete powerup;
     }
+    
+    delete player;
 }
 
 //--------------------------------------------------------------

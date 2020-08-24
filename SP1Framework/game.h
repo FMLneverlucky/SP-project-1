@@ -73,6 +73,12 @@ enum EndlessMode
     E_INIT,
     E_PLAY
 };
+enum Test
+{
+    T_INIT,
+    T_PLAY,
+    T_END
+};
 
 void init        ( void );      // initialize your variables, allocate memory, etc
 void getInput    ( void );      // get input from player
@@ -102,16 +108,23 @@ void level_set();
 void playEndless();
 void InitEndless();
 void enterEndless();
+void renderPoints();
+void set_points();
+void setsafezone();
+void rendersafezone();
 
-
+//Testing area
+void testStates();
+void initTest();
+void playTest();
+void endTest();
 
 //Walls
 void spawnWall(int no);
 void renderWall();
 
 //spawnendpoints
-void renderPoints();
-void set_points();
+
 
 //aesthetics
 void setBG();
@@ -135,11 +148,14 @@ void renderPowerUp();
 
 //UI, Map Objects
 void renderMainMenu();// main menu.
-void mainMenuWait();// init UI for main menu
+void mainMenuWait();// checks for cliks in main menu
 void renderPauseMenu();// d
 void pauseMenuWait();
 void renderWinLoseMenu(bool);
 void winLoseMenuWait();
+void initHUD();//init ONCE
+void renderHUD();// renders HUD
+//void updateHUD();
 
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
 int checkButtonClicks(Object**, int);// check if player clicked a button

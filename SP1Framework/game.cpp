@@ -54,9 +54,18 @@ Object restartButton(restartMessage.length() + 2, 3);
 Object mainMenuButton(restartMessage.length() + 2, 3);
 const int WLButtonCount = 3;
 
-//USAGE FOR GAME MODEs
+//HUD
+Object healthBar(1, 1);
+Object coughBar(1, 1);
+Object NPCremaining(1, 1);
+int currentHP;
+int cooldownLength;
+bool showHUD = true;
+
+//NORMAL MODE
 NormalMode NGameState = N_INIT;
 EndlessMode EGameState = E_INIT;
+Test TGameState = T_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
@@ -67,8 +76,11 @@ int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
 Position endPoint[9];
 Position spawnPoint[9];
+Position safezone[9];
 int highestLVL;
 int totalhostile = 0;
+
+int tempcounter;
 
 //TEST
 //double timer = 0;
@@ -87,13 +99,23 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[61] = { player , nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-const int entityLimit = 31;
+Entity* entities[61] = { player, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }; //6 rows
+const int entityLimit = 61;
 
-NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int NPCLimit = 20;
 
-Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
@@ -103,6 +125,7 @@ PowerUp* powerup = nullptr;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
+COORD consoleSize = g_Console.getConsoleSize();
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -131,7 +154,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    spawnWall(10);
+    //spawnWall(10);
     //spawnNPC(false, 3, 0.1, 3);
     //spawnNPC(true, 2, 0.1, 3);
 }
@@ -210,17 +233,18 @@ void getInput( void )
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 {    
-    switch (g_eGameState)
-    {
-    case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
-        break;
-    case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
-        break;
-    case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
-        break;
-    case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
-        break;
-    }
+    //switch (g_eGameState)
+    //{
+    //case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
+    //    break;
+    //case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
+    //    break;
+    //case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
+    //    break;
+    //case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
+    //    break;
+    //}
+    gameplayKBHandler(keyboardEvent);
 }
 
 //--------------------------------------------------------------
@@ -358,11 +382,12 @@ void update(double dt)
     {
         case S_MAINMENU: mainMenuWait(); // game logic for the splash screen
             break;
-        case S_TEST: updateGame(); // gameplay logic when we are in the game
+        case S_TEST: testStates(); // gameplay logic when we are in the game
             break;
         case S_GAMEMODE1: playNormal();
             break;
         case S_GAMEMODE2: playEndless();
+            break;
     }
 }
 
@@ -376,13 +401,48 @@ void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     if (!paused)
+    {
         moveCharacter();    // moves the character, collision detection, physics, etc
-                            // sound can be played here too.
+        showHUD = true;                   // sound can be played here too.
+    }
     else
     {
         pauseMenuWait();
+        showHUD = false;
     }                
     
+}
+
+void testStates()
+{
+    switch (TGameState)
+    {
+    case T_INIT:
+        initTest();
+        break;
+    case T_PLAY:
+        playTest();
+        break;
+    case T_END:
+        endTest();
+        break;
+    }
+}
+//Initialise variables and objects for test area here
+void initTest()
+{
+    initHUD();
+    TGameState = T_PLAY;
+}
+//The logic for test area
+void playTest()
+{
+    updateGame();
+}
+//Extra state to test "end" game scenarios
+void endTest()
+{
+
 }
 
 void playNormal()
@@ -398,9 +458,7 @@ void playNormal()
     case N_NEXTLEVEL:
         level_set();
         break;
-
     }
-
 }
 
 void InitNormal()
@@ -408,6 +466,7 @@ void InitNormal()
     lose = false;
     level = 0;
     level_set();
+    initHUD();
     
     
     //spawnWall(noW);
@@ -448,7 +507,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noP = 5;
         noC = 15;
     }
-
+    set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
     //spawnWall(noW);
@@ -457,8 +516,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
 
 void set_points()
 {
-    spawnPoint[4].set_x(g_sChar.m_cLocation.X);
-    spawnPoint[4].set_y(g_sChar.m_cLocation.Y);
+    spawnPoint[4].set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
 
     Position tempp;
     do
@@ -470,14 +528,15 @@ void set_points()
     endPoint[4].set_x(tempp.get_x());
     endPoint[4].set_y(tempp.get_y());
 
+
     for (int i = -1; i < 2; i++)
     {
         spawnPoint[1 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() - 1);
         spawnPoint[7 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() + 1);
-    
+
         endPoint[1 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() - 1);
         endPoint[7 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() + 1);
-      
+
         spawnPoint[3].set_pos(spawnPoint[4].get_x() - 1, spawnPoint[4].get_y());
         spawnPoint[5].set_pos(spawnPoint[4].get_x() + 1, spawnPoint[4].get_y());
         endPoint[3].set_pos(endPoint[4].get_x() - 1, endPoint[4].get_y());
@@ -528,11 +587,11 @@ void playLevel()
 {
     
     updateGame();
+    renderHUD();
 
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
         clear = true;
-        //print level clear screen here
         NGameState = N_NEXTLEVEL;
     }
 
@@ -566,15 +625,24 @@ void InitEndless()
     lose = false;
     totalhostile = 0;
     player->resetHP();
-    NPC::resetnoHostile;
+    NPC::resetnoHostile();
+    tempcounter = 0;
+    
+    setsafezone();
+
+    spawnNPC(false, 5, 0.5, 1);
+    spawnNPC(true, 1, 0.5, 1);
+
     EGameState = E_PLAY;
 }
 
 void enterEndless()
 {
-    if (NPCs[NPCLimit - 1] == nullptr) //Limit not reached yet;; aka can spawn more
+    tempcounter++;
+    if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
-        //spawn NPCs according to idk what?
+        spawnNPC(false, 1, 0.5, 1);
+        tempcounter = 0;
     }
 
     updateGame();
@@ -583,9 +651,96 @@ void enterEndless()
     {
         lose = true;
         totalhostile = NPC::getnoHostile();
+        for (int i = 0; i < NPCLimit; i++)
+        {
+            if (NPCs[i] != nullptr)
+            {
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
+
+        for (int p = 0; p < particle_limit; p++)
+        {
+            if (projectile[p] != nullptr)
+            {
+                delete projectile[p];
+                projectile[p] = nullptr;
+            }
+        }
+
+
+        if (powerup != nullptr)
+        {
+            delete powerup;
+            powerup = nullptr;
+        }
         EGameState = E_INIT;
         g_eGameState = S_MAINMENU;
     }
+
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            COORD npcpos;
+            npcpos.X = NPCs[i]->getposx() - static_cast<int>(player->getposx()) + 40;
+            npcpos.Y = NPCs[i]->getposy() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(npcpos) == false)
+            {
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
+    }
+}
+
+void setsafezone()
+{
+    safezone[4].set_pos(40, 12);
+
+    for (int i = -1; i < 2; i++)
+    {
+        safezone[1 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() - 1);
+        safezone[7 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() + 1);
+
+        safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
+        safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
+        
+
+    }
+}
+
+void rendersafezone()
+{
+    COORD c;
+    int colour;
+
+    for (int i = 0; i < 9; i++)
+    {
+       
+        if (i != 4)
+        {
+
+            colour = 0xFF;
+            c.X = safezone[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = safezone[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
+
+        }
+    }
+
+    colour = 0x7F;
+    c.X = safezone[4].get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = safezone[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    if (checkifinscreen(c))
+    {
+        g_Console.writeToBuffer(c, (char)254, colour);
+    }
+
 }
 
 void moveCharacter()
@@ -709,7 +864,8 @@ void render()
         renderBG(0x00);
         renderMainMenu();
         break;
-    case S_TEST: renderGame();
+    case S_TEST: 
+        renderGame();
         break;
     case S_GAMEMODE1: 
         renderBG(prevcol);
@@ -718,6 +874,7 @@ void render()
         break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
+        rendersafezone();
         renderGame();
         
         break;
@@ -761,6 +918,8 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
     if (paused)
         renderPauseMenu();
+    else
+        renderHUD();
     /*if (lose)
     {
         renderWinLoseMenu(false);
@@ -791,7 +950,7 @@ void renderMap()
         
     }*/
 
-    //renderWall();
+    renderWall();
     //renderPoints();
     renderNPC();
     renderprojectile();
@@ -920,156 +1079,63 @@ void renderWall()
     {
         if (Walls[i] != nullptr)
         {
-            c.X = Walls[i]->getposx();
-            c.Y = Walls[i]->getposy();
+            c.X = Walls[i]->getposx() - player->getposx() + 40;
+            c.Y = Walls[i]->getposy() - player->getposy() + 12;
 
             colour = 0x00;
 
-            g_Console.writeToBuffer(c, "W", colour);
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, "W", colour);
+            }
         }
     }
 }
 
-void spawnWall(int no)                                                                                  //function to spawn wall
+void spawnWall(int no)                                                                                                              //function to spawn wall
 {
-    for (int i = 0; i < no; i++)                                                                        //for loop to cycle the spawning of each wall
+    for (int j = 0; j < no; j++)                                                                                                    //for loop to cycle the spawning of each wall
     {   //find random x and y on unused spaces
+        bool isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+        bool isSpaceOccupied = false;
 
-        Wall nextWall;                                                                                  //declared here for conditional statement when using the setType() function later on
-        Position wallPivotPoint, wall2, wall3, wall4;                                                   //declare temporary position class to hold coordinates for each wall entity and accompanying wall entities later
-        bool isSpaceNearPlayer;                                                                         //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
-
-        while ((occupied(&wallPivotPoint) != nullptr) && isSpaceNearPlayer == true);                    //while position on map is unavailable
+        for (int w = 0; w < WallLimit; w++)                                                                                         // for loop to set positions on map for each wall entity
         {
-
-            wallPivotPoint.set_x(rand() % 80);                                                          //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-            wallPivotPoint.set_y(rand() % 24);                                                          //set y coordinate of variable, wallPivotPoint, as a number from 0 to 25
-            if (wallPivotPoint.get_x() > 39 && wallPivotPoint.get_x() <= 41)                            //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+            if (Walls[w] == nullptr)                                                                                                //checks if wall entity is unassigned on map
             {
-                if (wallPivotPoint.get_y() > 12 && wallPivotPoint.get_y() <= 14)                        //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                Walls[w] = new Wall;
+
+                do
                 {
-                    isSpaceNearPlayer = true;                                                           //if chosen coords are not near spawn zone, second condition is true for loop to stop
-                }
-            }
-        }
+                    int Pivotx = (rand() % 80);                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
+                    int Pivoty = (rand() % 24);                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+                    Walls[w]->setPos(Pivotx, Pivoty);
+                    Walls[w]->setPosForAll();
+                    for (int i = 1; i < 5; i++)
+                    {
+                        if (Walls[w]->getPos(i)->get_x() > 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+                        {
+                            if (Walls[w]->getPos(i)->get_y() > 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                            {
+                                isSpaceNearPlayer = true;                                                                           //if chosen coords are not near spawn zone, second condition is true for loop to stop
+                            }
+                        }
 
-        if (nextWall.setType() == I)                                                                    //checks if the next wall type is a 'I' or line piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());                                                        //setting x coord of second wall using previous pivot point as reference
-            wall2.set_y(wallPivotPoint.get_y() + 1);                                                    //setting y coord of second wall using previous pivot point as reference
+                        if (occupied(Walls[w]->getPos(i)) != nullptr)
+                        {
+                            isSpaceOccupied = true;
+                        }
+                    }
+                }while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
 
-            wall3.set_x(wallPivotPoint.get_x());                                                        //setting x coord of third wall using previous pivot point as reference
-            wall3.set_y(wallPivotPoint.get_y() + 2);                                                    //setting y coord of third wall using previous pivot point as reference
 
-            wall4.set_x(wallPivotPoint.get_x());                                                        //setting x coord of fourth wall using previous pivot point as reference
-            wall4.set_y(wallPivotPoint.get_y() + 3);                                                    //setting y coord of fourth wall using previous pivot point as reference
-        }
-
-        else if (nextWall.setType() == J)                                                               //checks if next wall is 'J' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());
-            wall2.set_y(wallPivotPoint.get_y() + 1);
-
-            wall3.set_x(wallPivotPoint.get_x());
-            wall3.set_y(wallPivotPoint.get_y() + 2);
-
-            wall4.set_x(wallPivotPoint.get_x() - 1);
-            wall4.set_y(wallPivotPoint.get_y() + 2);
-        }
-
-        else if (nextWall.setType() == L)                                                               //checks if next wall is 'L' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());
-            wall2.set_y(wallPivotPoint.get_y() + 1);
-
-            wall3.set_x(wallPivotPoint.get_x());
-            wall3.set_y(wallPivotPoint.get_y() + 2);
-
-            wall4.set_x(wallPivotPoint.get_x() + 1);
-            wall4.set_y(wallPivotPoint.get_y() + 2);
-        }
-
-        else if (nextWall.setType() == O)                                                               //checks if next wall is 'O' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x());
-            wall2.set_y(wallPivotPoint.get_y() + 1);
-
-            wall3.set_x(wallPivotPoint.get_x() + 1);
-            wall3.set_y(wallPivotPoint.get_y());
-
-            wall4.set_x(wallPivotPoint.get_x() + 1);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == S)                                                               //checks if next wall is 'S' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x() - 1);
-            wall2.set_y(wallPivotPoint.get_y());
-
-            wall3.set_x(wallPivotPoint.get_x() - 1);
-            wall3.set_y(wallPivotPoint.get_y() + 1);
-
-            wall4.set_x(wallPivotPoint.get_x() - 2);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == T)                                                               //checks if next wall is 'T' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x() + 1);
-            wall2.set_y(wallPivotPoint.get_y());
-
-            wall3.set_x(wallPivotPoint.get_x() + 2);
-            wall3.set_y(wallPivotPoint.get_y());
-
-            wall4.set_x(wallPivotPoint.get_x() + 1);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == Z)                                                               //checks if next wall is 'z' piece
-        {
-            wall2.set_x(wallPivotPoint.get_x() + 1);
-            wall2.set_y(wallPivotPoint.get_y());
-
-            wall3.set_x(wallPivotPoint.get_x() + 1);
-            wall3.set_y(wallPivotPoint.get_y() + 1);
-
-            wall4.set_x(wallPivotPoint.get_x() + 2);
-            wall4.set_y(wallPivotPoint.get_y() + 1);
-        }
-
-        else if (nextWall.setType() == d)                                                               //checks if next wall is a default 1x1 piece
-        {
-            return;
-        }
-
-        for (int w = 0; w < WallLimit; w++)                                                             // for loop to set positions on map for each wall entity
-        {
-            if (Walls[w] == nullptr)                                                                    //checks if wall entity is unassigned on map
-            {
-                Walls[w] = new Wall;                                                                    //set element of array as new object under wall class
-                entities[w + 20] = Walls[w];                                                            //set element from wall array to corresponding element on entity array
-                entities[w + 20]->set_pos(wallPivotPoint.get_x(), wallPivotPoint.get_y());              //set position of the temp wall entity to an element in the entity array
-                if (Walls[w + WallLimit] == nullptr)                                                    //checks if second accompanying wall is unassigned
+                for (int i = 1; i < 5; i++)
                 {
-                    Walls[w + WallLimit] = new Wall;
-                    entities[w + 20 + WallLimit] = Walls[w + WallLimit];
-                    entities[w + 20 + WallLimit]->set_pos(wall2.get_x(), wall2.get_y());
+                    Walls[w + WallLimit*i] = new Wall;                                                                              //set element of array as new object under wall class
+                    entities[w + 20 + WallLimit*i] = Walls[w + WallLimit*i];                                                        //set element from wall array to corresponding element on entity array
+                    entities[w + 20 + WallLimit*i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
                 }
-
-                if (Walls[w + WallLimit*2] == nullptr)                                                  //checks if third accompanying wall is unassigned
-                {
-                    Walls[w + WallLimit * 2] = new Wall;
-                    entities[w + 20 + WallLimit * 2] = Walls[w + WallLimit * 2];
-                    entities[w + 20 + WallLimit * 2]->set_pos(wall3.get_x(), wall3.get_y());
-                }
-
-                if (Walls[w + WallLimit * 3] == nullptr)                                                //checks if fourth accompanying wall is unassigned
-                {
-                    Walls[w + WallLimit * 3] = new Wall;
-                    entities[w + 20 + WallLimit * 3] = Walls[w + WallLimit * 3];
-                    entities[w + 20 + WallLimit * 3]->set_pos(wall2.get_x(), wall2.get_y());
-                }
-                break;                                                                                  //break from current loop
+                break;
             }
         }
     }
@@ -1148,7 +1214,18 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
         {
             temp.set_x(rand() % 80);
             temp.set_y((rand() % 23) + 1);
-   
+          
+            if (g_eGameState == S_GAMEMODE2)
+            {
+                COORD t;
+                t.X = temp.get_x() - player->getposx() + 40;
+                t.Y = temp.get_y() - player->getposy() + 12;
+                if (checkifinscreen(t) == false)
+                {
+                    valid = false;
+                }
+            }
+            
             for (int i = 0; i < 9; i++)
             {
                 if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
@@ -1391,14 +1468,13 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 5));
-    renderBox(&title, 0x8F, gameName);
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 5));
+    renderBox(&title, 0x0F, gameName);
 
-    MMButton.move(c.X / 2, c.Y * 2 / 5);
-    MMButton2.move(c.X / 2, c.Y * 3 / 5);
-    MMButton3.move(c.X / 2, c.Y * 4 / 5);
-    MMButton4.move(c.X / 2, c.Y);
+    MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 5);
+    MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 5);
+    MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 5);
+    MMButton4.move(consoleSize.X / 2, consoleSize.Y);
 
     MMButtons[0] = &MMButton;
     MMButtons[1] = &MMButton2;
@@ -1434,12 +1510,11 @@ void mainMenuWait()
 
 void renderPauseMenu()
 {
-    COORD c = g_Console.getConsoleSize();
-    Object title(71, 3, Position(c.X / 2, c.Y / 6));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 6));
     renderBox(&title, 0x0F, "Paused");
 
-    resumeButton.move(c.X / 2, c.Y * 2 / 4);
-    quitButton.move(c.X / 2, c.Y * 3 / 4);
+    resumeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
+    quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
     PMButtons[0] = &resumeButton;
     PMButtons[1] = &quitButton;
@@ -1466,15 +1541,14 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    COORD c = g_Console.getConsoleSize();
     std::string* message = win ? &winMessage : &loseMessage;
-    Object title(71, 3, Position(c.X / 2, c.Y / 3));
+    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
     renderBox(&title, 0x0F, *message);
 
-    continueButton.move(c.X * 3 / 4, c.Y * 2 / 3);
-    restartButton.move(c.X * 3 / 4, c.Y * 2 / 3);
-    mainMenuButton.move(c.X * 2 / 4, c.Y * 2 / 3);
-    quitButton.move(c.X / 4, c.Y * 2 / 3);
+    continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
+    restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
+    mainMenuButton.move(consoleSize.X * 2 / 4, consoleSize.Y * 2 / 3);
+    quitButton.move(consoleSize.X / 4, consoleSize.Y * 2 / 3);
 
     WLButtons[0] = &quitButton;
     WLButtons[1] = &mainMenuButton;
@@ -1497,12 +1571,60 @@ void winLoseMenuWait()
         g_eGameState = S_MAINMENU;
         break;
     case 2:
-        //do win lose stuff;
+        //do win lose stuff; 
         break;
     default:
         break;
     }
 }
+
+void initHUD()
+{
+    currentHP = player->get_maxHP();
+    cooldownLength = 0;
+    healthBar.resize(20, 1);
+    healthBar.move((healthBar.length() - 1) / 2, 0);
+    healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
+    coughBar.resize(30, 1);
+    coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+    coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+}
+
+void renderHUD()
+{
+
+    if (player->get_HP() != currentHP)
+    {
+        currentHP = player->get_HP();
+        healthBar.resize(20, 1);
+        healthBar.move((healthBar.length() - 1) / 2, 0);
+        healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
+        healthBar.scale((float)currentHP / player->get_maxHP(), 1);
+    }
+    if (player->get_cooldown() > 0)
+    {
+        coughBar.resize(30, 1);
+        coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+        coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+        coughBar.scale(1 / player->get_cooldown(), 1);
+    }
+
+    if (showHUD)
+    {
+        renderBox(&healthBar, 0x40);
+        renderBox(&coughBar, 0x20);
+    }
+}
+
+//void updateHUD()
+//{
+//    
+//    if (showHUD)
+//    {
+//        renderBox(&healthBar, 0x04);
+//        renderBox(&coughBar, 0x02);
+//    }
+//}
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {
@@ -1581,14 +1703,7 @@ void renderPoints()
     {
         if (i == 1)
         {
-            colour = 0x30;
-            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(c))
-            {
-                g_Console.writeToBuffer(c, "S", colour);
-            }
-
+  
             colour = 0x90;
             c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
@@ -1596,9 +1711,26 @@ void renderPoints()
             {
                 g_Console.writeToBuffer(c, "E", colour);
             }
+
+            colour = 0x30;
+            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, "S", colour);
+            }
         }
         else if (i != 4)
         {
+  
+            colour = 0x99;
+            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            if (checkifinscreen(c))
+            {
+                g_Console.writeToBuffer(c, " ", colour);
+            }
+
             colour = 0x33;
             c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
@@ -1607,13 +1739,6 @@ void renderPoints()
                 g_Console.writeToBuffer(c, " ", colour);
             }
 
-            colour = 0x99;
-            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(c))
-            {
-                g_Console.writeToBuffer(c, " ", colour);
-            }
         }
     }
     

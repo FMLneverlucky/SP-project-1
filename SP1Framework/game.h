@@ -77,7 +77,8 @@ enum NormalMode
 enum EndlessMode
 {
     E_INIT,
-    E_PLAY
+    E_PLAY,
+    E_LOSE
 };
 
 enum Test

@@ -714,6 +714,8 @@ void playEndless()
     case E_PLAY:
         enterEndless();
         break;
+    case E_LOSE:
+        winLoseMenuWait();
     }
 }
 
@@ -748,10 +750,7 @@ void enterEndless()
     if (player->get_HP() == 0)
     {
         lose = true;
-        totalhostile = NPC::getnoHostile();
-        resetSpawns();
-        EGameState = E_INIT;
-        g_eGameState = S_MAINMENU;
+        
     }
 
     for (int i = 0; i < NPCLimit; i++)
@@ -767,6 +766,13 @@ void enterEndless()
                 NPCs[i] = nullptr;
             }
         }
+    }
+    if (lose)
+    {
+        totalhostile = NPC::getnoHostile();
+        resetSpawns();
+        EGameState = E_LOSE;
+        
     }
 }
 
@@ -1005,6 +1011,10 @@ void render()
         renderBG(0x88); //dk what colour for now
         rendersafezone();
         renderGame();
+        if (lose)
+        {
+            renderWinLoseMenu(false);
+        }
         break;
     case S_TUTORIAL:
         renderBG(prevcol);
@@ -1823,9 +1833,11 @@ void winLoseMenuWait()
     case 1:
         g_eGameState = S_MAINMENU;
         NGameState = N_INIT;
+        EGameState = E_INIT;
         break;
     case 2:
-        //do win lose stuff; 
+        NGameState = N_INIT;
+        EGameState = E_INIT;
         break;
     default:
         break;

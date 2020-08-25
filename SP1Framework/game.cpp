@@ -545,7 +545,6 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    spawnPowerUp();
     
 }
 
@@ -629,7 +628,7 @@ void level_set() //deletes everyth
 
 void playLevel()
 {
-    
+    spawnPowerUp();
     updateGame();
     renderHUD();
 
@@ -1229,7 +1228,7 @@ void renderPowerUp()
             pu.X = static_cast<int>(powerup->get_xcoord()) - static_cast<int>(player->getposx()) + 40;
             pu.Y = static_cast<int>(powerup->get_ycoord()) - static_cast<int>(player->getposy()) + 12;
 
-            colour = 0x36;
+            colour = 0xB6;
             if (checkifinscreen(pu))
             {
                 g_Console.writeToBuffer(pu, (char)232, colour);
@@ -1247,16 +1246,21 @@ void spawnPowerUp()
         if (r == 53)
         {
             powerup = new PowerUp;
-            powerup->set_xcoord(rand() % 80);
-            powerup->set_ycoord(rand() % 24);
 
-            if (occupied(powerup->get_pos()) != nullptr)
+            do
             {
                 powerup->set_xcoord(rand() % 80);
-                powerup->set_ycoord(rand() % 24);
-            }
+                powerup->set_ycoord((rand() % 24) + 1); 
+            } while (occupied(powerup->get_pos()) != nullptr);
+
+            powerup->set_detime(300);
         }
-   }
+    }
+}
+
+void deletePowerUp()
+{
+
 }
 
 void renderNPC()

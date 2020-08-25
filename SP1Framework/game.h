@@ -157,6 +157,7 @@ void check_collision();
 //PowerUp
 void spawnPowerUp();
 void renderPowerUp();
+void deletePowerUp();
 
 //UI, Map Objects
 void renderMainMenu();// main menu.

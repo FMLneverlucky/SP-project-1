@@ -1,4 +1,3 @@
-
 #ifndef _GAME_H
 #define _GAME_H
 
@@ -60,6 +59,12 @@ struct SGameChar
     COORD m_cLocation;
     bool  m_bActive;
 };
+
+//enum MainMenu
+//{
+//    M_MAIN,
+//    M_GAMEMODES
+//};
 
 enum NormalMode
 {

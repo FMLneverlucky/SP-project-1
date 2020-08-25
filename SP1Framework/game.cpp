@@ -49,6 +49,9 @@ Object* MGButtons[5];
 const int MGButtonCount = 5;
 std::string stage = "SELECT";
 
+//QUICK FIX
+bool isMousePressed = false;
+
 //PAUSE MENU
 bool paused = false;
 Object* PMButtons[2];
@@ -422,7 +425,8 @@ void update(double dt)
             break;
         case S_GAMEMODE1: playNormal();
             break;
-        case S_GAMEMODE2: playEndless();
+        case S_GAMEMODE2:
+            playEndless();
             break;
         case S_TUTORIAL: playTutorial();
             break;
@@ -521,6 +525,8 @@ void playNormal()
         break;
     case N_NEXTLEVEL:
         level_set();
+    case N_LOSE:
+        winLoseMenuWait();
         break;
     }
 }
@@ -611,7 +617,7 @@ void set_points()
     }
 }
 
-void level_set() //deletes everyth
+void resetSpawns()
 {
     for (int i = 0; i < NPCLimit; i++)
     {
@@ -654,15 +660,21 @@ void level_set() //deletes everyth
         delete powerup;
         powerup = nullptr;
     }
+}
+
+void level_set() //deletes everyth
+{
     
+    resetSpawns();
+   
     player->resetHP();
     NPC::resetnoHostile();
     level++;
- 
+
     set_spawn();
-    //setBG();
     clear = false;
     NGameState = N_LEVEL;
+    
     
 }
 
@@ -681,17 +693,14 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
-        
-        //print lose screen here  
     }
 
     if (lose)
     {
         highestLVL = level;
-        level_set();
+        resetSpawns();
+        NGameState = N_LOSE;
 
-        NGameState = N_INIT;
-        g_eGameState = S_MAINMENU;
     }
 }
     
@@ -719,7 +728,7 @@ void InitEndless()
     setsafezone();
 
     spawnWall(10);
-    spawnNPC(false, 5, 0.9, 1);
+    spawnNPC(false, 5, 0.6, 1);
     //spawnNPC(true, 1, 0.5, 1);
 
     EGameState = E_PLAY;
@@ -730,7 +739,7 @@ void enterEndless()
     tempcounter++;
     if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
-        spawnNPC(false, 1, 0.5, 1);
+        spawnNPC(false, 1, 0.6, 1);
         tempcounter = 0;
     }
 
@@ -740,38 +749,7 @@ void enterEndless()
     {
         lose = true;
         totalhostile = NPC::getnoHostile();
-        for (int i = 0; i < NPCLimit; i++)
-        {
-            if (NPCs[i] != nullptr)
-            {
-                delete NPCs[i];
-                NPCs[i] = nullptr;
-            }
-        }
-
-        for (int w = 0; w < 40; w++)
-        {
-            if (Walls[w] != nullptr)
-            {
-                delete Walls[w];
-                Walls[w] = nullptr;
-            }
-        }
-
-        for (int p = 0; p < particle_limit; p++)
-        {
-            if (projectile[p] != nullptr)
-            {
-                delete projectile[p];
-                projectile[p] = nullptr;
-            }
-        }
-
-        if (powerup != nullptr)
-        {
-            delete powerup;
-            powerup = nullptr;
-        }
+        resetSpawns();
         EGameState = E_INIT;
         g_eGameState = S_MAINMENU;
     }
@@ -882,7 +860,7 @@ void moveCharacter()
     }
     
     //necessary/related updates
-    player->set_cooldown(player->get_cooldown() - 1);
+    
     player->update_pos(g_dDeltaTime); //sets pos of player
     g_sChar.m_cLocation.Y = player->getposy(); //moves player
     g_sChar.m_cLocation.X = player->getposx(); //moves player
@@ -941,13 +919,13 @@ void checkAll()
                     }
                 }
             }
-            break;
         }
     }
 
     check_collision(); //checks for HostileNPC-Player Collision
     limitprojectile(); //moves/updates projectiles
 
+    //rotates CCTVs radar every second
     for (int c = 0; c < CCTVLimit; c++)
     {
         if (CCTVs[c] != nullptr)
@@ -1018,6 +996,10 @@ void render()
         renderBG(prevcol);
         renderPoints();
         renderGame();
+        if (lose)
+        {
+            renderWinLoseMenu(false);
+        }
         break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
@@ -1543,7 +1525,7 @@ void moveall()
 
                 
             }
-            else if (NPCs[i]->get_ftime() != 0) //npc is hostile but on cooldown
+            else if (NPCs[i]->isonCD()) //npc is hostile but on cooldown
             {
                 NPCs[i]->set_direction(0);
                 NPCs[i]->set_count(NPCs[i]->get_count() - 1);
@@ -1840,6 +1822,7 @@ void winLoseMenuWait()
         break;
     case 1:
         g_eGameState = S_MAINMENU;
+        NGameState = N_INIT;
         break;
     case 2:
         //do win lose stuff; 
@@ -1872,13 +1855,13 @@ void renderHUD()
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
         healthBar.scale((float)currentHP / player->get_maxHP(), 1);
     }
-    if (player->get_cooldown() > 0)
+    /*if (player->get_cooldown() > 0)
     {
         coughBar.resize(30, 1);
         coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
         coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
         coughBar.scale(1 / player->get_cooldown(), 1);
-    }
+    }*/
 
     if (showHUD)
     {
@@ -1899,21 +1882,30 @@ void renderHUD()
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {
+    
     int mouseX, mouseY;
     if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {// check when player left click 
-        mouseX = g_mouseEvent.mousePosition.X;
-        mouseY = g_mouseEvent.mousePosition.Y;
-        for (int i = 0; i < arrayLength; i++)
-        {//check all the objects in the given array
-            if (mouseX >= buttons[i]->referencePosition()->get_x() &&
-                mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
-                mouseY >= buttons[i]->referencePosition()->get_y() &&
-                mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
-            {// check if mouse is within this Object
-                return i;
+        if (isMousePressed == false)
+        {
+            isMousePressed = true;
+            mouseX = g_mouseEvent.mousePosition.X;
+            mouseY = g_mouseEvent.mousePosition.Y;
+            for (int i = 0; i < arrayLength; i++)
+            {//check all the objects in the given array
+                if (mouseX >= buttons[i]->referencePosition()->get_x() &&
+                    mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
+                    mouseY >= buttons[i]->referencePosition()->get_y() &&
+                    mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
+                {// check if mouse is within this Object
+                    return i;
+                }
             }
         }
+    } 
+    else
+    {
+        isMousePressed = false;
     }
     return arrayLength;
 }
@@ -1948,16 +1940,19 @@ void check_collision()
     {
         if (NPCs[i] != nullptr)
         {
-            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() <= 0)
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->isonCD() == false)
             {
                 //timer += g_dDeltaTime;
                 //timer >3, run else dont;
-                NPCs[i]->cooldownstart();
-                NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                
                 player->loseHP(NPCs[i]->get_damage());
+                flashcount = 1 / g_dDeltaTime;
+                player->set_flash(true);
                 switch (g_eGameState)
                 {
                 case S_GAMEMODE1:
+                    NPCs[i]->cooldownstart();
+                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                     player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
                     resetallNPCs();
                     NPC::resetnoHostile();
@@ -1966,8 +1961,7 @@ void check_collision()
                     player->set_pos(safezone[4].get_x(), safezone[4].get_y());
                     break;
                 }
-                flashcount = 1 / g_dDeltaTime;
-                player->set_flash(true);
+                
                 
                 g_sChar.m_cLocation.Y = player->getposy(); 
                 g_sChar.m_cLocation.X = player->getposx(); 
@@ -2147,7 +2141,7 @@ bool insafezone(Position* pos)
 
 void deleteEntities()
 {
-    for (int i = 0; i < entityLimit; i++)
+    for (int i = 1; i < entityLimit; i++)
     {
         if (entities[i] != nullptr)
         {
@@ -2180,11 +2174,14 @@ void deleteEntities()
                     entities[i] = nullptr;
                 }
             }
-            delete entities[i];
-            entities[i] = nullptr;
-            player = nullptr;
+            /*delete entities[i];
+            entities[i] = nullptr;*/
+            
         }
     }
+    delete entities[0];
+    player = nullptr;
+    entities[0] = nullptr;
 }
 
 void renderText()

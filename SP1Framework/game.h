@@ -70,7 +70,8 @@ enum NormalMode
 {
     N_INIT,
     N_LEVEL,
-    N_NEXTLEVEL
+    N_NEXTLEVEL,
+    N_LOSE
 };
 
 enum EndlessMode
@@ -120,6 +121,7 @@ void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
+void resetSpawns();
 void level_set();
 void playEndless();
 void InitEndless();

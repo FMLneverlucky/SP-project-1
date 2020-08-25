@@ -22,7 +22,7 @@ float splashScreenTime = 0.5;
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
 std::string gameMode2 = "Endless";
-std::string gameMode3 = "Time Challenge (under construction)";
+std::string gameMode3 = "Tutorial";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
@@ -65,6 +65,7 @@ bool showHUD = true;
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
 EndlessMode EGameState = E_INIT;
+Tutorial TutState = TUT_GAMEPLAY;
 Test TGameState = T_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
@@ -277,17 +278,21 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 //--------------------------------------------------------------
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 {    
-    switch (g_eGameState)
-    {
-    case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
-        break;
-    case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-        break;
-    case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-        break;
-    case S_GAMEMODE2: gameplayMouseHandler(mouseEvent);
-        break;
-    }
+    //switch (g_eGameState)
+    //{
+    //case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
+    //    break;
+    //case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+    //    break;
+    //case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+    //    break;
+    //case S_GAMEMODE2: gameplayMouseHandler(mouseEvent);
+    //    break;
+    //case S_TUTORIAL: gameplayMouseHandler(mouseEvent);
+    //    break;
+    //}
+
+    gameplayMouseHandler(mouseEvent);
 }
 
 //--------------------------------------------------------------
@@ -400,6 +405,21 @@ void update(double dt)
             break;
         case S_GAMEMODE2: playEndless();
             break;
+        case S_TUTORIAL: playTutorial();
+            break;
+    }
+}
+
+void playTutorial()
+{
+    switch (TutState)
+    {
+    case TUT_GAMEPLAY:
+        break;
+    case TUT_POLICE:
+        break;
+    case TUT_POWERUP:
+        break;
     }
 }
 
@@ -814,7 +834,6 @@ void moveCharacter()
         {
             if (projectile[p] == nullptr)
             {
-
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
@@ -1223,7 +1242,7 @@ void renderNPC()
                 }
                 else
                 {
-                    colour = 0x66;
+                    colour = 0x11;
                 }
             }
             else
@@ -1258,10 +1277,12 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
     for (int i = 0; i < no; i++)
     {
         Position temp;
-        bool valid = true;
+        bool valid; 
 
         do
         {
+            valid = true;
+
             temp.set_x(rand() % 80);
             temp.set_y((rand() % 23) + 1);
           
@@ -1559,7 +1580,7 @@ void mainMenuWait()
         g_eGameState = S_GAMEMODE2;
         break;
     case 2:
-        g_eGameState = S_GAMEMODE3;
+        g_eGameState = S_TUTORIAL;
         break;
     case 3:
         g_eGameState = S_TEST;
@@ -1781,7 +1802,6 @@ void resetallNPCs()
         }
     }
 }
-
 
 void renderPoints()
 {

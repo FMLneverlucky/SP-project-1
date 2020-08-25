@@ -512,7 +512,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    
+    spawnPowerUp();
     
 }
 
@@ -969,7 +969,7 @@ void renderMap()
     renderNPC();
     renderprojectile();
     renderWall();
-    
+    renderPowerUp();
 }
 
 void renderCharacter()
@@ -1165,12 +1165,45 @@ void spawnWall(int no)                                                          
 
 void renderPowerUp()
 {
+    COORD pu;
+    int colour;
 
+    if (powerup != nullptr)
+    {
+
+            pu.X = static_cast<int>(powerup->get_xcoord()) - static_cast<int>(player->getposx()) + 40;
+            pu.Y = static_cast<int>(powerup->get_ycoord()) - static_cast<int>(player->getposy()) + 12;
+
+            colour = 0x36;
+            if (checkifinscreen(pu))
+            {
+                g_Console.writeToBuffer(pu, (char)232, colour);
+            }
+    }
+    
 }
 
 void spawnPowerUp()
 {
-    //powerup = new PowerUp(15 / g_dDeltaTime);
+    if (powerup == nullptr)
+    {
+        int r = rand() % 100;
+
+        if (r == 53)
+        {
+            powerup = new powerup;
+            powerup->set_xcoord(rand() % 80);
+            powerup->set_ycoord(rand() % 24);
+
+            if (occupied(powerup->get_pos()) != nullptr)
+            {
+                powerup->set_xcoord(rand() % 80);
+                powerup->set_ycoord(rand() % 24);
+                break;
+            }
+            break;
+        }
+   }
 }
 
 void renderNPC()

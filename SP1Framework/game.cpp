@@ -1739,7 +1739,7 @@ void check_collision()
     {
         if (NPCs[i] != nullptr)
         {
-            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() == 0)
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() <= 0)
             {
                 //timer += g_dDeltaTime;
                 //timer >3, run else dont;

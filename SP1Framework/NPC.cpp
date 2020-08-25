@@ -2,13 +2,13 @@
 int NPC::noHostile = 0;
 int NPC::total = 0;
 
-NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(0), cooldown(cd)
+NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(cd), onCD(false)
 {
 	//normal civilians use this
 	total++;
 }
 
-NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(5), freezetime(0), cooldown(1)
+NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(5), freezetime(1), onCD(false)
 {
 	//police use this
 	total++;
@@ -18,6 +18,11 @@ NPC::~NPC()
 {
 	
 	total--;
+}
+
+bool NPC::isonCD()
+{
+	return onCD;
 }
 
 bool NPC::isHostile()
@@ -30,6 +35,11 @@ void NPC::anger()
 	angry = true;
 	counter = 0;
 	noHostile++;
+}
+
+void NPC::calmdown()
+{
+	angry = false;
 }
 
 void NPC::set_count(int a)
@@ -55,6 +65,16 @@ float NPC::get_speed()
 void NPC::set_speed(float spd)
 {
 	speed = spd;
+}
+
+int NPC::get_damage()
+{
+	return damage;
+}
+
+int NPC::get_ftime()
+{
+	return freezetime;
 }
 
 Position* NPC::new_pos(double dtime)
@@ -97,15 +117,7 @@ Position* NPC::new_pos(double dtime)
 	return &tempp;
 }
 
-int NPC::get_damage()
-{
-	return damage;
-}
 
-int NPC::get_ftime()
-{
-	return freezetime;
-}
 
 void NPC::update_pos(double dtime)
 {
@@ -115,12 +127,14 @@ void NPC::update_pos(double dtime)
 
 void NPC::cooldownstart()
 {
-	freezetime = cooldown;
+	//freezetime = cooldown;
+	onCD = true;
 }
 
 void NPC::cooldownend()
 {
-	freezetime = 0;
+	//freezetime = 0;
+	onCD = false;
 }
 
 int NPC::getnoHostile()
@@ -138,7 +152,3 @@ int NPC::gettotal()
 	return total;
 }
 
-void NPC::calmdown()
-{
-	angry = false;
-}

@@ -1,5 +1,5 @@
 #include "Player.h"
-Player::Player() : maxHP(5), cooldown(0)
+Player::Player() : maxHP(5), flash(false)
 {
 	HP = maxHP;
 }
@@ -88,12 +88,3 @@ void Player::loseHP(int ack)
 	HP -= ack;
 }
 
-void Player::set_cooldown(int a)
-{
-	cooldown = a;
-}
-
-int Player::get_cooldown()
-{
-	return cooldown;
-}

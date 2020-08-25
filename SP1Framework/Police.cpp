@@ -7,7 +7,7 @@ Police::Police()
 
 Police::Police(int cd) 
 {
-	cooldown = cd;
+	freezetime = cd;
 }
 
 char Police::type()

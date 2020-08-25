@@ -168,14 +168,14 @@ void init( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void shutdown( void )
+void shutdown(void)
 {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < NPCLimit; i++)
+    /*for (int i = 0; i < NPCLimit; i++)
     {
         if (NPCs[i] != nullptr)
         {
@@ -196,10 +196,11 @@ void shutdown( void )
     {
         if (projectile[p] != nullptr)
         {
-            
+
             delete projectile[p];
         }
-    }
+    }*/
+    deleteEntities();
     
 
     if (powerup != nullptr)
@@ -207,7 +208,7 @@ void shutdown( void )
         delete powerup;
     }
     
-    delete player;
+    //delete player;
 }
 
 //--------------------------------------------------------------
@@ -544,7 +545,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    
+    spawnPowerUp();
     
 }
 
@@ -999,7 +1000,7 @@ void renderMap()
     renderNPC();
     renderprojectile();
     renderWall();
-    
+    renderPowerUp();
 }
 
 void renderCharacter()
@@ -1219,12 +1220,43 @@ void spawnWall(int no)                                                          
 
 void renderPowerUp()
 {
+    COORD pu;
+    int colour;
 
+    if (powerup != nullptr)
+    {
+
+            pu.X = static_cast<int>(powerup->get_xcoord()) - static_cast<int>(player->getposx()) + 40;
+            pu.Y = static_cast<int>(powerup->get_ycoord()) - static_cast<int>(player->getposy()) + 12;
+
+            colour = 0x36;
+            if (checkifinscreen(pu))
+            {
+                g_Console.writeToBuffer(pu, (char)232, colour);
+            }
+    }
+    
 }
 
 void spawnPowerUp()
 {
-    //powerup = new PowerUp(15 / g_dDeltaTime);
+    if (powerup == nullptr)
+    {
+        int r = rand() % 100;
+
+        if (r == 53)
+        {
+            powerup = new PowerUp;
+            powerup->set_xcoord(rand() % 80);
+            powerup->set_ycoord(rand() % 24);
+
+            if (occupied(powerup->get_pos()) != nullptr)
+            {
+                powerup->set_xcoord(rand() % 80);
+                powerup->set_ycoord(rand() % 24);
+            }
+        }
+   }
 }
 
 void renderNPC()
@@ -1766,7 +1798,7 @@ void check_collision()
     {
         if (NPCs[i] != nullptr)
         {
-            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() == 0)
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() <= 0)
             {
                 //timer += g_dDeltaTime;
                 //timer >3, run else dont;
@@ -1986,4 +2018,37 @@ bool insafezone(Position* pos)
         return true;
     }
     return false;
+}
+
+void deleteEntities()
+{
+    for (int i = 0; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr)
+        {
+            for (int n = 0; n < NPCLimit; n++)
+            {
+                if (NPCs[n] == entities[i])
+                {
+                    delete entities[i];
+                    NPCs[n] = nullptr;
+                    entities[i] = nullptr;
+                    return;
+                }
+            }
+            for (int n = 0; n < WallLimit; n++)
+            {
+                if (Walls[n] == entities[i])
+                {
+                    delete entities[i];
+                    Walls[n] = nullptr;
+                    entities[i] = nullptr;
+                    return;
+                }
+            }
+            delete entities[i];
+            entities[i] = nullptr;
+            player = nullptr;
+        }
+    }
 }

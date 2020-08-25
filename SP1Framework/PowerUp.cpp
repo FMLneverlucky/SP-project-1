@@ -3,7 +3,7 @@
 
 PowerUp::PowerUp()
 {
-	
+	detime = 0;
 }
 
 PowerUp::~PowerUp()
@@ -29,6 +29,16 @@ float PowerUp::get_xcoord()
 float PowerUp::get_ycoord()
 {
 	return UPpos.get_y();
+}
+
+void PowerUp::set_detime(int d)
+{
+	detime = d;
+}
+
+int PowerUp::get_detime()
+{
+	return detime;
 }
 
 Position* PowerUp::get_pos()

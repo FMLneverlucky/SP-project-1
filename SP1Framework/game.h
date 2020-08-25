@@ -131,6 +131,9 @@ void resetallNPCs();
 
 //Tutorials
 void playTutorial();
+void renderText();
+void initTutGP();
+void playTutGP();
 
 //Testing area
 void testStates();
@@ -162,6 +165,7 @@ void check_collision();
 //PowerUp
 void spawnPowerUp();
 void renderPowerUp();
+void deletePowerUp();
 
 //UI, Map Objects
 void renderMainMenu();// main menu.

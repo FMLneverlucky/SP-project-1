@@ -22,7 +22,7 @@ float splashScreenTime = 0.5;
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
 std::string gameMode2 = "Endless";
-std::string gameMode3 = "Tutorial";
+std::string gameMode3 = "Tutorial (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
@@ -92,6 +92,8 @@ int totalhostile = 0;
 int tempcounter;
 int flashcount = 0;
 
+//TUTORIAL
+std::string text = " ";
 //TEST
 //double timer = 0;
 
@@ -425,12 +427,24 @@ void playTutorial()
     switch (TutState)
     {
     case TUT_GAMEPLAY:
+        initTutGP();
+        playTutGP();
         break;
     case TUT_POLICE:
         break;
     case TUT_POWERUP:
         break;
     }
+}
+
+void initTutGP()
+{
+
+}
+
+void playTutGP()
+{
+
 }
 
 void splashScreenWait()    // waits for time to pass in splash screen
@@ -522,7 +536,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     {
         noC = 3;
         noP = 0;
-        spd = 0.1;
+        spd = 0.2;
         cdtime = 5;
         noW = 10;
     }
@@ -544,7 +558,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     }
     else
     {
-        spd = 0.5;
+        spd = 0.9;
         cdtime = 1;
         noP = 5;
         noC = 15;
@@ -554,7 +568,6 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    spawnPowerUp();
     
 }
 
@@ -618,7 +631,6 @@ void level_set() //deletes everyth
         }
     }
 
-
     if (powerup != nullptr)
     {
         delete powerup;
@@ -638,7 +650,7 @@ void level_set() //deletes everyth
 
 void playLevel()
 {
-    
+    spawnPowerUp();
     updateGame();
     renderHUD();
 
@@ -684,7 +696,7 @@ void InitEndless()
     setsafezone();
 
     spawnWall(10);
-    spawnNPC(false, 5, 0.5, 1);
+    spawnNPC(false, 5, 0.9, 1);
     //spawnNPC(true, 1, 0.5, 1);
 
     EGameState = E_PLAY;
@@ -705,12 +717,21 @@ void enterEndless()
     {
         lose = true;
         totalhostile = NPC::getnoHostile();
-        for (int i = 1; i < entityLimit; i++)
+        for (int i = 0; i < NPCLimit; i++)
         {
-            if (entities[i] != nullptr)
+            if (NPCs[i] != nullptr)
             {
-                delete entities[i];
-                entities[i] = nullptr;
+                delete NPCs[i];
+                NPCs[i] = nullptr;
+            }
+        }
+
+        for (int w = 0; w < 40; w++)
+        {
+            if (Walls[w] != nullptr)
+            {
+                delete Walls[w];
+                Walls[w] = nullptr;
             }
         }
 
@@ -722,7 +743,6 @@ void enterEndless()
                 projectile[p] = nullptr;
             }
         }
-
 
         if (powerup != nullptr)
         {
@@ -864,6 +884,7 @@ void moveCharacter()
                 }
             }
         }
+
     }
 
     player->set_cooldown(player->get_cooldown() - 1);
@@ -878,16 +899,19 @@ void moveCharacter()
 
     for (int p = 0; p < particle_limit; p++)
     {
-        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr) && occupied(projectile[p]->getpos())->type() == 'C')
+        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr))
         {
-            for (int i = 0; i < NPCLimit; i++)
+            if (occupied(projectile[p]->getpos())->type() == 'C')
             {
-                if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                for (int i = 0; i < NPCLimit; i++)
                 {
-                    NPCs[i]->anger();
-                    NPCs[i]->cooldownstart();
-                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
-                    
+                    if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                    {
+                        NPCs[i]->anger();
+                        NPCs[i]->cooldownstart();
+                        NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+
+                    }
                 }
             }
         }
@@ -916,7 +940,7 @@ void render()
     switch (g_eGameState)
     {
     case S_MAINMENU: 
-        renderBG(0x00);
+        //renderBG(0x00);
         renderMainMenu();
         break;
     case S_TEST: 
@@ -931,7 +955,11 @@ void render()
         renderBG(0x88); //dk what colour for now
         rendersafezone();
         renderGame();
-        
+        break;
+    case S_TUTORIAL:
+        renderBG(prevcol);
+        renderGame();
+        renderText();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -1021,15 +1049,23 @@ void renderCharacter()
     {
         if (flashcount % 10)
         {
-            g_sChar.m_bActive = !g_sChar.m_bActive;
+            g_sChar.m_bActive = false;
+        }
+        else
+        {
+            g_sChar.m_bActive = true;
         }
         flashcount--;
         if (flashcount == 0)
         {
             player->set_flash(false);
-            
         }
     }
+    else
+    {
+        g_sChar.m_bActive = true;
+    }
+
     WORD charColor = 0x44;
     if (g_sChar.m_bActive)
     {
@@ -1231,7 +1267,7 @@ void renderPowerUp()
             pu.X = static_cast<int>(powerup->get_xcoord()) - static_cast<int>(player->getposx()) + 40;
             pu.Y = static_cast<int>(powerup->get_ycoord()) - static_cast<int>(player->getposy()) + 12;
 
-            colour = 0x36;
+            colour = 0xB6;
             if (checkifinscreen(pu))
             {
                 g_Console.writeToBuffer(pu, (char)232, colour);
@@ -1249,16 +1285,21 @@ void spawnPowerUp()
         if (r == 53)
         {
             powerup = new PowerUp;
-            powerup->set_xcoord(rand() % 80);
-            powerup->set_ycoord(rand() % 24);
 
-            if (occupied(powerup->get_pos()) != nullptr)
+            do
             {
                 powerup->set_xcoord(rand() % 80);
-                powerup->set_ycoord(rand() % 24);
-            }
+                powerup->set_ycoord((rand() % 24) + 1); 
+            } while (occupied(powerup->get_pos()) != nullptr);
+
+            powerup->set_detime(300);
         }
-   }
+    }
+}
+
+void deletePowerUp()
+{
+
 }
 
 void renderNPC()
@@ -1960,7 +2001,7 @@ void setBG()
             colour = 0x88;
             break;
         case 1:
-            colour = 0x55;
+            colour = 0x77;
             break;
         case 2:
             colour = 0xDD;
@@ -2091,4 +2132,12 @@ void deleteEntities()
             player = nullptr;
         }
     }
+}
+
+void renderText()
+{
+    COORD textpos;
+    textpos.X = 30;
+    textpos.Y = 20;
+    g_Console.writeToBuffer(textpos, text , 0x0F);
 }

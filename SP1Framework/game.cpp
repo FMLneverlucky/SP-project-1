@@ -21,8 +21,8 @@ float splashScreenTime = 0.5;
 //UI NAMES
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
-std::string gameMode2 = "Endless (under consturction)";
-std::string gameMode3 = "Time Challenge (under construction)";
+std::string gameMode2 = "Endless";
+std::string gameMode3 = "Tutorial";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
@@ -65,6 +65,7 @@ bool showHUD = true;
 //NORMAL MODE
 NormalMode NGameState = N_INIT;
 EndlessMode EGameState = E_INIT;
+Tutorial TutState = TUT_GAMEPLAY;
 Test TGameState = T_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
@@ -81,6 +82,7 @@ int highestLVL;
 int totalhostile = 0;
 
 int tempcounter;
+int flashcount = 0;
 
 //TEST
 //double timer = 0;
@@ -173,20 +175,29 @@ void shutdown( void )
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < entityLimit; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
-        if (entities[i] != nullptr)
+        if (NPCs[i] != nullptr)
         {
-            delete entities[i];
+            delete NPCs[i];
         }
     }
+
+    for (int w = 0; w < 40; w++)
+    {
+        if (Walls[w] != nullptr)
+        {
+            delete Walls[w];
+        }
+    }
+
 
     for (int p = 0; p < particle_limit; p++)
     {
         if (projectile[p] != nullptr)
         {
-            if (projectile[p]->get_px() == 0 || projectile[p]->get_px() == 79)
-                delete projectile[p];
+            
+            delete projectile[p];
         }
     }
     
@@ -195,6 +206,8 @@ void shutdown( void )
     {
         delete powerup;
     }
+    
+    delete player;
 }
 
 //--------------------------------------------------------------
@@ -265,17 +278,21 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 //--------------------------------------------------------------
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 {    
-    switch (g_eGameState)
-    {
-    case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
-        break;
-    case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-        break;
-    case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-        break;
-    case S_GAMEMODE2: gameplayMouseHandler(mouseEvent);
-        break;
-    }
+    //switch (g_eGameState)
+    //{
+    //case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
+    //    break;
+    //case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+    //    break;
+    //case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+    //    break;
+    //case S_GAMEMODE2: gameplayMouseHandler(mouseEvent);
+    //    break;
+    //case S_TUTORIAL: gameplayMouseHandler(mouseEvent);
+    //    break;
+    //}
+
+    gameplayMouseHandler(mouseEvent);
 }
 
 //--------------------------------------------------------------
@@ -388,6 +405,21 @@ void update(double dt)
             break;
         case S_GAMEMODE2: playEndless();
             break;
+        case S_TUTORIAL: playTutorial();
+            break;
+    }
+}
+
+void playTutorial()
+{
+    switch (TutState)
+    {
+    case TUT_GAMEPLAY:
+        break;
+    case TUT_POLICE:
+        break;
+    case TUT_POWERUP:
+        break;
     }
 }
 
@@ -802,7 +834,6 @@ void moveCharacter()
         {
             if (projectile[p] == nullptr)
             {
-
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
@@ -975,7 +1006,21 @@ void renderMap()
 void renderCharacter()
 {
     // Draw the location of the character
-    WORD charColor = 0x0C;
+
+    if (player->get_flash())
+    {
+        if (flashcount % 10)
+        {
+            g_sChar.m_bActive = !g_sChar.m_bActive;
+        }
+        flashcount--;
+        if (flashcount == 0)
+        {
+            player->set_flash(false);
+            
+        }
+    }
+    WORD charColor = 0x44;
     if (g_sChar.m_bActive)
     {
         charColor = 0x09;
@@ -983,6 +1028,8 @@ void renderCharacter()
     COORD c;
     c.X = player->getrposx();
     c.Y = player->getrposy();
+
+    
     //g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
     g_Console.writeToBuffer(c, (char)1, charColor);
 }
@@ -1226,7 +1273,7 @@ void renderNPC()
                 }
                 else
                 {
-                    colour = 0x66;
+                    colour = 0x11;
                 }
             }
             else
@@ -1261,10 +1308,12 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
     for (int i = 0; i < no; i++)
     {
         Position temp;
-        bool valid = true;
+        bool valid; 
 
         do
         {
+            valid = true;
+
             temp.set_x(rand() % 80);
             temp.set_y((rand() % 23) + 1);
           
@@ -1562,7 +1611,7 @@ void mainMenuWait()
         g_eGameState = S_GAMEMODE2;
         break;
     case 2:
-        g_eGameState = S_GAMEMODE3;
+        g_eGameState = S_TUTORIAL;
         break;
     case 3:
         g_eGameState = S_TEST;
@@ -1752,17 +1801,35 @@ void check_collision()
                 {
                 case S_GAMEMODE1:
                     player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                    resetallNPCs();
+                    NPC::resetnoHostile();
                     break;
                 case S_GAMEMODE2:
                     player->set_pos(safezone[4].get_x(), safezone[4].get_y());
                     break;
                 }
+                flashcount = 1 / g_dDeltaTime;
+                player->set_flash(true);
                 
                 g_sChar.m_cLocation.Y = player->getposy(); 
                 g_sChar.m_cLocation.X = player->getposx(); 
                 //timer = 0;
             }
  
+        }
+    }
+}
+
+void resetallNPCs()
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            if (NPCs[i]->isHostile())
+            {
+                NPCs[i]->calmdown();
+            }
         }
     }
 }

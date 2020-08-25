@@ -30,16 +30,24 @@ std::string loseMessage = "GGEZ Uninstall";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Redo Level";
 std::string mainMenuMessage = "Main Menu";
-std::string quit = "quit";
-std::string resume = "resume";
+std::string quit = "Quit";
+std::string resume = "Resume";
+std::string back = "Back";
+std::string gamemodes = "Play";
 
 //MAINMENU
-Object* MMButtons[4];
+Object title(71, 3);
 Object MMButton(gameMode1.length() + 2, 3);
 Object MMButton2(gameMode2.length() + 2, 3);
 Object MMButton3(gameMode3.length() + 2, 3);
 Object MMButton4(gameMode4.length() + 2, 3);
-const int MMButtonCount = 4; 
+Object backButton(back.length() + 2, 3);
+Object gamemodeButton(gamemodes.length() + 2, 3);
+Object* MMButtons[2];
+const int MMButtonCount = 2; 
+Object* MGButtons[5];
+const int MGButtonCount = 5;
+std::string stage = "SELECT";
 
 //PAUSE MENU
 bool paused = false;
@@ -52,7 +60,7 @@ const int PMButtonCount = 2;
 Object* WLButtons[3];
 Object continueButton(continueMessage.length() + 2, 3);
 Object restartButton(restartMessage.length() + 2, 3);
-Object mainMenuButton(restartMessage.length() + 2, 3);
+Object mainMenuButton(mainMenuMessage.length() + 2, 3);
 const int WLButtonCount = 3;
 
 //HUD
@@ -103,6 +111,7 @@ SMouseEvent g_mouseEvent;
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_MAINMENU; // initial state
+//MainMenu g_mainMenu = M_MAIN;
 
 Player* player = new Player;
 
@@ -1692,44 +1701,82 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {
-    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 5));
+    if (stage == "MAIN")
+    {
+        title.move(consoleSize.X / 2, consoleSize.Y / 4);
+        gamemodeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
+        quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
+
+        MMButtons[0] = &gamemodeButton;
+        MMButtons[1] = &quitButton;
+
+        renderBox(&gamemodeButton, 0x78, gamemodes);
+        renderBox(&quitButton, 0x78, quit);
+    }
+    if (stage == "SELECT")
+    {
+        title.move(consoleSize.X / 2, consoleSize.Y / 7);
+        MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 7);
+        MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 7);
+        MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 7);
+        MMButton4.move(consoleSize.X / 2, consoleSize.Y * 5 / 7);
+        backButton.move(consoleSize.X / 2, consoleSize.Y * 6 / 7);
+
+        MGButtons[0] = &MMButton;
+        MGButtons[1] = &MMButton2;
+        MGButtons[2] = &MMButton3;
+        MGButtons[3] = &MMButton4;
+        MGButtons[4] = &backButton;
+
+        renderBox(&MMButton, 0x78, gameMode1);
+        renderBox(&MMButton2, 0x78, gameMode2);
+        renderBox(&MMButton3, 0x78, gameMode3);
+        renderBox(&MMButton4, 0x78, gameMode4);
+        renderBox(&backButton, 0x78, back);
+    }
     renderBox(&title, 0x0F, gameName);
-
-    MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 5);
-    MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 5);
-    MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 5);
-    MMButton4.move(consoleSize.X / 2, consoleSize.Y);
-
-    MMButtons[0] = &MMButton;
-    MMButtons[1] = &MMButton2;
-    MMButtons[2] = &MMButton3;
-    MMButtons[3] = &MMButton4;
-
-    renderBox(&MMButton, 0x78, gameMode1);
-    renderBox(&MMButton2, 0x78, gameMode2);
-    renderBox(&MMButton3, 0x78, gameMode3);
-    renderBox(&MMButton4, 0x78, gameMode4);
 }
 
 void mainMenuWait()
 {
-    switch (checkButtonClicks(MMButtons, MMButtonCount))
+    if (stage == "MAIN")
     {
-    case 0:
-        g_eGameState = S_GAMEMODE1;
-        break;
-    case 1:
-        g_eGameState = S_GAMEMODE2;
-        break;
-    case 2:
-        g_eGameState = S_TUTORIAL;
-        break;
-    case 3:
-        g_eGameState = S_TEST;
-        break;
-    default:
-        break;
+        switch (checkButtonClicks(MMButtons, MMButtonCount))
+        {
+        case 0:
+            stage = "SELECT";
+            break;
+        case 1:
+            g_bQuitGame = true;
+            break;
+        default:
+            break;
+        }
     }
+    if (stage == "SELECT")
+    {
+        switch (checkButtonClicks(MGButtons, MGButtonCount))
+        {
+        case 0:
+            g_eGameState = S_GAMEMODE1;
+            break;
+        case 1:
+            g_eGameState = S_GAMEMODE2;
+            break;
+        case 2:
+            g_eGameState = S_TUTORIAL;
+            break;
+        case 3:
+            g_eGameState = S_TEST;
+            break;
+        case 4:
+            stage = "MAIN";
+            break;
+        default:
+            break;
+        }
+    }
+    
 }
 
 void renderPauseMenu()

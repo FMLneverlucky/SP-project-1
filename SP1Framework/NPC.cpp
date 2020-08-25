@@ -137,3 +137,8 @@ int NPC::gettotal()
 {
 	return total;
 }
+
+void NPC::calmdown()
+{
+	angry = false;
+}

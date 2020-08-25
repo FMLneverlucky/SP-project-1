@@ -31,6 +31,7 @@ public:
     void update_pos(double dtime);
     void cooldownstart();
     void cooldownend();
+    void calmdown();
     static int getnoHostile();
     static void resetnoHostile();
     static int gettotal();

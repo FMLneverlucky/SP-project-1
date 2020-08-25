@@ -81,6 +81,7 @@ int highestLVL;
 int totalhostile = 0;
 
 int tempcounter;
+int flashcount = 0;
 
 //TEST
 //double timer = 0;
@@ -987,7 +988,21 @@ void renderMap()
 void renderCharacter()
 {
     // Draw the location of the character
-    WORD charColor = 0x0C;
+
+    if (player->get_flash())
+    {
+        if (flashcount % 10)
+        {
+            g_sChar.m_bActive = !g_sChar.m_bActive;
+        }
+        flashcount--;
+        if (flashcount == 0)
+        {
+            player->set_flash(false);
+            g_sChar.m_bActive = !g_sChar.m_bActive;
+        }
+    }
+    WORD charColor = 0x44;
     if (g_sChar.m_bActive)
     {
         charColor = 0x09;
@@ -995,6 +1010,8 @@ void renderCharacter()
     COORD c;
     c.X = player->getrposx();
     c.Y = player->getrposy();
+
+    
     //g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
     g_Console.writeToBuffer(c, (char)1, charColor);
 }
@@ -1733,11 +1750,15 @@ void check_collision()
                 {
                 case S_GAMEMODE1:
                     player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                    resetallNPCs();
+                    NPC::resetnoHostile();
                     break;
                 case S_GAMEMODE2:
                     player->set_pos(safezone[4].get_x(), safezone[4].get_y());
                     break;
                 }
+                flashcount = 1 / g_dDeltaTime;
+                player->set_flash(true);
                 
                 g_sChar.m_cLocation.Y = player->getposy(); 
                 g_sChar.m_cLocation.X = player->getposx(); 
@@ -1747,6 +1768,21 @@ void check_collision()
         }
     }
 }
+
+void resetallNPCs()
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            if (NPCs[i]->isHostile())
+            {
+                NPCs[i]->calmdown();
+            }
+        }
+    }
+}
+
 
 void renderPoints()
 {

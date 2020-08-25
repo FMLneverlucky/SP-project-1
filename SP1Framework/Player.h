@@ -6,6 +6,7 @@ private:
     int HP;
     int maxHP;
     int cooldown; //coughs
+    bool flash = false;
 
 public:
     Player();
@@ -18,6 +19,8 @@ public:
     void update_pos(double dtime);
     void set_cooldown(int a);
     int get_cooldown();
+    void set_flash(bool what);
+    bool get_flash();
     Position* new_pos(double dtime);
 };
 

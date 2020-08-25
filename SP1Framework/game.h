@@ -114,6 +114,7 @@ void set_points();
 void setsafezone();
 void rendersafezone();
 bool insafezone(Position* pos);
+void resetallNPCs();
 
 //Testing area
 void testStates();

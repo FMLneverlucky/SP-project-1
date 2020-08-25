@@ -49,7 +49,7 @@ enum EGAMESTATES
     S_MAINMENU,
     S_GAMEMODE1,
     S_GAMEMODE2,
-    S_GAMEMODE3,
+    S_TUTORIAL,
     S_TEST,
     S_COUNT
 };
@@ -73,11 +73,19 @@ enum EndlessMode
     E_INIT,
     E_PLAY
 };
+
 enum Test
 {
     T_INIT,
     T_PLAY,
     T_END
+};
+
+enum Tutorial
+{
+    TUT_GAMEPLAY,
+    TUT_POLICE,
+    TUT_POWERUP
 };
 
 void init        ( void );      // initialize your variables, allocate memory, etc
@@ -115,6 +123,9 @@ void setsafezone();
 void rendersafezone();
 bool insafezone(Position* pos);
 void resetallNPCs();
+
+//Tutorials
+void playTutorial();
 
 //Testing area
 void testStates();

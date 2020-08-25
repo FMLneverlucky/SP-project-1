@@ -1191,7 +1191,7 @@ void spawnPowerUp()
 
         if (r == 53)
         {
-            powerup = new powerup;
+            powerup = new PowerUp;
             powerup->set_xcoord(rand() % 80);
             powerup->set_ycoord(rand() % 24);
 
@@ -1199,9 +1199,7 @@ void spawnPowerUp()
             {
                 powerup->set_xcoord(rand() % 80);
                 powerup->set_ycoord(rand() % 24);
-                break;
             }
-            break;
         }
    }
 }

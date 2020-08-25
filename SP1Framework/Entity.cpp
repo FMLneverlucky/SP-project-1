@@ -1,6 +1,6 @@
 #include "Entity.h"
 
-Entity::Entity()
+Entity::Entity() : direction(NOT)
 {
 
 }

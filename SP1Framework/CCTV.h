@@ -4,15 +4,15 @@ class CCTV :
     public Entity
 {
 private:
-    Position radar[20];
-    bool cw;
+    Position radar[20]; //position of CCTV's radar/line of sight
+    bool cw; //rotation direction (clockwise/anticlockwise)
     int rotateCD; //no. of frames before rotation
 public:
     CCTV();
     CCTV(int dir, bool cw); //constructor where user chooses intitial direction and rotation
-    void setCD(double count);
-    int getCD();
-    void update_cctv(); //function to set new direction and positions(of line of sight of cctv) accordingly
+    void setCD(double count);  //sets rotateCD
+    int getCD(); //returns rotateCD
+    void update_cctv(); //sets new direction and positions(of line of sight of cctv) accordingly
     Position* getRadarPos(int index); //function to return radar position
     char type();
 

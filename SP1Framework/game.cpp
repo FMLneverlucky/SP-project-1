@@ -166,14 +166,14 @@ void init( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void shutdown( void )
+void shutdown(void)
 {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
     g_Console.clearBuffer();
 
-    for (int i = 0; i < NPCLimit; i++)
+    /*for (int i = 0; i < NPCLimit; i++)
     {
         if (NPCs[i] != nullptr)
         {
@@ -194,10 +194,11 @@ void shutdown( void )
     {
         if (projectile[p] != nullptr)
         {
-            
+
             delete projectile[p];
         }
-    }
+    }*/
+    deleteEntities();
     
 
     if (powerup != nullptr)
@@ -205,7 +206,7 @@ void shutdown( void )
         delete powerup;
     }
     
-    delete player;
+    //delete player;
 }
 
 //--------------------------------------------------------------
@@ -1923,4 +1924,37 @@ bool insafezone(Position* pos)
         return true;
     }
     return false;
+}
+
+void deleteEntities()
+{
+    for (int i = 0; i < entityLimit; i++)
+    {
+        if (entities[i] != nullptr)
+        {
+            for (int n = 0; n < NPCLimit; n++)
+            {
+                if (NPCs[n] == entities[i])
+                {
+                    delete entities[i];
+                    NPCs[n] = nullptr;
+                    entities[i] = nullptr;
+                    return;
+                }
+            }
+            for (int n = 0; n < WallLimit; n++)
+            {
+                if (Walls[n] == entities[i])
+                {
+                    delete entities[i];
+                    Walls[n] = nullptr;
+                    entities[i] = nullptr;
+                    return;
+                }
+            }
+            delete entities[i];
+            entities[i] = nullptr;
+            player = nullptr;
+        }
+    }
 }

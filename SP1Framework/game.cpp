@@ -1749,6 +1749,8 @@ void check_collision()
                 {
                 case S_GAMEMODE1:
                     player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                    resetallNPCs();
+                    NPC::resetnoHostile();
                     break;
                 case S_GAMEMODE2:
                     player->set_pos(safezone[4].get_x(), safezone[4].get_y());
@@ -1765,6 +1767,21 @@ void check_collision()
         }
     }
 }
+
+void resetallNPCs()
+{
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            if (NPCs[i]->isHostile())
+            {
+                NPCs[i]->calmdown();
+            }
+        }
+    }
+}
+
 
 void renderPoints()
 {

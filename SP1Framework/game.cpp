@@ -196,9 +196,9 @@ void shutdown(void)
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
     g_Console.clearBuffer();
+
     deleteEntities();
     
-
     if (powerup != nullptr)
     {
         delete powerup;
@@ -762,8 +762,6 @@ void setsafezone()
 
         safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
         safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
-        
-
     }
 }
 
@@ -1904,8 +1902,10 @@ void limitprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            if ((projectile[p]->get_pcooldown() != 0))
+            if (projectile[p]->get_pcooldown() > 0)
             {
+                if (projectile[p]->get_pcooldown() > 100)
+                    projectile[p]->set_pcooldown(100); // make sure it cap at 100
                 projectile[p]->set_pcooldown(projectile[p]->get_pcooldown() - 1);
                 if (projectile[p]->get_spacecount() != 0)
                 {

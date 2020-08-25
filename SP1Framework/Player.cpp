@@ -14,6 +14,16 @@ char Player::type()
 	return 'P';
 }
 
+void Player::set_flash(bool what)
+{
+	flash = what;
+}
+
+bool Player::get_flash()
+{
+	return flash;
+}
+
 Position* Player::new_pos(double dtime)
 {
 	tempp.set_x(this->pos.get_x());

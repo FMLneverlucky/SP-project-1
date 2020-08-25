@@ -195,32 +195,6 @@ void shutdown(void)
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
     g_Console.clearBuffer();
-
-    /*for (int i = 0; i < NPCLimit; i++)
-    {
-        if (NPCs[i] != nullptr)
-        {
-            delete NPCs[i];
-        }
-    }
-
-    for (int w = 0; w < 40; w++)
-    {
-        if (Walls[w] != nullptr)
-        {
-            delete Walls[w];
-        }
-    }
-
-
-    for (int p = 0; p < particle_limit; p++)
-    {
-        if (projectile[p] != nullptr)
-        {
-
-            delete projectile[p];
-        }
-    }*/
     deleteEntities();
     
 

@@ -11,6 +11,7 @@
 #include "Projectile.h"
 #include "Wall.h"
 #include "PowerUp.h"
+#include "CCTV.h"
 
 //FOR TESTING
 bool checkInputs = false;
@@ -81,6 +82,8 @@ Position safezone[9];
 int highestLVL;
 int totalhostile = 0;
 
+
+//for temp use in code
 int tempcounter;
 int flashcount = 0;
 
@@ -90,7 +93,7 @@ std::string text = " ";
 //double timer = 0;
 
 //map aesthetics
-int prevcol = 0x00;
+int prevcol = 0x88;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -103,14 +106,15 @@ EGAMESTATES g_eGameState = S_MAINMENU; // initial state
 
 Player* player = new Player;
 
-Entity* entities[61] = { player, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }; //6 rows
-const int entityLimit = 61;
+Entity* entities[66] = { player, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row //NPCs
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //NPCs
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr};                                             //6 rows //CCTVs
+const int entityLimit = 66;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -123,9 +127,12 @@ Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullpt
 const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
-int particle_limit = 3;
+const int particle_limit = 3;
 
 PowerUp* powerup = nullptr;
+
+CCTV* CCTVs[5] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+const int CCTVLimit = 5;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -450,6 +457,7 @@ void updateGame()       // gameplay logic
     if (!paused)
     {
         moveCharacter();    // moves the character, collision detection, physics, etc
+        checkAll();
         showHUD = true;                   // sound can be played here too.
     }
     else
@@ -559,6 +567,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
+    spawnCCTV(2);
     
 }
 
@@ -622,6 +631,15 @@ void level_set() //deletes everyth
         }
     }
 
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
+            delete CCTVs[c];
+            CCTVs[c] = nullptr;
+        }
+    }
+
     if (powerup != nullptr)
     {
         delete powerup;
@@ -633,7 +651,7 @@ void level_set() //deletes everyth
     level++;
  
     set_spawn();
-    setBG();
+    //setBG();
     clear = false;
     NGameState = N_LEVEL;
     
@@ -654,12 +672,17 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
+        
+        //print lose screen here  
+    }
+
+    if (lose)
+    {
         highestLVL = level;
         level_set();
-        
+
         NGameState = N_INIT;
         g_eGameState = S_MAINMENU;
-        //print lose screen here  
     }
 }
     
@@ -849,6 +872,21 @@ void moveCharacter()
         player->set_direction(0);
     }
     
+    //necessary/related updates
+    player->set_cooldown(player->get_cooldown() - 1);
+    player->update_pos(g_dDeltaTime); //sets pos of player
+    g_sChar.m_cLocation.Y = player->getposy(); //moves player
+    g_sChar.m_cLocation.X = player->getposx(); //moves player
+    
+    moveall(); //moves NPCs
+    
+
+    
+}
+
+void checkAll()
+{
+    //cough
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         for (int p = 0; p < particle_limit; p++)
@@ -858,13 +896,13 @@ void moveCharacter()
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
-                projectile[p]->set_newpos(); 
+                projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
                 break;
             }
         }
 
-        //g_sChar.m_bActive = !g_sChar.m_bActive;
+        //for turning Police hostile
         for (int n = 0; n < NPCLimit; n++)
         {
             if (NPCs[n] != nullptr)
@@ -876,18 +914,48 @@ void moveCharacter()
             }
         }
 
+        //checking if player is within cctv radar when coughing
+        for (int c = 0; c < CCTVLimit; c++)
+        {
+            if (CCTVs[c] != nullptr)
+            {
+                for (int r = 0; r < 20; r++)
+                {
+                    if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
+                    {
+                        if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
+                        {
+                            lose = true;
+                            break;
+                        }
+
+                    }
+                }
+            }
+            break;
+        }
     }
 
-    player->set_cooldown(player->get_cooldown() - 1);
-    player->update_pos(g_dDeltaTime); //sets pos of player
-    g_sChar.m_cLocation.Y = player->getposy(); //moves player
-    g_sChar.m_cLocation.X = player->getposx(); //moves player
-    
-    moveall(); //moves NPCs
-    check_collision();
+    check_collision(); //checks for HostileNPC-Player Collision
     limitprojectile(); //moves/updates projectiles
-    
 
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
+            if (CCTVs[c]->getCD() == 0)
+            {
+                CCTVs[c]->update_cctv();
+                CCTVs[c]->setCD(1 / g_dDeltaTime);
+            }
+            else
+            {
+                CCTVs[c]->setCD(CCTVs[c]->getCD() - 1);
+            }
+        }
+    }
+
+    //checks if cough projectile is on the same block as an NPC, and turns them hostile if so
     for (int p = 0; p < particle_limit; p++)
     {
         if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr))
@@ -1029,6 +1097,7 @@ void renderMap()
     renderNPC();
     renderprojectile();
     renderWall();
+    renderCCTV();
     renderPowerUp();
 }
 
@@ -1942,31 +2011,6 @@ void renderPoints()
 
 }
 
-void setBG()
-{
-    int colour;
-    do
-    {
-        int a = rand() % 3;
-        switch (a)
-        {
-        case 0:
-            colour = 0x88;
-            break;
-        case 1:
-            colour = 0x77;
-            break;
-        case 2:
-            colour = 0xDD;
-            break;
-            
-
-        }
-    } while (prevcol == colour);
-
-    prevcol = colour;
-}
-
 void renderBG(int col)
 {
     COORD c;
@@ -2080,6 +2124,15 @@ void deleteEntities()
                     return;
                 }
             }
+            for (int c = 0; c < CCTVLimit; c++)
+            {
+                if (CCTVs[c] == entities[i])
+                {
+                    delete entities[i];
+                    CCTVs[c] = nullptr;
+                    entities[i] = nullptr;
+                }
+            }
             delete entities[i];
             entities[i] = nullptr;
             player = nullptr;
@@ -2093,4 +2146,79 @@ void renderText()
     textpos.X = 30;
     textpos.Y = 20;
     g_Console.writeToBuffer(textpos, text , 0x0F);
+}
+
+void renderCCTV()
+{
+    COORD cctvpos;
+    COORD radarpos;
+    int colour;
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
+            //rendering of CCTV
+            colour = 0x7A;
+            cctvpos.X = CCTVs[c]->getrposx();
+            cctvpos.Y = CCTVs[c]->getrposy();
+
+            if (checkifinscreen(cctvpos))
+            {
+                g_Console.writeToBuffer(cctvpos, (char)233 , colour);
+            }
+
+            //rendering of CCTV's line of sight
+            for (int r = 0; r < 20; r++)
+            {
+                colour = 0x8F;
+                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
+                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
+                if (checkifinscreen(radarpos))
+                {
+                    g_Console.writeToBuffer(radarpos, (char)177, colour);
+                }
+            }
+        }
+    }
+}
+
+void spawnCCTV(int no)
+{
+    for (int i = 0; i < no; i++)
+    {
+        Position temp;
+        bool valid;
+        do
+        {
+            valid = true;
+            temp.set_pos(rand() % 80, (rand() % 24) + 1);
+
+            for (int i = 0; i < 9; i++)
+            {
+                if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
+                {
+                    valid = false;
+                }
+                else if (temp.get_x() == endPoint[i].get_x() && temp.get_y() == endPoint[i].get_y())
+                {
+                    valid = false;
+                }
+            }
+
+        } while (occupied(&temp) != nullptr || valid == false);
+
+        for (int c = 0; c < CCTVLimit; c++)
+        {
+            if (CCTVs[c] == nullptr)
+            {
+                CCTVs[c] = new CCTV((rand() % 8) + 1, (rand() % 2));
+                entities[c + 61] = CCTVs[c];
+                CCTVs[c]->set_pos(temp.get_x(), temp.get_y());
+                CCTVs[c]->setCD(1 / g_dDeltaTime);
+                CCTVs[c]->update_cctv();
+                break;
+            }
+        }
+
+    }
 }

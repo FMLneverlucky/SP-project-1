@@ -108,6 +108,8 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+void checkAll();
+
 //Game Modes
 void InitNormal();
 void playNormal();
@@ -140,9 +142,11 @@ void endTest();
 void spawnWall(int no);
 void renderWall();
 
+//CCTV
+void renderCCTV();
+void spawnCCTV(int no);
 
 //aesthetics
-void setBG();
 void renderBG(int col);
 void setallrpos();
 bool checkifinscreen(COORD c);

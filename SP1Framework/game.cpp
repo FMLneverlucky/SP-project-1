@@ -12,6 +12,7 @@
 #include "Wall.h"
 #include "PowerUp.h"
 #include "CCTV.h"
+#include <irrKlang.h>
 
 //FOR TESTING
 bool checkInputs = false;

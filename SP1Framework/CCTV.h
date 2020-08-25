@@ -7,6 +7,7 @@ private:
     Position radar[20]; //position of CCTV's radar/line of sight
     bool cw; //rotation direction (clockwise/anticlockwise)
     int rotateCD; //no. of frames before rotation
+
 public:
     CCTV();
     CCTV(int dir, bool cw); //constructor where user chooses intitial direction and rotation

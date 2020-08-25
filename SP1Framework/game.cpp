@@ -1070,10 +1070,11 @@ void renderMap()
 
     
     //renderPoints();
+    renderCCTV();
     renderNPC();
     renderprojectile();
     renderWall();
-    renderCCTV();
+    
     renderPowerUp();
 }
 

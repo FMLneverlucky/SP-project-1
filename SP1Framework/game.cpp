@@ -1017,7 +1017,7 @@ void renderCharacter()
         if (flashcount == 0)
         {
             player->set_flash(false);
-            g_sChar.m_bActive = !g_sChar.m_bActive;
+            
         }
     }
     WORD charColor = 0x44;

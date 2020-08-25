@@ -7,7 +7,11 @@ enum direction
 	UP,
 	DOWN,
 	LEFT,
-	RIGHT
+	RIGHT,
+	TOPLEFT,
+	TOPRIGHT,
+	BOTTOMRIGHT,
+	BOTTOMLEFT
 };
 
 class Entity

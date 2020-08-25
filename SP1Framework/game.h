@@ -126,6 +126,9 @@ void resetallNPCs();
 
 //Tutorials
 void playTutorial();
+void renderText();
+void initTutGP();
+void playTutGP();
 
 //Testing area
 void testStates();

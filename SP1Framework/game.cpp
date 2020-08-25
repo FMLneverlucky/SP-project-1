@@ -22,7 +22,7 @@ float splashScreenTime = 0.5;
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
 std::string gameMode2 = "Endless";
-std::string gameMode3 = "Tutorial";
+std::string gameMode3 = "Tutorial (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
@@ -713,7 +713,6 @@ void enterEndless()
             }
         }
 
-
         if (powerup != nullptr)
         {
             delete powerup;
@@ -1011,15 +1010,23 @@ void renderCharacter()
     {
         if (flashcount % 10)
         {
-            g_sChar.m_bActive = !g_sChar.m_bActive;
+            g_sChar.m_bActive = false;
+        }
+        else
+        {
+            g_sChar.m_bActive = true;
         }
         flashcount--;
         if (flashcount == 0)
         {
             player->set_flash(false);
-            
         }
     }
+    else
+    {
+        g_sChar.m_bActive = true;
+    }
+
     WORD charColor = 0x44;
     if (g_sChar.m_bActive)
     {

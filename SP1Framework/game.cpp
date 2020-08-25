@@ -193,34 +193,8 @@ void shutdown(void)
 
     g_Console.clearBuffer();
 
-    /*for (int i = 0; i < NPCLimit; i++)
-    {
-        if (NPCs[i] != nullptr)
-        {
-            delete NPCs[i];
-        }
-    }
-
-    for (int w = 0; w < 40; w++)
-    {
-        if (Walls[w] != nullptr)
-        {
-            delete Walls[w];
-        }
-    }
-
-
-    for (int p = 0; p < particle_limit; p++)
-    {
-        if (projectile[p] != nullptr)
-        {
-
-            delete projectile[p];
-        }
-    }*/
     deleteEntities();
     
-
     if (powerup != nullptr)
     {
         delete powerup;
@@ -803,8 +777,6 @@ void setsafezone()
 
         safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
         safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
-        
-
     }
 }
 
@@ -1924,8 +1896,10 @@ void limitprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            if ((projectile[p]->get_pcooldown() != 0))
+            if (projectile[p]->get_pcooldown() > 0)
             {
+                if (projectile[p]->get_pcooldown() > 100)
+                    projectile[p]->set_pcooldown(100); // make sure it cap at 100
                 projectile[p]->set_pcooldown(projectile[p]->get_pcooldown() - 1);
                 if (projectile[p]->get_spacecount() != 0)
                 {

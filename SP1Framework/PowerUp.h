@@ -5,7 +5,7 @@ class PowerUp
 {
 private:
 	Position UPpos;
-	int detime;
+	int detime; //despawn time
 public:
 	PowerUp();
 	~PowerUp();
@@ -14,6 +14,6 @@ public:
 	float get_xcoord();
 	float get_ycoord();
 	void set_detime(int d);
-	int get_detime();
+	int get_detime(); 
 	Position* get_pos();
 };

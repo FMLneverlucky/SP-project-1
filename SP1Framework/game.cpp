@@ -671,6 +671,9 @@ void playLevel()
     updateGame();
     renderHUD();
 
+    if (player->get_ld() != 0)
+        player->update_ld();
+
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
     {
         clear = true;
@@ -1348,9 +1351,10 @@ void spawnPowerUp()
 {
     if (powerup == nullptr)
     {
-        int r = rand() % 100;
+        int r = rand() % 1000;
+        int a = rand() % 1000;
 
-        if (r == 53)
+        if (r == a)
         {
             powerup = new PowerUp;
 
@@ -1360,7 +1364,7 @@ void spawnPowerUp()
                 powerup->set_ycoord((rand() % 24) + 1); 
             } while (occupied(powerup->get_pos()) != nullptr);
 
-            powerup->set_detime(1100);
+            powerup->set_detime(2250);
         }
     }
 }
@@ -1369,8 +1373,15 @@ void deletePowerUp()
 {
     if (powerup != nullptr)
     {
-        if (powerup->get_detime() != 0)
-        powerup->set_detime(powerup->get_detime() - 1);
+        if ((g_sChar.m_cLocation.X == powerup->get_xcoord()) && (g_sChar.m_cLocation.Y == powerup->get_ycoord()))
+        {
+            player->set_lethal();
+            delete powerup;
+            powerup = nullptr;
+        }
+
+        else if (powerup->get_detime() != 0)
+            powerup->set_detime(powerup->get_detime() - 1);
 
         else
         {
@@ -1682,7 +1693,11 @@ void renderprojectile()
             pr.X = static_cast<int>(projectile[p]->get_px()) - static_cast<int>(player->getposx()) + 40;
             pr.Y = static_cast<int>(projectile[p]->get_py()) - static_cast<int>(player->getposy()) + 12;
 
-            colour = 0xA1;
+            if (player->get_lethalstatus() == 1)
+                colour = 0x55;
+            else
+                colour = 0xA1;
+
             if (checkifinscreen(pr))
             {
                 g_Console.writeToBuffer(pr, " ", colour);

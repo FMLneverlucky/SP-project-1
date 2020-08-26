@@ -11,6 +11,8 @@
 #include "Projectile.h"
 #include "Wall.h"
 #include "PowerUp.h"
+#include "CCTV.h"
+#include <irrKlang.h>
 
 //FOR TESTING
 bool checkInputs = false;
@@ -29,16 +31,27 @@ std::string loseMessage = "GGEZ Uninstall";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Redo Level";
 std::string mainMenuMessage = "Main Menu";
-std::string quit = "quit";
-std::string resume = "resume";
+std::string quit = "Quit";
+std::string resume = "Resume";
+std::string back = "Back";
+std::string gamemodes = "Play";
 
 //MAINMENU
-Object* MMButtons[4];
+Object title(71, 3);
 Object MMButton(gameMode1.length() + 2, 3);
 Object MMButton2(gameMode2.length() + 2, 3);
 Object MMButton3(gameMode3.length() + 2, 3);
 Object MMButton4(gameMode4.length() + 2, 3);
-const int MMButtonCount = 4; 
+Object backButton(back.length() + 2, 3);
+Object gamemodeButton(gamemodes.length() + 2, 3);
+Object* MMButtons[2];
+const int MMButtonCount = 2; 
+Object* MGButtons[5];
+const int MGButtonCount = 5;
+std::string stage = "SELECT";
+
+//QUICK FIX
+bool isMousePressed = false;
 
 //PAUSE MENU
 bool paused = false;
@@ -51,7 +64,7 @@ const int PMButtonCount = 2;
 Object* WLButtons[3];
 Object continueButton(continueMessage.length() + 2, 3);
 Object restartButton(restartMessage.length() + 2, 3);
-Object mainMenuButton(restartMessage.length() + 2, 3);
+Object mainMenuButton(mainMenuMessage.length() + 2, 3);
 const int WLButtonCount = 3;
 
 //HUD
@@ -81,14 +94,18 @@ Position safezone[9];
 int highestLVL;
 int totalhostile = 0;
 
+
+//for temp use in code
 int tempcounter;
 int flashcount = 0;
 
+//TUTORIAL
+std::string text = " ";
 //TEST
 //double timer = 0;
 
 //map aesthetics
-int prevcol = 0x00;
+int prevcol = 0x88;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -98,17 +115,19 @@ SMouseEvent g_mouseEvent;
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_MAINMENU; // initial state
+//MainMenu g_mainMenu = M_MAIN;
 
 Player* player = new Player;
 
-Entity* entities[61] = { player, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
-                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }; //6 rows
-const int entityLimit = 61;
+Entity* entities[66] = { player, 
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //10 per row //NPCs
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //NPCs
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
+                        nullptr, nullptr, nullptr, nullptr, nullptr};                                             //6 rows //CCTVs
+const int entityLimit = 66;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -121,9 +140,12 @@ Wall* Walls[40] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullpt
 const int WallLimit = 10;
 
 Projectile* projectile[3] = { nullptr, nullptr, nullptr };
-int particle_limit = 3;
+const int particle_limit = 3;
 
 PowerUp* powerup = nullptr;
+
+CCTV* CCTVs[5] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+const int CCTVLimit = 5;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -175,34 +197,8 @@ void shutdown(void)
 
     g_Console.clearBuffer();
 
-    /*for (int i = 0; i < NPCLimit; i++)
-    {
-        if (NPCs[i] != nullptr)
-        {
-            delete NPCs[i];
-        }
-    }
-
-    for (int w = 0; w < 40; w++)
-    {
-        if (Walls[w] != nullptr)
-        {
-            delete Walls[w];
-        }
-    }
-
-
-    for (int p = 0; p < particle_limit; p++)
-    {
-        if (projectile[p] != nullptr)
-        {
-
-            delete projectile[p];
-        }
-    }*/
     deleteEntities();
     
-
     if (powerup != nullptr)
     {
         delete powerup;
@@ -404,7 +400,8 @@ void update(double dt)
             break;
         case S_GAMEMODE1: playNormal();
             break;
-        case S_GAMEMODE2: playEndless();
+        case S_GAMEMODE2:
+            playEndless();
             break;
         case S_TUTORIAL: playTutorial();
             break;
@@ -416,12 +413,24 @@ void playTutorial()
     switch (TutState)
     {
     case TUT_GAMEPLAY:
+        initTutGP();
+        playTutGP();
         break;
     case TUT_POLICE:
         break;
     case TUT_POWERUP:
         break;
     }
+}
+
+void initTutGP()
+{
+
+}
+
+void playTutGP()
+{
+
 }
 
 void splashScreenWait()    // waits for time to pass in splash screen
@@ -436,6 +445,7 @@ void updateGame()       // gameplay logic
     if (!paused)
     {
         moveCharacter();    // moves the character, collision detection, physics, etc
+        checkAll();
         showHUD = true;                   // sound can be played here too.
     }
     else
@@ -490,6 +500,8 @@ void playNormal()
         break;
     case N_NEXTLEVEL:
         level_set();
+    case N_LOSE:
+        winLoseMenuWait();
         break;
     }
 }
@@ -513,7 +525,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     {
         noC = 3;
         noP = 0;
-        spd = 0.1;
+        spd = 0.2;
         cdtime = 5;
         noW = 10;
     }
@@ -535,7 +547,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     }
     else
     {
-        spd = 0.5;
+        spd = 0.9;
         cdtime = 1;
         noP = 5;
         noC = 15;
@@ -545,6 +557,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     set_points();
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
+    spawnCCTV(2);
     
 }
 
@@ -579,7 +592,7 @@ void set_points()
     }
 }
 
-void level_set() //deletes everyth
+void resetSpawns()
 {
     for (int i = 0; i < NPCLimit; i++)
     {
@@ -608,21 +621,35 @@ void level_set() //deletes everyth
         }
     }
 
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
+            delete CCTVs[c];
+            CCTVs[c] = nullptr;
+        }
+    }
 
     if (powerup != nullptr)
     {
         delete powerup;
         powerup = nullptr;
     }
+}
+
+void level_set() //deletes everyth
+{
     
+    resetSpawns();
+   
     player->resetHP();
     NPC::resetnoHostile();
     level++;
- 
+
     set_spawn();
-    setBG();
     clear = false;
     NGameState = N_LEVEL;
+    
     
 }
 
@@ -642,12 +669,14 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
+    }
+
+    if (lose)
+    {
         highestLVL = level;
-        level_set();
-        
-        NGameState = N_INIT;
-        g_eGameState = S_MAINMENU;
-        //print lose screen here  
+        resetSpawns();
+        NGameState = N_LOSE;
+
     }
 }
     
@@ -661,6 +690,8 @@ void playEndless()
     case E_PLAY:
         enterEndless();
         break;
+    case E_LOSE:
+        winLoseMenuWait();
     }
 }
 
@@ -675,7 +706,7 @@ void InitEndless()
     setsafezone();
 
     spawnWall(10);
-    spawnNPC(false, 5, 0.5, 1);
+    spawnNPC(false, 5, 0.6, 1);
     //spawnNPC(true, 1, 0.5, 1);
 
     EGameState = E_PLAY;
@@ -686,7 +717,7 @@ void enterEndless()
     tempcounter++;
     if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
-        spawnNPC(false, 1, 0.5, 1);
+        spawnNPC(false, 1, 0.6, 1);
         tempcounter = 0;
     }
 
@@ -695,32 +726,7 @@ void enterEndless()
     if (player->get_HP() == 0)
     {
         lose = true;
-        totalhostile = NPC::getnoHostile();
-        for (int i = 1; i < entityLimit; i++)
-        {
-            if (entities[i] != nullptr)
-            {
-                delete entities[i];
-                entities[i] = nullptr;
-            }
-        }
-
-        for (int p = 0; p < particle_limit; p++)
-        {
-            if (projectile[p] != nullptr)
-            {
-                delete projectile[p];
-                projectile[p] = nullptr;
-            }
-        }
-
-        if (powerup != nullptr)
-        {
-            delete powerup;
-            powerup = nullptr;
-        }
-        EGameState = E_INIT;
-        g_eGameState = S_MAINMENU;
+        
     }
 
     for (int i = 0; i < NPCLimit; i++)
@@ -737,6 +743,13 @@ void enterEndless()
             }
         }
     }
+    if (lose)
+    {
+        totalhostile = NPC::getnoHostile();
+        resetSpawns();
+        EGameState = E_LOSE;
+        
+    }
 }
 
 void setsafezone()
@@ -750,8 +763,6 @@ void setsafezone()
 
         safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
         safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
-        
-
     }
 }
 
@@ -828,6 +839,21 @@ void moveCharacter()
         player->set_direction(0);
     }
     
+    //necessary/related updates
+    
+    player->update_pos(g_dDeltaTime); //sets pos of player
+    g_sChar.m_cLocation.Y = player->getposy(); //moves player
+    g_sChar.m_cLocation.X = player->getposx(); //moves player
+    
+    moveall(); //moves NPCs
+    
+
+    
+}
+
+void checkAll()
+{
+    //cough
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         for (int p = 0; p < particle_limit; p++)
@@ -837,13 +863,13 @@ void moveCharacter()
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
-                projectile[p]->set_newpos(); 
+                projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
                 break;
             }
         }
 
-        //g_sChar.m_bActive = !g_sChar.m_bActive;
+        //for turning Police hostile
         for (int n = 0; n < NPCLimit; n++)
         {
             if (NPCs[n] != nullptr)
@@ -854,30 +880,64 @@ void moveCharacter()
                 }
             }
         }
+
+        //checking if player is within cctv radar when coughing
+        for (int c = 0; c < CCTVLimit; c++)
+        {
+            if (CCTVs[c] != nullptr)
+            {
+                for (int r = 0; r < 20; r++)
+                {
+                    if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
+                    {
+                        if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
+                        {
+                            lose = true;
+                            break;
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
-    player->set_cooldown(player->get_cooldown() - 1);
-    player->update_pos(g_dDeltaTime); //sets pos of player
-    g_sChar.m_cLocation.Y = player->getposy(); //moves player
-    g_sChar.m_cLocation.X = player->getposx(); //moves player
-    
-    moveall(); //moves NPCs
-    check_collision();
+    check_collision(); //checks for HostileNPC-Player Collision
     limitprojectile(); //moves/updates projectiles
-    
 
+    //rotates CCTVs radar every second
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
+            if (CCTVs[c]->getCD() == 0)
+            {
+                CCTVs[c]->update_cctv();
+                CCTVs[c]->setCD(1 / g_dDeltaTime);
+            }
+            else
+            {
+                CCTVs[c]->setCD(CCTVs[c]->getCD() - 1);
+            }
+        }
+    }
+
+    //checks if cough projectile is on the same block as an NPC, and turns them hostile if so
     for (int p = 0; p < particle_limit; p++)
     {
-        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr) && occupied(projectile[p]->getpos())->type() == 'C')
+        if ((projectile[p] != nullptr) && (occupied(projectile[p]->getpos()) != nullptr))
         {
-            for (int i = 0; i < NPCLimit; i++)
+            if (occupied(projectile[p]->getpos())->type() == 'C')
             {
-                if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                for (int i = 0; i < NPCLimit; i++)
                 {
-                    NPCs[i]->anger();
-                    NPCs[i]->cooldownstart();
-                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
-                    
+                    if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                    {
+                        NPCs[i]->anger();
+                        NPCs[i]->cooldownstart();
+                        NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+
+                    }
                 }
             }
         }
@@ -906,7 +966,7 @@ void render()
     switch (g_eGameState)
     {
     case S_MAINMENU: 
-        renderBG(0x00);
+        //renderBG(0x00);
         renderMainMenu();
         break;
     case S_TEST: 
@@ -916,12 +976,24 @@ void render()
         renderBG(prevcol);
         renderPoints();
         renderGame();
+        if (lose)
+        {
+            renderWinLoseMenu(false);
+        }
         break;
     case S_GAMEMODE2:
         renderBG(0x88); //dk what colour for now
         rendersafezone();
         renderGame();
-        
+        if (lose)
+        {
+            renderWinLoseMenu(false);
+        }
+        break;
+    case S_TUTORIAL:
+        renderBG(prevcol);
+        renderGame();
+        renderText();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -997,9 +1069,11 @@ void renderMap()
 
     
     //renderPoints();
+    renderCCTV();
     renderNPC();
     renderprojectile();
     renderWall();
+    
     renderPowerUp();
 }
 
@@ -1447,7 +1521,7 @@ void moveall()
 
                 
             }
-            else if (NPCs[i]->get_ftime() != 0) //npc is hostile but on cooldown
+            else if (NPCs[i]->isonCD()) //npc is hostile but on cooldown
             {
                 NPCs[i]->set_direction(0);
                 NPCs[i]->set_count(NPCs[i]->get_count() - 1);
@@ -1605,44 +1679,82 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {
-    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 5));
+    if (stage == "MAIN")
+    {
+        title.move(consoleSize.X / 2, consoleSize.Y / 4);
+        gamemodeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
+        quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
+
+        MMButtons[0] = &gamemodeButton;
+        MMButtons[1] = &quitButton;
+
+        renderBox(&gamemodeButton, 0x78, gamemodes);
+        renderBox(&quitButton, 0x78, quit);
+    }
+    if (stage == "SELECT")
+    {
+        title.move(consoleSize.X / 2, consoleSize.Y / 7);
+        MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 7);
+        MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 7);
+        MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 7);
+        MMButton4.move(consoleSize.X / 2, consoleSize.Y * 5 / 7);
+        backButton.move(consoleSize.X / 2, consoleSize.Y * 6 / 7);
+
+        MGButtons[0] = &MMButton;
+        MGButtons[1] = &MMButton2;
+        MGButtons[2] = &MMButton3;
+        MGButtons[3] = &MMButton4;
+        MGButtons[4] = &backButton;
+
+        renderBox(&MMButton, 0x78, gameMode1);
+        renderBox(&MMButton2, 0x78, gameMode2);
+        renderBox(&MMButton3, 0x78, gameMode3);
+        renderBox(&MMButton4, 0x78, gameMode4);
+        renderBox(&backButton, 0x78, back);
+    }
     renderBox(&title, 0x0F, gameName);
-
-    MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 5);
-    MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 5);
-    MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 5);
-    MMButton4.move(consoleSize.X / 2, consoleSize.Y);
-
-    MMButtons[0] = &MMButton;
-    MMButtons[1] = &MMButton2;
-    MMButtons[2] = &MMButton3;
-    MMButtons[3] = &MMButton4;
-
-    renderBox(&MMButton, 0x78, gameMode1);
-    renderBox(&MMButton2, 0x78, gameMode2);
-    renderBox(&MMButton3, 0x78, gameMode3);
-    renderBox(&MMButton4, 0x78, gameMode4);
 }
 
 void mainMenuWait()
 {
-    switch (checkButtonClicks(MMButtons, MMButtonCount))
+    if (stage == "MAIN")
     {
-    case 0:
-        g_eGameState = S_GAMEMODE1;
-        break;
-    case 1:
-        g_eGameState = S_GAMEMODE2;
-        break;
-    case 2:
-        g_eGameState = S_TUTORIAL;
-        break;
-    case 3:
-        g_eGameState = S_TEST;
-        break;
-    default:
-        break;
+        switch (checkButtonClicks(MMButtons, MMButtonCount))
+        {
+        case 0:
+            stage = "SELECT";
+            break;
+        case 1:
+            g_bQuitGame = true;
+            break;
+        default:
+            break;
+        }
     }
+    if (stage == "SELECT")
+    {
+        switch (checkButtonClicks(MGButtons, MGButtonCount))
+        {
+        case 0:
+            g_eGameState = S_GAMEMODE1;
+            break;
+        case 1:
+            g_eGameState = S_GAMEMODE2;
+            break;
+        case 2:
+            g_eGameState = S_TUTORIAL;
+            break;
+        case 3:
+            g_eGameState = S_TEST;
+            break;
+        case 4:
+            stage = "MAIN";
+            break;
+        default:
+            break;
+        }
+    }
+    
 }
 
 void renderPauseMenu()
@@ -1706,9 +1818,12 @@ void winLoseMenuWait()
         break;
     case 1:
         g_eGameState = S_MAINMENU;
+        NGameState = N_INIT;
+        EGameState = E_INIT;
         break;
     case 2:
-        //do win lose stuff; 
+        NGameState = N_INIT;
+        EGameState = E_INIT;
         break;
     default:
         break;
@@ -1738,13 +1853,13 @@ void renderHUD()
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
         healthBar.scale((float)currentHP / player->get_maxHP(), 1);
     }
-    if (player->get_cooldown() > 0)
+    /*if (player->get_cooldown() > 0)
     {
         coughBar.resize(30, 1);
         coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
         coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
         coughBar.scale(1 / player->get_cooldown(), 1);
-    }
+    }*/
 
     if (showHUD)
     {
@@ -1765,21 +1880,30 @@ void renderHUD()
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {
+    
     int mouseX, mouseY;
     if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {// check when player left click 
-        mouseX = g_mouseEvent.mousePosition.X;
-        mouseY = g_mouseEvent.mousePosition.Y;
-        for (int i = 0; i < arrayLength; i++)
-        {//check all the objects in the given array
-            if (mouseX >= buttons[i]->referencePosition()->get_x() &&
-                mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
-                mouseY >= buttons[i]->referencePosition()->get_y() &&
-                mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
-            {// check if mouse is within this Object
-                return i;
+        if (isMousePressed == false)
+        {
+            isMousePressed = true;
+            mouseX = g_mouseEvent.mousePosition.X;
+            mouseY = g_mouseEvent.mousePosition.Y;
+            for (int i = 0; i < arrayLength; i++)
+            {//check all the objects in the given array
+                if (mouseX >= buttons[i]->referencePosition()->get_x() &&
+                    mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
+                    mouseY >= buttons[i]->referencePosition()->get_y() &&
+                    mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
+                {// check if mouse is within this Object
+                    return i;
+                }
             }
         }
+    } 
+    else
+    {
+        isMousePressed = false;
     }
     return arrayLength;
 }
@@ -1790,8 +1914,10 @@ void limitprojectile()
     {
         if (projectile[p] != nullptr)
         {
-            if ((projectile[p]->get_pcooldown() != 0))
+            if (projectile[p]->get_pcooldown() > 0)
             {
+                if (projectile[p]->get_pcooldown() > 100)
+                    projectile[p]->set_pcooldown(100); // make sure it cap at 100
                 projectile[p]->set_pcooldown(projectile[p]->get_pcooldown() - 1);
                 if (projectile[p]->get_spacecount() != 0)
                 {
@@ -1814,16 +1940,19 @@ void check_collision()
     {
         if (NPCs[i] != nullptr)
         {
-            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->get_ftime() <= 0)
+            if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->isonCD() == false)
             {
                 //timer += g_dDeltaTime;
                 //timer >3, run else dont;
-                NPCs[i]->cooldownstart();
-                NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                
                 player->loseHP(NPCs[i]->get_damage());
+                flashcount = 1 / g_dDeltaTime;
+                player->set_flash(true);
                 switch (g_eGameState)
                 {
                 case S_GAMEMODE1:
+                    NPCs[i]->cooldownstart();
+                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                     player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
                     resetallNPCs();
                     NPC::resetnoHostile();
@@ -1832,8 +1961,7 @@ void check_collision()
                     player->set_pos(safezone[4].get_x(), safezone[4].get_y());
                     break;
                 }
-                flashcount = 1 / g_dDeltaTime;
-                player->set_flash(true);
+                
                 
                 g_sChar.m_cLocation.Y = player->getposy(); 
                 g_sChar.m_cLocation.X = player->getposx(); 
@@ -1922,31 +2050,6 @@ void renderPoints()
         g_Console.writeToBuffer(c, (char)254, colour);
     }
 
-}
-
-void setBG()
-{
-    int colour;
-    do
-    {
-        int a = rand() % 3;
-        switch (a)
-        {
-        case 0:
-            colour = 0x88;
-            break;
-        case 1:
-            colour = 0x55;
-            break;
-        case 2:
-            colour = 0xDD;
-            break;
-            
-
-        }
-    } while (prevcol == colour);
-
-    prevcol = colour;
 }
 
 void renderBG(int col)
@@ -2038,7 +2141,7 @@ bool insafezone(Position* pos)
 
 void deleteEntities()
 {
-    for (int i = 0; i < entityLimit; i++)
+    for (int i = 1; i < entityLimit; i++)
     {
         if (entities[i] != nullptr)
         {
@@ -2062,9 +2165,104 @@ void deleteEntities()
                     return;
                 }
             }
-            delete entities[i];
-            entities[i] = nullptr;
-            player = nullptr;
+            for (int c = 0; c < CCTVLimit; c++)
+            {
+                if (CCTVs[c] == entities[i])
+                {
+                    delete entities[i];
+                    CCTVs[c] = nullptr;
+                    entities[i] = nullptr;
+                }
+            }
+            /*delete entities[i];
+            entities[i] = nullptr;*/
+            
         }
+    }
+    delete entities[0];
+    player = nullptr;
+    entities[0] = nullptr;
+}
+
+void renderText()
+{
+    COORD textpos;
+    textpos.X = 30;
+    textpos.Y = 20;
+    g_Console.writeToBuffer(textpos, text , 0x0F);
+}
+
+void renderCCTV()
+{
+    COORD cctvpos;
+    COORD radarpos;
+    int colour;
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
+            //rendering of CCTV
+            colour = 0x7A;
+            cctvpos.X = CCTVs[c]->getrposx();
+            cctvpos.Y = CCTVs[c]->getrposy();
+
+            if (checkifinscreen(cctvpos))
+            {
+                g_Console.writeToBuffer(cctvpos, (char)233 , colour);
+            }
+
+            //rendering of CCTV's line of sight
+            for (int r = 0; r < 20; r++)
+            {
+                colour = 0x8F;
+                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
+                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
+                if (checkifinscreen(radarpos))
+                {
+                    g_Console.writeToBuffer(radarpos, (char)177, colour);
+                }
+            }
+        }
+    }
+}
+
+void spawnCCTV(int no)
+{
+    for (int i = 0; i < no; i++)
+    {
+        Position temp;
+        bool valid;
+        do
+        {
+            valid = true;
+            temp.set_pos(rand() % 80, (rand() % 24) + 1);
+
+            for (int i = 0; i < 9; i++)
+            {
+                if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
+                {
+                    valid = false;
+                }
+                else if (temp.get_x() == endPoint[i].get_x() && temp.get_y() == endPoint[i].get_y())
+                {
+                    valid = false;
+                }
+            }
+
+        } while (occupied(&temp) != nullptr || valid == false);
+
+        for (int c = 0; c < CCTVLimit; c++)
+        {
+            if (CCTVs[c] == nullptr)
+            {
+                CCTVs[c] = new CCTV((rand() % 8) + 1, (rand() % 2));
+                entities[c + 61] = CCTVs[c];
+                CCTVs[c]->set_pos(temp.get_x(), temp.get_y());
+                CCTVs[c]->setCD(1 / g_dDeltaTime);
+                CCTVs[c]->update_cctv();
+                break;
+            }
+        }
+
     }
 }

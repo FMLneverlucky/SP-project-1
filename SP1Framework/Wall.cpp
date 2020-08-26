@@ -149,86 +149,16 @@ Position* Wall::getPos(int x)
         return &wall4;
     };
 }
-//int Wall::setType()
-//{
-//	int x = rand() % 8;
-//	int nextWall;
-//	switch (x)
-//	{
-//	case 1:
-//		nextWall = I;
-//		break;
-//	case 2:
-//		nextWall = J;
-//		break;
-//	case 3:
-//		nextWall = L;
-//		break;
-//	case 4:
-//		nextWall = O;
-//		break;
-//	case 5:
-//		nextWall = S;
-//		break;
-//	case 6:
-//		nextWall = T;
-//		break;
-//	case 7:
-//		nextWall = Z;
-//		break;
-//	default:
-//		nextWall = d;
-//	}
-//	return nextWall;
-//}
 
-//void Wall::typeI()
-//{
-//	
-//}
-//
-//void Wall::typeJ()
-//{
-//
-//}
-//
-//void Wall::typeL()
-//{
-//
-//}
-//
-//void Wall::typeO()
-//{
-//
-//}
-//
-//void Wall::typeS()
-//{
-//
-//}
-//
-//void Wall::typeT()
-//{
-//
-//}
-//
-//void Wall::typeZ()
-//{
-//
-//}
-//
-//void Wall::typed()
-//{
-//
-//}
 
 void Wall::update_pos(double dtime)
 {
-
+    //No codes here
 }
 
 Position* Wall::new_pos(double dtime)
 {
+    //No codes here
 	Position p;
 	return &p;
 }

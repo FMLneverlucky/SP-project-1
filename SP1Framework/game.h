@@ -1,4 +1,3 @@
-
 #ifndef _GAME_H
 #define _GAME_H
 
@@ -61,17 +60,25 @@ struct SGameChar
     bool  m_bActive;
 };
 
+//enum MainMenu
+//{
+//    M_MAIN,
+//    M_GAMEMODES
+//};
+
 enum NormalMode
 {
     N_INIT,
     N_LEVEL,
-    N_NEXTLEVEL
+    N_NEXTLEVEL,
+    N_LOSE
 };
 
 enum EndlessMode
 {
     E_INIT,
-    E_PLAY
+    E_PLAY,
+    E_LOSE
 };
 
 enum Test
@@ -108,11 +115,14 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+void checkAll();
+
 //Game Modes
 void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
+void resetSpawns();
 void level_set();
 void playEndless();
 void InitEndless();
@@ -126,6 +136,9 @@ void resetallNPCs();
 
 //Tutorials
 void playTutorial();
+void renderText();
+void initTutGP();
+void playTutGP();
 
 //Testing area
 void testStates();
@@ -137,9 +150,11 @@ void endTest();
 void spawnWall(int no);
 void renderWall();
 
+//CCTV
+void renderCCTV();
+void spawnCCTV(int no);
 
 //aesthetics
-void setBG();
 void renderBG(int col);
 void setallrpos();
 bool checkifinscreen(COORD c);

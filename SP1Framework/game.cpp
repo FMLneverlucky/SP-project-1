@@ -532,12 +532,12 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     else if (level < 6)
     {
         noC++;
-        spd += 0.0285;
+        spd += 0.05;
         cdtime = 2.5;
     }
     else if (level < 15)
     {
-        spd += 0.0285;
+        spd += 0.05;
         cdtime = 2;
         if (level % 2)
         {
@@ -1600,7 +1600,7 @@ void moveall()
                 }
                 if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
                 {
-                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W')
+                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W' || occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'R')
                     {
 
                         NPCs[i]->set_direction(0);

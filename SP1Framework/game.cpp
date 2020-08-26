@@ -526,19 +526,19 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noC = 3;
         noP = 0;
         spd = 0.2;
-        cdtime = 5;
+        cdtime = 3;
         noW = 10;
     }
     else if (level < 6)
     {
         noC++;
-        spd += 0.0285;
-        cdtime -= 0.2857;
+        spd += 0.05;
+        cdtime = 2.5;
     }
     else if (level < 15)
     {
-        spd += 0.0285;
-        cdtime -= 0.2857;
+        spd += 0.05;
+        cdtime = 2;
         if (level % 2)
         {
             noC++;
@@ -1267,7 +1267,7 @@ void spawnWall(int no)                                                          
                     isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivotx = (rand() % 76) + 4;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
                     int Pivoty = (rand() % 23);                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
@@ -1420,7 +1420,7 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
+void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
 {
     for (int i = 0; i < no; i++)
     {
@@ -1607,7 +1607,7 @@ void moveall()
                 }
                 if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
                 {
-                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W')
+                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W' || occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'R')
                     {
 
                         NPCs[i]->set_direction(0);

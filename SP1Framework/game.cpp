@@ -37,6 +37,8 @@ std::string back = "Back";
 std::string gamemodes = "Play";
 
 std::string objective = "";
+std::string scoreboard = "";
+std::string highscore = "";
 
 //MAINMENU
 Object title(71, 3);
@@ -50,7 +52,7 @@ Object* MMButtons[2];
 const int MMButtonCount = 2; 
 Object* MGButtons[5];
 const int MGButtonCount = 5;
-std::string stage = "SELECT";
+std::string stage = "MAIN";
 
 //QUICK FIX
 bool isMousePressed = false;
@@ -1675,7 +1677,7 @@ void renderBox(Object* box, int colour, std::string text = " ")
         for (int x = 0; x < box->length(); x++)
         {
             c.X++;
-            g_Console.writeToBuffer(c, temp = (x >= ((box->length() + 1) / 2) - 1 - text.length() / 2 && x < ((box->length() + 1) / 2) + text.length() / 2  && y == box->height() / 2) ? text[i++] : ' ', colour);
+            g_Console.writeToBuffer(c, temp = (x >= ((box->length() + 1) / 2) - (text.length() + 1) / 2 && x < ((box->length() + 1) / 2) + ((text.length() + 1) / 2)  && y == box->height() / 2) ? text[i++] : ' ', colour);
         }
         c.Y++;
     }
@@ -1815,6 +1817,7 @@ void renderWinLoseMenu(bool win)
 
 void winLoseMenuWait()
 {
+    showHUD = false;
     switch (checkButtonClicks(WLButtons, WLButtonCount))
     {
     case 0:
@@ -1824,10 +1827,12 @@ void winLoseMenuWait()
         g_eGameState = S_MAINMENU;
         NGameState = N_INIT;
         EGameState = E_INIT;
+        showHUD = true;
         break;
     case 2:
         NGameState = N_INIT;
         EGameState = E_INIT;
+        showHUD = true;
         break;
     default:
         break;
@@ -1851,6 +1856,7 @@ void renderHUD()
     Object HealthText(22, 1, Position(19 / 2 + 1, 1));
     Object HealthBorder(22, 1, Position(19 / 2 + 1, 2));
     Object Objective(30, 1 ,Position(consoleSize.X / 2, consoleSize.Y * 9 / 10 + 1));
+    Object Scoreboard(16, 1, Position(consoleSize.X / 2, 1));
     if (player->get_HP() != currentHP)
     {
         currentHP = player->get_HP();
@@ -1859,7 +1865,7 @@ void renderHUD()
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
         healthBar.scale((float)currentHP / player->get_maxHP (), 1);
     }
-    int counter = 0;
+    int counter = 0;// count projectiles on board
     for (int i = 0; i < particle_limit; i++)
         counter += projectile[i] != nullptr ? 1 : 0;
     coughBar.resize(30, 1);
@@ -1870,12 +1876,11 @@ void renderHUD()
     {
         if (g_eGameState == S_GAMEMODE1)
         {
-            counter = 0;
+            counter = 0; // this time to count npcs alive
             for (int i = 0; i < NPCLimit; i++)
             {
-                counter += (NPCs[i] != nullptr && NPCs[i]->type() == 'C') ? 1 : 0;
+                counter += (NPCs[i] != nullptr && NPCs[i]->type() == 'C' && !NPCs[i]->isHostile()) ? 1 : 0;
             }
-            counter -= NPC::getnoHostile();
             objective = "Objective:";
             if (counter > 0)
             {
@@ -1885,13 +1890,15 @@ void renderHUD()
             }
             else
                 objective.append("escape");
-                
+            scoreboard = "Level ";
+            scoreboard.append(std::to_string(level));
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
         renderBox(&coughBar, 0x20);
         renderBox(&Objective, 0x70, objective);
+        renderBox(&Scoreboard, 0x07, scoreboard);
     }
 }
 

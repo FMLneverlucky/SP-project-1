@@ -526,19 +526,19 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noC = 3;
         noP = 0;
         spd = 0.2;
-        cdtime = 5;
+        cdtime = 3;
         noW = 10;
     }
     else if (level < 6)
     {
         noC++;
         spd += 0.0285;
-        cdtime -= 0.2857;
+        cdtime = 2.5;
     }
     else if (level < 15)
     {
         spd += 0.0285;
-        cdtime -= 0.2857;
+        cdtime = 2;
         if (level % 2)
         {
             noC++;
@@ -1413,7 +1413,7 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
+void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
 {
     for (int i = 0; i < no; i++)
     {

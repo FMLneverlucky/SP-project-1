@@ -15,7 +15,7 @@ private:
 
 protected:
     bool onCD; //whether NPC is on cooldown or not
-    int freezetime; //cooldown time(in seconds)
+    float freezetime; //cooldown time(in seconds)
 
 public:
     NPC(int cd); //allows user to choose cooldown time of NPC when spawning
@@ -26,7 +26,7 @@ public:
     int get_count();
     float get_speed();
     int get_damage();
-    int get_ftime();
+    float get_ftime();
     bool isonCD();
 
     //Setters

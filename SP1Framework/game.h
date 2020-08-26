@@ -161,7 +161,7 @@ bool checkifinscreen(COORD c);
 
 
 //NPCs 
-void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs
+void spawnNPC(bool isPolice, int no, float spd, float cooldowntime); //spawns NPCs
 void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr

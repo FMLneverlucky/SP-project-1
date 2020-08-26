@@ -72,7 +72,7 @@ int NPC::get_damage()
 	return damage;
 }
 
-int NPC::get_ftime()
+float NPC::get_ftime()
 {
 	return freezetime;
 }

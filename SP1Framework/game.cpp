@@ -660,7 +660,7 @@ void playLevel()
     updateGame();
     renderHUD();
 
-    if (player->get_lethalstatus() == 0)
+    if (player->get_lethalstatus() == 1)
         player->update_ld();
 
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())

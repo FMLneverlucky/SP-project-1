@@ -18,7 +18,6 @@ public:
     int get_maxHP();
     bool get_flash();
     int get_lethalstatus();
-    int get_ld(); //get lethality duration
 
     //Setters
     void resetHP(); //sets HP to maxHP
@@ -28,6 +27,7 @@ public:
     void update_pos(double dtime); //moves player by no of squares per frame
     void set_lethal();
     void update_ld(); //lethality duration timer ish
+    void resetlethality();
     
     char type();  // return char to tell what type of entity this is
 

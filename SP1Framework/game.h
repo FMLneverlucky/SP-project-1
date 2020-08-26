@@ -8,9 +8,8 @@
 #include "Player.h"
 #include "NPC.h"
 #include "Police.h"
-
 #include "Object.h"
-
+#include "Zone.h"
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
 
@@ -131,9 +130,8 @@ void InitEndless();
 void enterEndless();
 void renderPoints();
 void set_points();
-void setsafezone();
 void rendersafezone();
-bool insafezone(Position* pos);
+bool inZone(Position* pos, Zone& zone);
 void resetallNPCs();
 
 //Tutorials
@@ -163,7 +161,7 @@ bool checkifinscreen(COORD c);
 
 
 //NPCs 
-void spawnNPC(bool isPolice, int no, float spd, int cooldowntime); //spawns NPCs
+void spawnNPC(bool isPolice, int no, float spd, float cooldowntime); //spawns NPCs
 void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr

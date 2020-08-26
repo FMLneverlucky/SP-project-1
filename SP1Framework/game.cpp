@@ -1,18 +1,16 @@
 // This is the main file for the game logic and function
-//
-//
-#include "game.h"
-#include "Framework\console.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "time.h"
 #include <stdlib.h>
+#include <irrKlang.h>
+#include "game.h"
+#include "Framework\console.h"
+#include "time.h"
 #include "Projectile.h"
 #include "Wall.h"
 #include "PowerUp.h"
 #include "CCTV.h"
-#include <irrKlang.h>
 
 #include <fstream>
 
@@ -94,9 +92,10 @@ int noP; //no. of Police
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
-Position endPoint[9];
-Position spawnPoint[9];
-Position safezone[9];
+//Position endPoint[9];
+//Position spawnPoint[9];
+//Position safezone[9];
+
 int highestLVL;
 int totalhostile = 0;
 
@@ -152,6 +151,10 @@ PowerUp* powerup = nullptr;
 
 CCTV* CCTVs[5] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 const int CCTVLimit = 5;
+
+Zone spawnPoint;
+Zone endPoint;
+Zone safeZone;
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -521,6 +524,9 @@ void InitNormal()
 {
     lose = false;
     level = 0;
+    player->set_pos(40, 12);
+    g_sChar.m_cLocation.X = 40;
+    g_sChar.m_cLocation.Y = 12;
     level_set();
     initHUD();
     
@@ -537,19 +543,19 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noC = 3;
         noP = 0;
         spd = 0.2;
-        cdtime = 5;
+        cdtime = 3;
         noW = 10;
     }
     else if (level < 6)
     {
         noC++;
-        spd += 0.0285;
-        cdtime -= 0.2857;
+        spd += 0.05;
+        cdtime = 2.5;
     }
     else if (level < 15)
     {
-        spd += 0.0285;
-        cdtime -= 0.2857;
+        spd += 0.05;
+        cdtime = 2;
         if (level % 2)
         {
             noC++;
@@ -564,8 +570,8 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noC = 15;
     }
 
-    spawnWall(noW);
     set_points();
+    spawnWall(noW);
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
     spawnCCTV(2);
@@ -574,7 +580,7 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
 
 void set_points()
 {
-    spawnPoint[4].set_pos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    spawnPoint.setpos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
 
     Position tempp;
     do
@@ -583,24 +589,9 @@ void set_points()
         tempp.set_y((rand() % 21) + 2);
 
     } while (occupied(&tempp) != nullptr);
-    endPoint[4].set_x(tempp.get_x());
-    endPoint[4].set_y(tempp.get_y());
 
-
-    for (int i = -1; i < 2; i++)
-    {
-        spawnPoint[1 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() - 1);
-        spawnPoint[7 + i].set_pos(spawnPoint[4].get_x() + i, spawnPoint[4].get_y() + 1);
-
-        endPoint[1 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() - 1);
-        endPoint[7 + i].set_pos(endPoint[4].get_x() + i, endPoint[4].get_y() + 1);
-
-        spawnPoint[3].set_pos(spawnPoint[4].get_x() - 1, spawnPoint[4].get_y());
-        spawnPoint[5].set_pos(spawnPoint[4].get_x() + 1, spawnPoint[4].get_y());
-        endPoint[3].set_pos(endPoint[4].get_x() - 1, endPoint[4].get_y());
-        endPoint[5].set_pos(endPoint[4].get_x() + 1, endPoint[4].get_y());
-
-    }
+    endPoint.setpos(tempp.get_x(), tempp.get_y());
+ 
 }
 
 void resetSpawns()
@@ -654,6 +645,7 @@ void level_set() //deletes everyth
     resetSpawns();
    
     player->resetHP();
+    player->resetlethality();
     NPC::resetnoHostile();
     level++;
 
@@ -671,10 +663,10 @@ void playLevel()
     updateGame();
     renderHUD();
 
-    if (player->get_ld() != 0)
+    if (player->get_lethalstatus() == 1)
         player->update_ld();
 
-    if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
+    if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint.getpos(4)->get_x() && static_cast<int>(player->getposy()) == endPoint.getpos(4)->get_y())
     {
         clear = true;
         NGameState = N_NEXTLEVEL;
@@ -735,8 +727,11 @@ void InitEndless()
     player->resetHP();
     NPC::resetnoHostile();
     tempcounter = 0;
-    
-    setsafezone();
+
+    player->set_pos(40, 12);
+    g_sChar.m_cLocation.X = 40;
+    g_sChar.m_cLocation.X = 12;
+    safeZone.setpos(40, 12);
 
     spawnWall(10);
     spawnNPC(false, 5, 0.6, 1);
@@ -787,20 +782,6 @@ void enterEndless()
     }
 }
 
-void setsafezone()
-{
-    safezone[4].set_pos(40, 12);
-
-    for (int i = -1; i < 2; i++)
-    {
-        safezone[1 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() - 1);
-        safezone[7 + i].set_pos(safezone[4].get_x() + i, safezone[4].get_y() + 1);
-
-        safezone[3].set_pos(safezone[4].get_x() - 1, safezone[4].get_y());
-        safezone[5].set_pos(safezone[4].get_x() + 1, safezone[4].get_y());
-    }
-}
-
 void rendersafezone()
 {
     COORD c;
@@ -813,8 +794,8 @@ void rendersafezone()
         {
 
             colour = 0xBB;
-            c.X = safezone[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = safezone[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            c.X = safeZone.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = safeZone.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
             if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
@@ -824,8 +805,8 @@ void rendersafezone()
     }
 
     colour = 0x7F;
-    c.X = safezone[4].get_x() - static_cast<int>(player->getposx()) + 40;
-    c.Y = safezone[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    c.X = safeZone.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = safeZone.getpos(4)->get_y() - static_cast<int>(player->getposy()) + 12;
     if (checkifinscreen(c))
     {
         g_Console.writeToBuffer(c, (char)254, colour);
@@ -869,7 +850,7 @@ void moveCharacter()
     {
         player->set_direction(0);
     }
-    if (!insafezone(player->getpos()) && g_eGameState == S_GAMEMODE2 && insafezone(player->new_pos(g_dDeltaTime)))
+    if (!inZone(player->getpos(), safeZone) && g_eGameState == S_GAMEMODE2 && inZone(player->new_pos(g_dDeltaTime), safeZone))
     {
         player->set_direction(0);
     }
@@ -888,21 +869,47 @@ void moveCharacter()
 
 void checkAll()
 {
-    //cough
+    //Cough related checks and updates
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         for (int p = 0; p < particle_limit; p++)
         {
             if (projectile[p] == nullptr)
             {
+                //Coughs if there are projectiles available
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
+
+                //checking if player is within cctv radar when coughing - lose game condition
+                for (int c = 0; c < CCTVLimit; c++)
+                {
+                    if (CCTVs[c] != nullptr)
+                    {
+                        for (int r = 0; r < 25; r++)
+                        {
+                            if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
+                            {
+                                if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
+                                {
+                                    lose = true;
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                }
+
                 break;
+
+                
             }
         }
+
+        
 
         //for turning Police hostile
         for (int n = 0; n < NPCLimit; n++)
@@ -916,35 +923,18 @@ void checkAll()
             }
         }
 
-        //checking if player is within cctv radar when coughing
-        for (int c = 0; c < CCTVLimit; c++)
-        {
-            if (CCTVs[c] != nullptr)
-            {
-                for (int r = 0; r < 20; r++)
-                {
-                    if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
-                    {
-                        if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
-                        {
-                            lose = true;
-                            break;
-                        }
-
-                    }
-                }
-            }
-        }
+        
     }
 
     check_collision(); //checks for HostileNPC-Player Collision
     limitprojectile(); //moves/updates projectiles
 
-    //rotates CCTVs radar every second
+    //CCTV related checks/updates
     for (int c = 0; c < CCTVLimit; c++)
     {
         if (CCTVs[c] != nullptr)
-        {
+        {   
+            //rotates CCTVs radar every second
             if (CCTVs[c]->getCD() == 0)
             {
                 CCTVs[c]->update_cctv();
@@ -954,8 +944,24 @@ void checkAll()
             {
                 CCTVs[c]->setCD(CCTVs[c]->getCD() - 1);
             }
+            
+            //checks for walls, block CCTV line of sight
+            for (int i = 0; i < 25; i++)
+            {
+                if (occupied(CCTVs[c]->getRadarPos(i)) != nullptr)
+                {
+                    if (occupied(CCTVs[c]->getRadarPos(i))->type() == 'W')
+                    {
+                        CCTVs[c]->disable(i);
+                    }
+                }
+            }
+
         }
-    }
+    } 
+
+   
+   
 
     //checks if cough projectile is on the same block as an NPC, and turns them hostile if so
     for (int p = 0; p < particle_limit; p++)
@@ -966,12 +972,21 @@ void checkAll()
             {
                 for (int i = 0; i < NPCLimit; i++)
                 {
-                    if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                    if (NPCs[i] != nullptr)
                     {
-                        NPCs[i]->anger();
-                        NPCs[i]->cooldownstart();
-                        NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                        if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                        {
+                            NPCs[i]->anger();
+                            NPCs[i]->cooldownstart();
+                            NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
 
+                        }
+
+                        if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1)
+                        {
+                            delete NPCs[i];
+                            NPCs[i] = nullptr;
+                        }
                     }
                 }
             }
@@ -1275,7 +1290,7 @@ void spawnWall(int no)                                                          
 {
     for (int j = 0; j < no; j++)                                                                                                    //for loop to cycle the spawning of each wall
     {   //find random x and y on unused spaces
-        bool isSpaceNearPlayer;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+        bool isSpaceinZone;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
         bool isSpaceOccupied;
 
         for (int w = 0; w < WallLimit; w++)                                                                                         // for loop to set positions on map for each wall entity
@@ -1287,23 +1302,30 @@ void spawnWall(int no)                                                          
 
                 do
                 {
-                    isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
+                    isSpaceinZone = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
-                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
+                    int Pivotx = (rand() % 78) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivoty = (rand() % 20) + 3;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
                     Walls[w]->setPosForAll();
                     for (int i = 0; i < 4; i++)
                     {
-                        if (Walls[w]->getPos(i)->get_x() > 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+                        switch (g_eGameState)
                         {
-                            if (Walls[w]->getPos(i)->get_y() > 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                        case S_GAMEMODE1:
+                            if (inZone(Walls[w]->getPos(i), spawnPoint) || inZone(Walls[w]->getPos(i), endPoint))
                             {
-                                isSpaceNearPlayer = true;
-                                break;//if chosen coords are not near spawn zone, second condition is true for loop to stop
+                                isSpaceinZone = true;
                             }
+                            break;
+                        case S_GAMEMODE2:
+                            if (inZone(Walls[w]->getPos(i), safeZone))
+                            {
+                                isSpaceinZone = true;
+                            }
+                            break;
                         }
 
                         if (occupied(Walls[w]->getPos(i)) != nullptr && occupied(Walls[w]->getPos(i)) != Walls[w])
@@ -1311,9 +1333,9 @@ void spawnWall(int no)                                                          
                             isSpaceOccupied = true;
                             break;
                         }
+                        
                     }
-                } while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
-
+                } while (isSpaceOccupied == true || isSpaceinZone == true);                                                      //while position on map is unavailable
 
                 for (int i = 1; i < 4; i++)
                 {
@@ -1444,7 +1466,7 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
+void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
 {
     for (int i = 0; i < no; i++)
     {
@@ -1458,8 +1480,19 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
             temp.set_x(rand() % 80);
             temp.set_y((rand() % 23) + 1);
           
-            if (g_eGameState == S_GAMEMODE2)
+            //check if pos is valid
+            switch (g_eGameState)
             {
+            case S_GAMEMODE1:
+
+                if (inZone(&temp, spawnPoint) || inZone(&temp, endPoint))
+                {
+                    valid = false;
+                }
+                break;
+
+            case S_GAMEMODE2:
+
                 COORD t;
                 t.X = temp.get_x() - player->getposx() + 40;
                 t.Y = temp.get_y() - player->getposy() + 12;
@@ -1467,19 +1500,14 @@ void spawnNPC(bool isPolice, int no, float spd, int cooldowntime) //spd shud be 
                 {
                     valid = false;
                 }
-            }
-            
-            for (int i = 0; i < 9; i++)
-            {
-                if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
+
+                if (inZone(&temp, safeZone))
                 {
                     valid = false;
                 }
-                else if (temp.get_x() == endPoint[i].get_x() && temp.get_y() == endPoint[i].get_y())
-                {
-                    valid = false;
-                }
+                break;
             }
+
         } while (occupied(&temp) != nullptr || valid == false); //while pos is not available
 
         for (int n = 0; n < NPCLimit; n++)
@@ -1631,7 +1659,7 @@ void moveall()
                 }
                 if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
                 {
-                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W')
+                    if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W' || occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'R')
                     {
 
                         NPCs[i]->set_direction(0);
@@ -1643,17 +1671,13 @@ void moveall()
             switch (g_eGameState)
             {
             case S_GAMEMODE1:
-                if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= spawnPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= spawnPoint[7].get_y() + 1 && (NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= spawnPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= spawnPoint[1].get_y()))
-                {
-                    NPCs[i]->set_direction(0);
-                }
-                if (NPCs[i]->new_pos(g_dDeltaTime)->get_x() <= endPoint[5].get_x() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_y() <= endPoint[7].get_y() + 1 && NPCs[i]->new_pos(g_dDeltaTime)->get_x() >= endPoint[3].get_x() && NPCs[i]->new_pos(g_dDeltaTime)->get_y() >= endPoint[1].get_y())
+                if (inZone(NPCs[i]->new_pos(g_dDeltaTime), spawnPoint) || inZone(NPCs[i]->new_pos(g_dDeltaTime), endPoint))
                 {
                     NPCs[i]->set_direction(0);
                 }
                 break;
             case S_GAMEMODE2:
-                if (insafezone(NPCs[i]->new_pos(g_dDeltaTime)))
+                if (inZone(NPCs[i]->new_pos(g_dDeltaTime), safeZone))
                 {
                     NPCs[i]->set_direction(0);
                 }
@@ -1784,9 +1808,11 @@ void mainMenuWait()
         {
         case 0:
             g_eGameState = S_GAMEMODE1;
+            NGameState = N_INIT;
             break;
         case 1:
             g_eGameState = S_GAMEMODE2;
+            EGameState = E_INIT;
             break;
         case 2:
             g_eGameState = S_TUTORIAL;
@@ -1828,6 +1854,7 @@ void pauseMenuWait()
         break;
     case 1:
         g_eGameState = S_MAINMENU;
+        paused = false;
         break;
     default:
         break;
@@ -2029,12 +2056,12 @@ void check_collision()
                 case S_GAMEMODE1:
                     NPCs[i]->cooldownstart();
                     NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
-                    player->set_pos(spawnPoint[4].get_x(), spawnPoint[4].get_y());
+                    player->set_pos(spawnPoint.getpos(4)->get_x(), spawnPoint.getpos(4)->get_y());
                     resetallNPCs();
                     NPC::resetnoHostile();
                     break;
                 case S_GAMEMODE2:
-                    player->set_pos(safezone[4].get_x(), safezone[4].get_y());
+                    player->set_pos(safeZone.getpos(4)->get_x(), safeZone.getpos(4)->get_y());
                     break;
                 }
                 
@@ -2073,16 +2100,16 @@ void renderPoints()
         {
   
             colour = 0x90;
-            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            c.X = endPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
             if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, "E", colour);
             }
 
             colour = 0x30;
-            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            c.X = spawnPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
             if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, "S", colour);
@@ -2092,16 +2119,16 @@ void renderPoints()
         {
   
             colour = 0x99;
-            c.X = endPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = endPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            c.X = endPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = endPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
             if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
 
             colour = 0x33;
-            c.X = spawnPoint[i].get_x() - static_cast<int>(player->getposx()) + 40;
-            c.Y = spawnPoint[i].get_y() - static_cast<int>(player->getposy()) + 12;
+            c.X = spawnPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
+            c.Y = spawnPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
             if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
@@ -2111,16 +2138,16 @@ void renderPoints()
     }
     
     colour = 0x7F;
-    c.X = endPoint[4].get_x() - static_cast<int>(player->getposx()) + 40;
-    c.Y = endPoint[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    c.X = endPoint.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = endPoint.getpos(4)->get_y() - static_cast<int>(player->getposy()) + 12;
     if (checkifinscreen(c))
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
 
     colour = 0x7F;
-    c.X = spawnPoint[4].get_x() - static_cast<int>(player->getposx()) + 40;
-    c.Y = spawnPoint[4].get_y() - static_cast<int>(player->getposy()) + 12;
+    c.X = spawnPoint.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
+    c.Y = spawnPoint.getpos(4)->get_y() - static_cast<int>(player->getposy()) + 12;
     if (checkifinscreen(c))
     {
         g_Console.writeToBuffer(c, (char)254, colour);
@@ -2206,9 +2233,10 @@ bool checkifinscreen(COORD c)
     return false;
 }
 
-bool insafezone(Position* pos)
+bool inZone(Position* pos, Zone& zone)
 {
-    if (static_cast<int>(pos->get_x()) <= 41 && static_cast<int>(pos->get_x()) >= 39 && static_cast<int>(pos->get_y()) <= 13 && static_cast<int>(pos->get_y() >= 11))
+    
+    if ((int)pos->get_x() <= zone.getpos(5)->get_x() + 1 && (int)pos->get_y() <= zone.getpos(7)->get_y() + 1 && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
     {
         return true;
     }
@@ -2277,6 +2305,18 @@ void renderCCTV()
     {
         if (CCTVs[c] != nullptr)
         {
+            //rendering of CCTV's line of sight
+            for (int r = 0; r < 25; r++)
+            {
+                colour = 0x8F;
+                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
+                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
+                if (checkifinscreen(radarpos))
+                {
+                    g_Console.writeToBuffer(radarpos, (char)177, colour);
+                }
+            }
+
             //rendering of CCTV
             colour = 0x7A;
             cctvpos.X = CCTVs[c]->getrposx();
@@ -2287,17 +2327,6 @@ void renderCCTV()
                 g_Console.writeToBuffer(cctvpos, (char)233 , colour);
             }
 
-            //rendering of CCTV's line of sight
-            for (int r = 0; r < 20; r++)
-            {
-                colour = 0x8F;
-                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
-                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
-                if (checkifinscreen(radarpos))
-                {
-                    g_Console.writeToBuffer(radarpos, (char)177, colour);
-                }
-            }
         }
     }
 }
@@ -2313,16 +2342,9 @@ void spawnCCTV(int no)
             valid = true;
             temp.set_pos(rand() % 80, (rand() % 24) + 1);
 
-            for (int i = 0; i < 9; i++)
+            if (inZone(&temp, spawnPoint) || inZone(&temp, endPoint))
             {
-                if (temp.get_x() == spawnPoint[i].get_x() && temp.get_y() == spawnPoint[i].get_y())
-                {
-                    valid = false;
-                }
-                else if (temp.get_x() == endPoint[i].get_x() && temp.get_y() == endPoint[i].get_y())
-                {
-                    valid = false;
-                }
+                valid = false;
             }
 
         } while (occupied(&temp) != nullptr || valid == false);
@@ -2331,7 +2353,7 @@ void spawnCCTV(int no)
         {
             if (CCTVs[c] == nullptr)
             {
-                CCTVs[c] = new CCTV((rand() % 8) + 1, (rand() % 2));
+                CCTVs[c] = new CCTV((rand() % 4) + 1, (rand() % 2));
                 entities[c + 61] = CCTVs[c];
                 CCTVs[c]->set_pos(temp.get_x(), temp.get_y());
                 CCTVs[c]->setCD(1 / g_dDeltaTime);

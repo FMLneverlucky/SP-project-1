@@ -7,11 +7,7 @@ enum direction //for Entity movement/anyth that involves direction
 	UP,
 	DOWN,
 	LEFT,
-	RIGHT,
-	TOPLEFT,
-	TOPRIGHT,
-	BOTTOMRIGHT,
-	BOTTOMLEFT
+	RIGHT
 };
 
 class Entity

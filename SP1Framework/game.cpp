@@ -643,6 +643,7 @@ void level_set() //deletes everyth
     resetSpawns();
    
     player->resetHP();
+    player->resetlethality();
     NPC::resetnoHostile();
     level++;
 
@@ -939,19 +940,21 @@ void checkAll()
             {
                 for (int i = 0; i < NPCLimit; i++)
                 {
-                    if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1)
+                    if (NPCs[i] != nullptr)
                     {
-                        delete NPCs[i];
-                        NPCs[i] = nullptr;
-                        noC--; //fix?
-                    }
+                        if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                        {
+                            NPCs[i]->anger();
+                            NPCs[i]->cooldownstart();
+                            NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
 
-                    else if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
-                    {
-                        NPCs[i]->anger();
-                        NPCs[i]->cooldownstart();
-                        NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                        }
 
+                        if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1)
+                        {
+                            delete NPCs[i];
+                            NPCs[i] = nullptr;
+                        }
                     }
                 }
             }

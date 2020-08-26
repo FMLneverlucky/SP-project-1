@@ -105,3 +105,9 @@ void Player::update_ld()
 	if (lethality_duration == 0)
 		lethal = false;
 }
+
+void Player::resetlethality()
+{
+	lethal = false;
+	lethality_duration = 0;
+}

@@ -27,6 +27,7 @@ public:
     void update_pos(double dtime); //moves player by no of squares per frame
     void set_lethal();
     void update_ld(); //lethality duration timer ish
+    void resetlethality();
     
     char type();  // return char to tell what type of entity this is
 

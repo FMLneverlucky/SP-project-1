@@ -1,18 +1,16 @@
 // This is the main file for the game logic and function
-//
-//
-#include "game.h"
-#include "Framework\console.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "time.h"
 #include <stdlib.h>
+#include <irrKlang.h>
+#include "game.h"
+#include "Framework\console.h"
+#include "time.h"
 #include "Projectile.h"
 #include "Wall.h"
 #include "PowerUp.h"
 #include "CCTV.h"
-#include <irrKlang.h>
 
 //FOR TESTING
 bool checkInputs = false;
@@ -1263,15 +1261,15 @@ void spawnWall(int no)                                                          
                     isSpaceOccupied = false;
 
                     int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
-                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
+                    int Pivoty = (rand() % 23);                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
                     Walls[w]->setPosForAll();
                     for (int i = 0; i < 4; i++)
                     {
-                        if (Walls[w]->getPos(i)->get_x() > 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
+                        if (Walls[w]->getPos(i)->get_x() >= 39 && Walls[w]->getPos(i)->get_x() <= 41)                                //check for if random x coordinate is not within 1 block of spawn zone on x axis 
                         {
-                            if (Walls[w]->getPos(i)->get_y() > 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
+                            if (Walls[w]->getPos(i)->get_y() >= 12 && Walls[w]->getPos(i)->get_y() <= 14)                            //check for if random y coordinate is not within 1 block of spawn zone on x axis
                             {
                                 isSpaceNearPlayer = true;
                                 break;//if chosen coords are not near spawn zone, second condition is true for loop to stop
@@ -1285,7 +1283,6 @@ void spawnWall(int no)                                                          
                         }
                     }
                 } while (isSpaceOccupied == true || isSpaceNearPlayer == true);                                                      //while position on map is unavailable
-
 
                 for (int i = 1; i < 4; i++)
                 {

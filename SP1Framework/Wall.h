@@ -1,25 +1,12 @@
 #pragma once
 #include "Entity.h"
 
-enum types
-{
-    I,
-    J,
-    L,
-    O,
-    S,
-    T,
-    Z,
-    d
-};
-
 class Wall :
     public Entity
 
 {
 protected:
-    Position wallPivot, wall2, wall3, wall4;
-    types nextWall;
+    Position wallPos[4];
 
 public:
     Wall();

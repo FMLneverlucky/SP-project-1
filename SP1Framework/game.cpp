@@ -187,9 +187,14 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    std::ifstream pfile("highestLevel.txt");
-    if (is_empty(pfile))
+    std::ifstream file("highestLevel.txt");
+    if (file.is_open())
     {
+        file.close();
+    }
+    if (is_empty(file))
+    {
+        file.close();
         std::ofstream file("highestLevel.txt");
         if (file.is_open())
         {
@@ -687,7 +692,7 @@ void playLevel()
             file.close();
             if (level > std::stoi(prevHigh))
             {
-                std::ofstream myfile("higestLevel.txt");
+                std::ofstream myfile("highestLevel.txt");
                 if (myfile.is_open())
                 {
                     myfile << std::to_string(level);

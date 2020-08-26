@@ -709,6 +709,8 @@ void InitEndless()
     spawnNPC(false, 5, 0.6, 1);
     //spawnNPC(true, 1, 0.5, 1);
 
+    initHUD();
+
     EGameState = E_PLAY;
 }
 
@@ -1853,14 +1855,13 @@ void renderHUD()
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
         healthBar.scale((float)currentHP / player->get_maxHP(), 1);
     }
-    /*if (player->get_cooldown() > 0)
-    {
-        coughBar.resize(30, 1);
-        coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
-        coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
-        coughBar.scale(1 / player->get_cooldown(), 1);
-    }*/
-
+    int counter = 0;
+    for (int i = 0; i < particle_limit; i++)
+        counter += projectile[i] != nullptr ? 1 : 0;
+    coughBar.resize(30, 1);
+    coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+    coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+    coughBar.scale((particle_limit - counter) / (float)particle_limit, 1);
     if (showHUD)
     {
         renderBox(&healthBar, 0x40);
@@ -1891,9 +1892,9 @@ int checkButtonClicks(Object** buttons, int arrayLength)
             mouseY = g_mouseEvent.mousePosition.Y;
             for (int i = 0; i < arrayLength; i++)
             {//check all the objects in the given array
-                if (mouseX >= buttons[i]->referencePosition()->get_x() &&
+                if (mouseX >= buttons[i]->referencePosition()->get_x() - 1 &&
                     mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
-                    mouseY >= buttons[i]->referencePosition()->get_y() &&
+                    mouseY >= buttons[i]->referencePosition()->get_y() - 1 &&
                     mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
                 {// check if mouse is within this Object
                     return i;
@@ -1907,6 +1908,8 @@ int checkButtonClicks(Object** buttons, int arrayLength)
     }
     return arrayLength;
 }
+
+
 
 void limitprojectile()
 {

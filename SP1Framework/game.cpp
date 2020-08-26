@@ -184,10 +184,10 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    std::ifstream pfile("g:/highestLevel.txt");
+    std::ifstream pfile("highestLevel.txt");
     if (is_empty(pfile))
     {
-        std::ofstream file("g:/highestLevel.txt");
+        std::ofstream file("highestLevel.txt");
         if (file.is_open())
         {
             file << std::to_string(0);
@@ -688,14 +688,14 @@ void playLevel()
     if (lose)
     {
         std::string prevHigh;
-        std::ifstream file("g:/higestLevel.txt");
+        std::ifstream file("highestLevel.txt");
         if (file.is_open()) //check if file is successfully opened
         {
             std::getline(file, prevHigh);//get the previous highscore and store in this temp string
             file.close();
             if (level > std::stoi(prevHigh))
             {
-                std::ofstream myfile("g:/highestLevel.txt");
+                std::ofstream myfile("higestLevel.txt");
                 if (myfile.is_open())
                 {
                     myfile << std::to_string(level);

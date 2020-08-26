@@ -865,12 +865,33 @@ void checkAll()
         {
             if (projectile[p] == nullptr)
             {
+                //cough
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
                 break;
+
+                //checking if player is within cctv radar when coughing
+                for (int c = 0; c < CCTVLimit; c++)
+                {
+                    if (CCTVs[c] != nullptr)
+                    {
+                        for (int r = 0; r < 20; r++)
+                        {
+                            if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
+                            {
+                                if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
+                                {
+                                    lose = true;
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -886,25 +907,7 @@ void checkAll()
             }
         }
 
-        //checking if player is within cctv radar when coughing
-        for (int c = 0; c < CCTVLimit; c++)
-        {
-            if (CCTVs[c] != nullptr)
-            {
-                for (int r = 0; r < 20; r++)
-                {
-                    if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
-                    {
-                        if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
-                        {
-                            lose = true;
-                            break;
-                        }
-
-                    }
-                }
-            }
-        }
+        
     }
 
     check_collision(); //checks for HostileNPC-Player Collision

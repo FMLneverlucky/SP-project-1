@@ -6,6 +6,8 @@ private:
     int HP; //current HP of player
     int maxHP; //max HP of player
     bool flash; //whether player is flashing or not
+    bool lethal;
+    int lethality_duration;
 
 public:
     Player();
@@ -15,6 +17,8 @@ public:
     int get_HP();
     int get_maxHP();
     bool get_flash();
+    int get_lethalstatus();
+    int get_ld(); //get lethality duration
 
     //Setters
     void resetHP(); //sets HP to maxHP
@@ -22,7 +26,10 @@ public:
     void set_flash(bool what); //sets flash to true/false
     Position* new_pos(double dtime); //returns new position of player before its position is set
     void update_pos(double dtime); //moves player by no of squares per frame
+    void set_lethal();
+    void update_ld(); //lethality duration timer ish
     
     char type();  // return char to tell what type of entity this is
+
 };
 

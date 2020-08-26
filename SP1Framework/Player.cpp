@@ -1,5 +1,5 @@
 #include "Player.h"
-Player::Player() : maxHP(5), flash(false)
+Player::Player() : maxHP(5), flash(false), lethal(false), lethality_duration(0)
 {
 	HP = maxHP;
 }
@@ -88,3 +88,25 @@ void Player::loseHP(int ack)
 	HP -= ack;
 }
 
+int Player::get_lethalstatus()
+{
+	return lethal; // 0 = false, 1 = true
+}
+
+void Player::set_lethal()
+{
+	lethal = true;
+	lethality_duration = 1500;
+}
+
+void Player::update_ld()
+{
+	lethality_duration -= 1;
+	if (lethality_duration == 0)
+		lethal = false;
+}
+
+int Player::get_ld()
+{
+	return lethality_duration;
+}

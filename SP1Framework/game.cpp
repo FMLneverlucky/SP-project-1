@@ -940,7 +940,7 @@ void checkAll()
                     {
                         delete NPCs[i];
                         NPCs[i] = nullptr;
-                        noC--;
+                        noC--; //fix?
                     }
 
                     else if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)

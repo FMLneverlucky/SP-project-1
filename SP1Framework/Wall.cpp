@@ -20,8 +20,8 @@ char Wall::type()
 
 void Wall::setPos(int x, int y)
 {
-    wallPivot.set_x(x);                                                          //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-    wallPivot.set_y(y);         
+    wallPos[0].set_x(x);                                                          //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+    wallPos[0].set_y(y);
     pos.set_x(x);
     pos.set_y(y);
     
@@ -30,98 +30,377 @@ void Wall::setPos(int x, int y)
 
 void Wall::setPosForAll()
 {
-    int x = rand() % 8;
-    switch (x)                                                                                  //checks if the next wall type is a 'I' or line piece
+    int x = rand() % 30;
+    switch (x)
     {
+        //checks if next wall is 'I' piece and the different rotations of said piece
         case 1:
         {
-            wall2.set_x(wallPivot.get_x());                                                        //setting x coord of second wall using previous pivot point as reference
-            wall2.set_y(wallPivot.get_y() + 1);                                                    //setting y coord of second wall using previous pivot point as reference
+            wallPos[1].set_x(wallPos[0].get_x());                                                        //setting x coord of second wall using previous pivot point as reference
+            wallPos[1].set_y(wallPos[0].get_y() + 1);                                                    //setting y coord of second wall using previous pivot point as reference
 
-            wall3.set_x(wallPivot.get_x());                                                        //setting x coord of third wall using previous pivot point as reference
-            wall3.set_y(wallPivot.get_y() + 2);                                                    //setting y coord of third wall using previous pivot point as reference
+            wallPos[2].set_x(wallPos[0].get_x());                                                        //setting x coord of third wall using previous pivot point as reference
+            wallPos[2].set_y(wallPos[0].get_y() + 2);                                                    //setting y coord of third wall using previous pivot point as reference
 
-            wall4.set_x(wallPivot.get_x());                                                        //setting x coord of fourth wall using previous pivot point as reference
-            wall4.set_y(wallPivot.get_y() + 3);
+            wallPos[3].set_x(wallPos[0].get_x());                                                        //setting x coord of fourth wall using previous pivot point as reference
+            wallPos[3].set_y(wallPos[0].get_y() + 3);
             
             break;
         }
 
-        case 2:                                                                                         //checks if next wall is 'J' piece
+        case 2:
         {
-            wall2.set_x(wallPivot.get_x());
-            wall2.set_y(wallPivot.get_y() + 1);
+            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_y(wallPos[0].get_y());
 
-            wall3.set_x(wallPivot.get_x());
-            wall3.set_y(wallPivot.get_y() + 2);
+            wallPos[2].set_x(wallPos[0].get_x() + 2);
+            wallPos[2].set_y(wallPos[0].get_y());
 
-            wall4.set_x(wallPivot.get_x() - 1);
-            wall4.set_y(wallPivot.get_y() + 2);
+            wallPos[3].set_x(wallPos[0].get_x() + 3);
+            wallPos[3].set_y(wallPos[0].get_y());
             break;
         }
 
-        case 3:                                                                                         //checks if next wall is 'L' piece
+        case 3:
         {
-            wall2.set_x(wallPivot.get_x());
-            wall2.set_y(wallPivot.get_y() + 1);
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
 
-            wall3.set_x(wallPivot.get_x());
-            wall3.set_y(wallPivot.get_y() + 2);
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() - 2);
 
-            wall4.set_x(wallPivot.get_x() + 1);
-            wall4.set_y(wallPivot.get_y() + 2);
+            wallPos[3].set_x(wallPos[0].get_x());
+            wallPos[3].set_y(wallPos[0].get_y() - 3);
+            break;
+        }
+        case 4:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() - 2);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() - 3);
+            wallPos[3].set_y(wallPos[0].get_y());
             break;
         }
 
-        case 4:                                                                                         //checks if next wall is 'O' piece
+        //checks if next wall is 'J' piece and the different rotations of said piece
+        case 5:
         {
-            wall2.set_x(wallPivot.get_x());
-            wall2.set_y(wallPivot.get_y() + 1);
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
 
-            wall3.set_x(wallPivot.get_x() + 1);
-            wall3.set_y(wallPivot.get_y());
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() + 2);
 
-            wall4.set_x(wallPivot.get_x() + 1);
-            wall4.set_y(wallPivot.get_y() + 1);
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 2);
             break;
         }
 
-        case 5:                                                                                         //checks if next wall is 'S' piece
+        case 6:
         {
-            wall2.set_x(wallPivot.get_x() - 1);
-            wall2.set_y(wallPivot.get_y());
+            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_y(wallPos[0].get_y());
 
-            wall3.set_x(wallPivot.get_x() - 1);
-            wall3.set_y(wallPivot.get_y() + 1);
+            wallPos[2].set_x(wallPos[0].get_x() + 2);
+            wallPos[2].set_y(wallPos[0].get_y());
 
-            wall4.set_x(wallPivot.get_x() - 2);
-            wall4.set_y(wallPivot.get_y() + 1);
+            wallPos[3].set_x(wallPos[0].get_x() + 2);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
             break;
         }
 
-        case 6:                                                                                         //checks if next wall is 'T' piece
+        case 7:
         {
-            wall2.set_x(wallPivot.get_x() + 1);
-            wall2.set_y(wallPivot.get_y());
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
 
-            wall3.set_x(wallPivot.get_x() + 2);
-            wall3.set_y(wallPivot.get_y());
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() - 2);
 
-            wall4.set_x(wallPivot.get_x() + 1);
-            wall4.set_y(wallPivot.get_y() + 1);
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 2);
             break;
         }
 
-        case 7:                                                                                         //checks if next wall is 'z' piece
+        case 8:
         {
-            wall2.set_x(wallPivot.get_x() + 1);
-            wall2.set_y(wallPivot.get_y());
+            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_y(wallPos[0].get_y());
 
-            wall3.set_x(wallPivot.get_x() + 1);
-            wall3.set_y(wallPivot.get_y() + 1);
+            wallPos[2].set_x(wallPos[0].get_x() - 2);
+            wallPos[2].set_y(wallPos[0].get_y());
 
-            wall4.set_x(wallPivot.get_x() + 2);
-            wall4.set_y(wallPivot.get_y() + 1);
+            wallPos[3].set_x(wallPos[0].get_x() - 2);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        //checks if next wall is 'L' piece and the different rotations of said piece
+        case 9:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() + 2);
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 2);
+            break;
+        }
+
+        case 10:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() + 2);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() + 2);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 11:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() - 2);
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 2);
+            break;
+        }
+
+        case 12:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() - 2);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() - 2);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        //checks if next wall is 'O' piece and the different rotations of said piece
+        case 13:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() + 1);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 14:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() - 1);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 15:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() - 1);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        case 16:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() + 1);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        //checks if next wall is 'S' piece and the different rotations of said piece
+        case 17:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() - 1);
+            wallPos[2].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() - 2);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 18:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() - 1);
+            wallPos[2].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 2);
+            break;
+        }
+
+        case 19:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() + 1);
+            wallPos[2].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() + 2);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        case 20:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() + 1);
+            wallPos[2].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 2);
+            break;
+        }
+
+        //checks if next wall is 'T' piece and the different rotations of said piece
+        case 21:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() + 2);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 22:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() + 2);
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 23:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() - 2);
+            wallPos[2].set_y(wallPos[0].get_y());
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        case 24:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[2].set_x(wallPos[0].get_x());
+            wallPos[2].set_y(wallPos[0].get_y() - 2);
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        //checks if next wall is 'Z' piece and the different rotations of said piece
+        case 25:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() + 1);
+            wallPos[2].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() + 2);
+            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            break;
+        }
+
+        case 26:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() + 1);
+            wallPos[2].set_y(wallPos[0].get_y() + 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() + 1);
+            wallPos[3].set_y(wallPos[0].get_y() + 2);
+            break;
+        }
+
+        case 27:
+        {
+            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_y(wallPos[0].get_y());
+
+            wallPos[2].set_x(wallPos[0].get_x() - 1);
+            wallPos[2].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() - 2);
+            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            break;
+        }
+
+        case 28:
+        {
+            wallPos[1].set_x(wallPos[0].get_x());
+            wallPos[1].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[2].set_x(wallPos[0].get_x() - 1);
+            wallPos[2].set_y(wallPos[0].get_y() - 1);
+
+            wallPos[3].set_x(wallPos[0].get_x() - 1);
+            wallPos[3].set_y(wallPos[0].get_y() - 2);
             break;
         }
 
@@ -137,16 +416,16 @@ Position* Wall::getPos(int x)
     switch (x)
     {
     case 0:
-        return &wallPivot;
+        return &wallPos[0];
 
     case 1:
-        return &wall2;
+        return &wallPos[1];
 
     case 2:
-        return &wall3;
+        return &wallPos[2];
         
     case 3:
-        return &wall4;
+        return &wallPos[3];
     };
 }
 

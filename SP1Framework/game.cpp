@@ -29,12 +29,14 @@ std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
 std::string continueMessage = "Next Level";
-std::string restartMessage = "Redo Level";
+std::string restartMessage = "Restart";
 std::string mainMenuMessage = "Main Menu";
 std::string quit = "Quit";
 std::string resume = "Resume";
 std::string back = "Back";
 std::string gamemodes = "Play";
+
+std::string objective = "";
 
 //MAINMENU
 Object title(71, 3);
@@ -712,6 +714,8 @@ void InitEndless()
     spawnNPC(false, 5, 0.6, 1);
     //spawnNPC(true, 1, 0.5, 1);
 
+    initHUD();
+
     EGameState = E_PLAY;
 }
 
@@ -1258,8 +1262,8 @@ void spawnWall(int no)                                                          
                     isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
                     Walls[w]->setPosForAll();
@@ -1778,13 +1782,13 @@ void renderPauseMenu()
     renderBox(&title, 0x0F, "Paused");
 
     resumeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
-    quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
+    mainMenuButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
     PMButtons[0] = &resumeButton;
-    PMButtons[1] = &quitButton;
+    PMButtons[1] = &mainMenuButton;
 
     renderBox(&resumeButton, 0x0A, resume);
-    renderBox(&quitButton, 0x04, quit);
+    renderBox(&mainMenuButton, 0x04, mainMenuMessage);
 }
 
 void pauseMenuWait()
@@ -1795,7 +1799,7 @@ void pauseMenuWait()
         paused = false;
         break;
     case 1:
-        g_bQuitGame = true;
+        g_eGameState = S_MAINMENU;
         break;
     default:
         break;
@@ -1850,7 +1854,7 @@ void initHUD()
     currentHP = player->get_maxHP();
     cooldownLength = 0;
     healthBar.resize(20, 1);
-    healthBar.move((healthBar.length() - 1) / 2, 0);
+    healthBar.move((healthBar.length() - 1) / 2 + 1, 2);
     healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
     coughBar.resize(30, 1);
     coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
@@ -1859,27 +1863,50 @@ void initHUD()
 
 void renderHUD()
 {
-
+    Object HealthText(22, 1, Position(19 / 2 + 1, 1));
+    Object HealthBorder(22, 1, Position(19 / 2 + 1, 2));
+    Object Objective(30, 1 ,Position(consoleSize.X / 2, consoleSize.Y * 9 / 10 + 1));
     if (player->get_HP() != currentHP)
     {
         currentHP = player->get_HP();
         healthBar.resize(20, 1);
-        healthBar.move((healthBar.length() - 1) / 2, 0);
+        healthBar.move((healthBar.length() - 1) / 2 + 1, 2);
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
-        healthBar.scale((float)currentHP / player->get_maxHP(), 1);
+        healthBar.scale((float)currentHP / player->get_maxHP (), 1);
     }
-    /*if (player->get_cooldown() > 0)
-    {
-        coughBar.resize(30, 1);
-        coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
-        coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
-        coughBar.scale(1 / player->get_cooldown(), 1);
-    }*/
-
+    int counter = 0;
+    for (int i = 0; i < particle_limit; i++)
+        counter += projectile[i] != nullptr ? 1 : 0;
+    coughBar.resize(30, 1);
+    coughBar.move(consoleSize.X / 2, consoleSize.Y * 9 / 10);
+    coughBar.setPivot(coughBar.referencePosition()->get_x(), coughBar.referencePosition()->get_y());
+    coughBar.scale((particle_limit - counter) / (float)particle_limit, 1);
     if (showHUD)
     {
+        if (g_eGameState == S_GAMEMODE1)
+        {
+            counter = 0;
+            for (int i = 0; i < NPCLimit; i++)
+            {
+                counter += (NPCs[i] != nullptr && NPCs[i]->type() == 'C') ? 1 : 0;
+            }
+            counter -= NPC::getnoHostile();
+            objective = "Objective:";
+            if (counter > 0)
+            {
+                objective.append("cough at ");
+                objective.append(std::to_string(counter));
+                objective.append(" civilian");
+            }
+            else
+                objective.append("escape");
+                
+        }
+        renderBox(&HealthText, 0x04, "Health");
+        renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
         renderBox(&coughBar, 0x20);
+        renderBox(&Objective, 0x70, objective);
     }
 }
 
@@ -1895,7 +1922,6 @@ void renderHUD()
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {
-    
     int mouseX, mouseY;
     if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {// check when player left click 
@@ -1906,9 +1932,9 @@ int checkButtonClicks(Object** buttons, int arrayLength)
             mouseY = g_mouseEvent.mousePosition.Y;
             for (int i = 0; i < arrayLength; i++)
             {//check all the objects in the given array
-                if (mouseX >= buttons[i]->referencePosition()->get_x() &&
+                if (mouseX >= buttons[i]->referencePosition()->get_x() - 1 &&
                     mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
-                    mouseY >= buttons[i]->referencePosition()->get_y() &&
+                    mouseY >= buttons[i]->referencePosition()->get_y() - 1 &&
                     mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
                 {// check if mouse is within this Object
                     return i;
@@ -1922,6 +1948,8 @@ int checkButtonClicks(Object** buttons, int arrayLength)
     }
     return arrayLength;
 }
+
+
 
 void limitprojectile()
 {

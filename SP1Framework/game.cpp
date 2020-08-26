@@ -660,7 +660,7 @@ void playLevel()
     updateGame();
     renderHUD();
 
-    if (player->get_ld() != 0)
+    if (player->get_lethalstatus() == 0)
         player->update_ld();
 
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint[4].get_x() && static_cast<int>(player->getposy()) == endPoint[4].get_y())
@@ -936,7 +936,14 @@ void checkAll()
             {
                 for (int i = 0; i < NPCLimit; i++)
                 {
-                    if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
+                    if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1)
+                    {
+                        delete NPCs[i];
+                        NPCs[i] = nullptr;
+                        noC--;
+                    }
+
+                    else if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
                     {
                         NPCs[i]->anger();
                         NPCs[i]->cooldownstart();

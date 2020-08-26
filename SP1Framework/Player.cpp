@@ -96,7 +96,7 @@ int Player::get_lethalstatus()
 void Player::set_lethal()
 {
 	lethal = true;
-	lethality_duration = 1500;
+	lethality_duration = 900;
 }
 
 void Player::update_ld()
@@ -104,9 +104,4 @@ void Player::update_ld()
 	lethality_duration -= 1;
 	if (lethality_duration == 0)
 		lethal = false;
-}
-
-int Player::get_ld()
-{
-	return lethality_duration;
 }

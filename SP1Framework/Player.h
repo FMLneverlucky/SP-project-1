@@ -18,7 +18,6 @@ public:
     int get_maxHP();
     bool get_flash();
     int get_lethalstatus();
-    int get_ld(); //get lethality duration
 
     //Setters
     void resetHP(); //sets HP to maxHP

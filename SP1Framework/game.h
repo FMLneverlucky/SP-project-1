@@ -8,9 +8,8 @@
 #include "Player.h"
 #include "NPC.h"
 #include "Police.h"
-
 #include "Object.h"
-
+#include "Zone.h"
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
 
@@ -129,9 +128,8 @@ void InitEndless();
 void enterEndless();
 void renderPoints();
 void set_points();
-void setsafezone();
 void rendersafezone();
-bool insafezone(Position* pos);
+bool inZone(Position* pos, Zone& zone);
 void resetallNPCs();
 
 //Tutorials

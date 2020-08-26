@@ -1255,8 +1255,8 @@ void spawnWall(int no)                                                          
                     isSpaceNearPlayer = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPivotPoint, as a number from 0 to 80
-                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPivotPoint, as a number from 0 to 24
+                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivoty = (rand() % 23) ;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
                     Walls[w]->setPosForAll();

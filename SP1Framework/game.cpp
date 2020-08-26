@@ -14,6 +14,8 @@
 #include "CCTV.h"
 #include <irrKlang.h>
 
+#include <fstream>
+
 //FOR TESTING
 bool checkInputs = false;
 bool checkTimeElapsed = false;
@@ -182,9 +184,16 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    //spawnWall(10);
-    //spawnNPC(false, 3, 0.1, 3);
-    //spawnNPC(true, 2, 0.1, 3);
+    std::ifstream pfile("g:/highestLevel.txt");
+    if (is_empty(pfile))
+    {
+        std::ofstream file("g:/highestLevel.txt");
+        if (file.is_open())
+        {
+            file << std::to_string(0);
+            file.close();
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -207,8 +216,6 @@ void shutdown(void)
     {
         delete powerup;
     }
-    
-    //delete player;
 }
 
 //--------------------------------------------------------------
@@ -677,7 +684,26 @@ void playLevel()
 
     if (lose)
     {
-        highestLVL = level;
+        std::string prevHigh;
+        std::ifstream file("g:/higestLevel.txt");
+        if (file.is_open()) //check if file is successfully opened
+        {
+            std::getline(file, prevHigh);//get the previous highscore and store in this temp string
+            file.close();
+            if (level > std::stoi(prevHigh))
+            {
+                std::ofstream myfile("g:/highestLevel.txt");
+                if (myfile.is_open())
+                {
+                    myfile << std::to_string(level);
+                    myfile.close();
+                }
+            }
+        }
+        if (level > highestLVL)//in case theres problem opening that file
+        { 
+            highestLVL = level;
+        }
         resetSpawns();
         NGameState = N_LOSE;
 
@@ -2300,4 +2326,9 @@ void spawnCCTV(int no)
         }
 
     }
+}
+
+bool is_empty(std::ifstream& pFile)
+{
+    return pFile.peek() == std::ifstream::traits_type::eof();
 }

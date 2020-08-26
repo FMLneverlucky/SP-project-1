@@ -95,6 +95,7 @@
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="Wall.cpp" />
+    <ClCompile Include="Zone.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCTV.h" />
@@ -111,6 +112,7 @@
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="Wall.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="Zone.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

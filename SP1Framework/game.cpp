@@ -629,6 +629,7 @@ void level_set() //deletes everyth
 void playLevel()
 {
     spawnPowerUp();
+    deletePowerUp();
     updateGame();
     renderHUD();
 
@@ -1253,13 +1254,24 @@ void spawnPowerUp()
                 powerup->set_ycoord((rand() % 24) + 1); 
             } while (occupied(powerup->get_pos()) != nullptr);
 
-            powerup->set_detime(300);
+            powerup->set_detime(1100);
         }
     }
 }
 
 void deletePowerUp()
 {
+    if (powerup != nullptr)
+    {
+        if (powerup->get_detime() != 0)
+        powerup->set_detime(powerup->get_detime() - 1);
+
+        else
+        {
+            delete powerup;
+            powerup = nullptr;
+        }
+    }
 
 }
 

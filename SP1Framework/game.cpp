@@ -841,26 +841,26 @@ void moveCharacter()
 
 void checkAll()
 {
-    //cough
+    //Cough related checks and updates
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         for (int p = 0; p < particle_limit; p++)
         {
             if (projectile[p] == nullptr)
             {
-                //cough
+                //Coughs if there are projectiles available
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
 
-                //checking if player is within cctv radar when coughing
+                //checking if player is within cctv radar when coughing - lose game condition
                 for (int c = 0; c < CCTVLimit; c++)
                 {
                     if (CCTVs[c] != nullptr)
                     {
-                        for (int r = 0; r < 20; r++)
+                        for (int r = 0; r < 25; r++)
                         {
                             if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
                             {
@@ -901,11 +901,12 @@ void checkAll()
     check_collision(); //checks for HostileNPC-Player Collision
     limitprojectile(); //moves/updates projectiles
 
-    //rotates CCTVs radar every second
+    //CCTV related checks/updates
     for (int c = 0; c < CCTVLimit; c++)
     {
         if (CCTVs[c] != nullptr)
-        {
+        {   
+            //rotates CCTVs radar every second
             if (CCTVs[c]->getCD() == 0)
             {
                 CCTVs[c]->update_cctv();
@@ -915,8 +916,24 @@ void checkAll()
             {
                 CCTVs[c]->setCD(CCTVs[c]->getCD() - 1);
             }
+            
+            //checks for walls, block CCTV line of sight
+            for (int i = 0; i < 25; i++)
+            {
+                if (occupied(CCTVs[c]->getRadarPos(i)) != nullptr)
+                {
+                    if (occupied(CCTVs[c]->getRadarPos(i))->type() == 'W')
+                    {
+                        CCTVs[c]->disable(i);
+                    }
+                }
+            }
+
         }
-    }
+    } 
+
+   
+   
 
     //checks if cough projectile is on the same block as an NPC, and turns them hostile if so
     for (int p = 0; p < particle_limit; p++)
@@ -1260,7 +1277,7 @@ void spawnWall(int no)                                                          
                     isSpaceinZone = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivotx = (rand() % 78) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
                     int Pivoty = (rand() % 20) + 3;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
@@ -2253,6 +2270,18 @@ void renderCCTV()
     {
         if (CCTVs[c] != nullptr)
         {
+            //rendering of CCTV's line of sight
+            for (int r = 0; r < 25; r++)
+            {
+                colour = 0x8F;
+                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
+                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
+                if (checkifinscreen(radarpos))
+                {
+                    g_Console.writeToBuffer(radarpos, (char)177, colour);
+                }
+            }
+
             //rendering of CCTV
             colour = 0x7A;
             cctvpos.X = CCTVs[c]->getrposx();
@@ -2263,17 +2292,6 @@ void renderCCTV()
                 g_Console.writeToBuffer(cctvpos, (char)233 , colour);
             }
 
-            //rendering of CCTV's line of sight
-            for (int r = 0; r < 20; r++)
-            {
-                colour = 0x8F;
-                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
-                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
-                if (checkifinscreen(radarpos))
-                {
-                    g_Console.writeToBuffer(radarpos, (char)177, colour);
-                }
-            }
         }
     }
 }
@@ -2300,7 +2318,7 @@ void spawnCCTV(int no)
         {
             if (CCTVs[c] == nullptr)
             {
-                CCTVs[c] = new CCTV((rand() % 8) + 1, (rand() % 2));
+                CCTVs[c] = new CCTV((rand() % 4) + 1, (rand() % 2));
                 entities[c + 61] = CCTVs[c];
                 CCTVs[c]->set_pos(temp.get_x(), temp.get_y());
                 CCTVs[c]->setCD(1 / g_dDeltaTime);

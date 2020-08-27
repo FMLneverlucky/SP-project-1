@@ -2535,10 +2535,9 @@ void initStoredData(std::string fileName, int data)
         std::getline(file, temp);
         data = std::stoi(temp);
         file.close();
-        }
     }
 }
-}
+
 
 void playSound(std::string filename, std::string filetype, bool loop)
 {

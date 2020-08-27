@@ -92,11 +92,12 @@ int noP; //no. of Police
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
+int noCCTV;
 //Position endPoint[9];
 //Position spawnPoint[9];
 //Position safezone[9];
 
-int highestLVL;
+int highestLVL = 0;
 int totalhostile = 0;
 
 
@@ -188,10 +189,6 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     std::ifstream file("highestLevel.txt");
-    if (file.is_open())
-    {
-        file.close();
-    }
     if (is_empty(file))
     {
         file.close();
@@ -201,6 +198,13 @@ void init( void )
             file << std::to_string(0);
             file.close();
         }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        highestLVL = std::stoi(temp);
+        file.close();
     }
 }
 
@@ -550,12 +554,17 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         spd = 0.2;
         cdtime = 3;
         noW = 10;
+        noCCTV = 0;
     }
     else if (level < 6)
     {
         noC++;
         spd += 0.05;
         cdtime = 2.5;
+        if (level % 2 == 1)
+        {
+            noCCTV++;
+        }
     }
     else if (level < 15)
     {
@@ -566,6 +575,10 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
             noC++;
             noP = level - 5;
         }
+        if (level == 7 || level == 10)
+        {
+            noCCTV++;
+        }
     }
     else
     {
@@ -573,13 +586,14 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         cdtime = 1;
         noP = 5;
         noC = 15;
+        noCCTV = 5;
     }
 
     set_points();
     spawnWall(noW);
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    spawnCCTV(2);
+    spawnCCTV(noCCTV);
     
 }
 
@@ -593,7 +607,7 @@ void set_points()
         tempp.set_x((rand() % 78) + 1);
         tempp.set_y((rand() % 21) + 2);
 
-    } while (occupied(&tempp) != nullptr);
+    } while (occupied(&tempp) != nullptr && inZone(&tempp, spawnPoint));
 
     endPoint.setpos(tempp.get_x(), tempp.get_y());
  
@@ -684,22 +698,24 @@ void playLevel()
 
     if (lose)
     {
-        std::string prevHigh;
-        std::ifstream file("highestLevel.txt");
-        if (file.is_open()) //check if file is successfully opened
-        {
-            std::getline(file, prevHigh);//get the previous highscore and store in this temp string
-            file.close();
-            if (level > std::stoi(prevHigh))
-            {
-                std::ofstream myfile("highestLevel.txt");
-                if (myfile.is_open())
-                {
-                    myfile << std::to_string(level);
-                    myfile.close();
-                }
-            }
-        }
+        //std::string prevHigh;
+        //std::ifstream file("highestLevel.txt");
+        //if (file.is_open()) //check if file is successfully opened
+        //{
+        //    std::getline(file, prevHigh);//get the previous highscore and store in this temp string
+        //    file.close();
+        //    if (level > std::stoi(prevHigh))
+        //    {
+        //        std::ofstream file("highestLevel.txt");
+        //        if (file.is_open())
+        //        {
+        //            file << std::to_string(level);
+        //            file.close();
+        //        }
+        //    }
+        //}
+        updateScore("highestLevel.txt", level);
+
         if (level > highestLVL)//in case theres problem opening that file
         { 
             highestLVL = level;
@@ -740,7 +756,9 @@ void InitEndless()
 
     spawnWall(10);
     spawnNPC(false, 5, 0.6, 1);
-    //spawnNPC(true, 1, 0.5, 1);
+    spawnNPC(true, 3, 0.7, 1);
+    spawnCCTV(5);
+    
 
     initHUD();
 
@@ -768,13 +786,17 @@ void enterEndless()
     {
         if (NPCs[i] != nullptr)
         {
-            COORD npcpos;
-            npcpos.X = NPCs[i]->getposx() - static_cast<int>(player->getposx()) + 40;
-            npcpos.Y = NPCs[i]->getposy() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(npcpos) == false)
+            if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
             {
-                delete NPCs[i];
-                NPCs[i] = nullptr;
+                if (NPCs[i]->get_lifespan() <= 0)
+                {
+                    delete NPCs[i];
+                    NPCs[i] = nullptr;
+                }
+                else
+                {
+                    NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
+                }
             }
         }
     }
@@ -984,6 +1006,7 @@ void checkAll()
                             NPCs[i]->anger();
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                            NPCs[i]->set_lifespan(20 / g_dDeltaTime);
 
                         }
 
@@ -1930,6 +1953,7 @@ void renderHUD()
     Object HealthBorder(22, 1, Position(19 / 2 + 1, 2));
     Object Objective(30, 1 ,Position(consoleSize.X / 2, consoleSize.Y * 9 / 10 + 1));
     Object Scoreboard(16, 1, Position(consoleSize.X / 2, 1));
+    Object highScore(25, 1, Position(Scoreboard.position()->get_x(), Scoreboard.position()->get_y() + 1));
     if (player->get_HP() != currentHP)
     {
         currentHP = player->get_HP();
@@ -1965,13 +1989,16 @@ void renderHUD()
                 objective.append("escape");
             scoreboard = "Level ";
             scoreboard.append(std::to_string(level));
+            highscore = "Level Record: Level ";
+            highscore.append(std::to_string(highestLVL));
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
-        renderBox(&coughBar, 0x20);
+        renderBox(&coughBar, player->get_lethalstatus() == 1 ? 0x50 : 0xA0);
         renderBox(&Objective, 0x70, objective);
         renderBox(&Scoreboard, 0x07, scoreboard);
+        renderBox(&highScore, 0x07, highscore);
     }
 }
 
@@ -2241,7 +2268,7 @@ bool checkifinscreen(COORD c)
 bool inZone(Position* pos, Zone& zone)
 {
     
-    if ((int)pos->get_x() <= zone.getpos(5)->get_x() + 1 && (int)pos->get_y() <= zone.getpos(7)->get_y() + 1 && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
+    if ((int)pos->get_x() <= zone.getpos(5)->get_x() && (int)pos->get_y() <= zone.getpos(7)->get_y() && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
     {
         return true;
     }
@@ -2373,4 +2400,24 @@ void spawnCCTV(int no)
 bool is_empty(std::ifstream& pFile)
 {
     return pFile.peek() == std::ifstream::traits_type::eof();
+}
+
+void updateScore(std::string fileName, int score)
+{
+    std::string prevScore;
+    std::ifstream file(fileName);
+    if (file.is_open()) //check if file is successfully opened
+    {
+        std::getline(file, prevScore);//get the previous highscore and store in this temp string
+        file.close();
+        if (level > std::stoi(prevScore))
+        {
+            std::ofstream file(fileName);
+            if (file.is_open())
+            {
+                file << std::to_string(score);
+                file.close();
+            }
+        }
+    }
 }

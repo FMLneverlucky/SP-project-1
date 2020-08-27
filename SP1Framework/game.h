@@ -116,6 +116,8 @@ void renderInputEvents();   // renders the status of input events
 
 bool is_empty(std::ifstream& pFile); // check if a file is empty
 
+void updateScore(std::string fileName, int score); // store highscore to memory
+
 void checkAll();
 
 //Game Modes

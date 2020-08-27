@@ -226,10 +226,10 @@ void init( void )
         highestLVL = std::stoi(temp);
         file.close();
     }*/
-    initStoredData(highestLevelFile, highestLVL);
-    initStoredData(highestKillFile, highestKill);
-    initStoredData(bestTimeFile, bestTime);
-    initStoredData(highestKPMFile, highestKPM);
+    initStoredData(highestLevelFile, &highestLVL);
+    initStoredData(highestKillFile, &highestKill);
+    initStoredData(bestTimeFile, &bestTime);
+    initStoredData(highestKPMFile, &highestKPM);
 }
 
 //--------------------------------------------------------------
@@ -2498,7 +2498,7 @@ void updateScore(std::string fileName, double score, double* sessionBest)
     }
 }
 
-void initStoredData(std::string fileName, double data)
+void initStoredData(std::string fileName, double* data)
 {
     std::ifstream file(fileName);
     if (is_empty(file))
@@ -2515,11 +2515,11 @@ void initStoredData(std::string fileName, double data)
     {
         std::string temp;
         std::getline(file, temp);
-        data = std::stod(temp);
+        *data = std::stod(temp);
         file.close();
     }
 }
-void initStoredData(std::string fileName, int data)
+void initStoredData(std::string fileName, int* data)
 {
     std::ifstream file(fileName);
     if (is_empty(file))
@@ -2536,7 +2536,7 @@ void initStoredData(std::string fileName, int data)
     {
         std::string temp;
         std::getline(file, temp);
-        data = std::stoi(temp);
+        *data = std::stoi(temp);
         file.close();
     }
 }

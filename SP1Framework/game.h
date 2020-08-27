@@ -119,8 +119,8 @@ void renderInputEvents();   // renders the status of input events
 bool is_empty(std::ifstream& pFile); // check if a file is empty
 void updateScore(std::string fileName, int score, int* sessionBest); // store highscore to memory
 void updateScore(std::string fileName, double score, double* sessionBest); // store highscore to memory
-void initStoredData(std::string fileName, int); // create file if it doesnt exist
-void initStoredData(std::string fileName, double); // create file if it doesnt exist
+void initStoredData(std::string fileName, int*); // create file if it doesnt exist
+void initStoredData(std::string fileName, double*); // create file if it doesnt exist
 
 void checkAll();
 

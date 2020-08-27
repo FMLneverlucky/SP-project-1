@@ -607,7 +607,7 @@ void set_points()
         tempp.set_x((rand() % 78) + 1);
         tempp.set_y((rand() % 21) + 2);
 
-    } while (occupied(&tempp) != nullptr);
+    } while (occupied(&tempp) != nullptr && inZone(&tempp, spawnPoint));
 
     endPoint.setpos(tempp.get_x(), tempp.get_y());
  

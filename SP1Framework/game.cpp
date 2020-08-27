@@ -605,15 +605,29 @@ void set_points()
 {
     spawnPoint.setpos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
 
-    Position tempp;
+    bool overlap;
+    Position temppos;
     do
     {
-        tempp.set_x((rand() % 78) + 1);
-        tempp.set_y((rand() % 21) + 2);
+        overlap = false;
+        temppos.set_x((rand() % 78) + 1);
+        temppos.set_y((rand() % 21) + 2);
 
-    } while (occupied(&tempp) != nullptr && inZone(&tempp, spawnPoint));
+        endPoint.setpos(temppos.get_x(), temppos.get_y());
 
-    endPoint.setpos(tempp.get_x(), tempp.get_y());
+        for (int s = 0; s < 9; s++)
+        {
+            for (int e = 0; e < 9; e++)
+            {
+                if (spawnPoint.getpos(s)->get_x() == endPoint.getpos(e)->get_x() && spawnPoint.getpos(s)->get_x() == endPoint.getpos(e)->get_y())
+                {
+                    overlap = true;
+                }
+            }
+        }
+    } while (occupied(&temppos) != nullptr || inZone(&temppos, spawnPoint) || overlap);
+
+    
  
 }
 

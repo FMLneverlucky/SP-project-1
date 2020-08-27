@@ -13,7 +13,7 @@ public:
 	void set_ycoord(float b);
 	float get_xcoord();
 	float get_ycoord();
-	void set_detime(int d);
-	int get_detime(); 
+	void set_detime(int d); //set despawn time
+	int get_detime(); //get despawn time
 	Position* get_pos();
 };

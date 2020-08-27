@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <irrKlang.h>
+#include <fstream>
 #include "game.h"
 #include "Framework\console.h"
 #include "time.h"
@@ -12,7 +13,9 @@
 #include "PowerUp.h"
 #include "CCTV.h"
 
-#include <fstream>
+#pragma comment(lib, "irrklang.lib")
+
+using namespace irrklang;
 
 //FOR TESTING
 bool checkInputs = false;
@@ -146,7 +149,7 @@ Entity* entities[66] = { player,
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
-                        nullptr, nullptr, nullptr, nullptr, nullptr};                                             //6 rows //CCTVs
+                        nullptr, nullptr, nullptr, nullptr, nullptr};                                             //CCTVs
 const int entityLimit = 66;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
@@ -352,6 +355,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_S; break;
     case 0x41: key = K_A; break;
     case 0x44: key = K_D; break;
+    case 0x4D: key = K_M; break;
     case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break; 
     }
@@ -2531,5 +2535,28 @@ void initStoredData(std::string fileName, int data)
         std::getline(file, temp);
         data = std::stoi(temp);
         file.close();
+        }
+    }
+}
+}
+
+void playSound(std::string filename, std::string filetype, bool loop)
+{
+    ISoundEngine* engine = createIrrKlangDevice();
+    if (!engine)
+    {
+        //should display something on UI, if engine is not created, i.e sound not working
+    }
+    
+    std::string songFile = "media/" + filename + '.' + filetype;
+
+    //engine->play2D("songFile", loop);
+}
+
+void muteBGM()
+{
+    if (g_skKeyEvent[K_M].keyReleased)
+    {
+        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
     }
 }

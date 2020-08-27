@@ -111,3 +111,13 @@ void Player::resetlethality()
 	lethal = false;
 	lethality_duration = 0;
 }
+
+void Player::prevDamaged(char e)
+{
+	prevDamage = e;
+}
+
+char Player::getPrevDamaged()
+{
+	return prevDamage;
+}

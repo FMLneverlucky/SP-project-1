@@ -28,6 +28,9 @@ std::string gameMode3 = "Tutorial (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
+std::string deathByCCTV = "How'd they catch you in 4k?!";
+std::string deathByCivilian = "You got beaten up lol";
+std::string deathByPolice = "Get fined scrub";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Restart";
 std::string mainMenuMessage = "Main Menu";
@@ -698,22 +701,6 @@ void playLevel()
 
     if (lose)
     {
-        //std::string prevHigh;
-        //std::ifstream file("highestLevel.txt");
-        //if (file.is_open()) //check if file is successfully opened
-        //{
-        //    std::getline(file, prevHigh);//get the previous highscore and store in this temp string
-        //    file.close();
-        //    if (level > std::stoi(prevHigh))
-        //    {
-        //        std::ofstream file("highestLevel.txt");
-        //        if (file.is_open())
-        //        {
-        //            file << std::to_string(level);
-        //            file.close();
-        //        }
-        //    }
-        //}
         updateScore("highestLevel.txt", level);
 
         if (level > highestLVL)//in case theres problem opening that file
@@ -915,6 +902,7 @@ void checkAll()
                             {
                                 if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
                                 {
+                                    player->prevDamaged(CCTVs[c]->type());
                                     lose = true;
                                     break;
                                 }
@@ -1885,9 +1873,7 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    std::string* message = win ? &winMessage : &loseMessage;
     Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
-    renderBox(&title, 0x0F, *message);
 
     continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
     restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
@@ -1898,6 +1884,28 @@ void renderWinLoseMenu(bool win)
     WLButtons[1] = &mainMenuButton;
     WLButtons[2] = win ? &continueButton : &restartButton;
 
+    char killedBy = player->getPrevDamaged();
+    std::string* message = &winMessage;
+    if (!win)
+    {
+        if (killedBy == 'R') // killed by cctv
+        {
+            message = &deathByCCTV;
+        }
+        else if (killedBy == 'C') // killed by civilian
+        {
+            message = &deathByCivilian;
+        }
+        else if (killedBy == 'B') // killed by police
+        {
+            message = &deathByPolice;
+        }
+        else
+        {
+            message = &loseMessage;
+        }
+    }    
+    renderBox(&title, 0x0F, *message);
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
@@ -1988,7 +1996,7 @@ void renderHUD()
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
-        renderBox(&coughBar, player->get_lethalstatus() == 1 ? 0x50 : 0xA0);
+        renderBox(&coughBar, player->get_lethalstatus() == 1 ? 0x55 : 0xAA);
         renderBox(&Objective, 0x70, objective);
         renderBox(&Scoreboard, 0x07, scoreboard);
         renderBox(&highScore, 0x07, highscore);
@@ -2074,6 +2082,7 @@ void check_collision()
                 //timer >3, run else dont;
                 
                 player->loseHP(NPCs[i]->get_damage());
+                player->prevDamaged(NPCs[i]->type());
                 flashcount = 1 / g_dDeltaTime;
                 player->set_flash(true);
                 switch (g_eGameState)

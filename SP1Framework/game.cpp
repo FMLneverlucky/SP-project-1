@@ -1002,6 +1002,7 @@ void checkAll()
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
                         {
+                            player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
                         }
@@ -1767,18 +1768,18 @@ void renderBox(Object* box, int colour, std::string text = " ")
 }
 
 void renderMainMenu()
-{
+{// put this in render loop
     if (stage == "MAIN")
-    {
-        title.move(consoleSize.X / 2, consoleSize.Y / 4);
+    {// create the object classes outside (scroll to top)
+        title.move(consoleSize.X / 2, consoleSize.Y / 4);// use move function to move it to where u want it to be
         gamemodeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
         quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
-        MMButtons[0] = &gamemodeButton;
-        MMButtons[1] = &quitButton;
+        MMButtons[0] = &gamemodeButton;// create an array for the clickable functions
+        MMButtons[1] = &quitButton;// add the object objects that are used as buttons into the array
 
-        renderBox(&gamemodeButton, 0x78, gamemodes);
-        renderBox(&quitButton, 0x78, quit);
+        renderBox(&gamemodeButton, 0x78, gamemodes);// use this renderbox function to render the object
+        renderBox(&quitButton, 0x78, quit); // 3rd parameter(text) is optional. text length must be smaller than or equal to length of box
     }
     if (stage == "SELECT")
     {
@@ -1805,18 +1806,18 @@ void renderMainMenu()
 }
 
 void mainMenuWait()
-{
+{// put this in update loop
     if (stage == "MAIN")
     {
         switch (checkButtonClicks(MMButtons, MMButtonCount))
-        {
-        case 0:
+        { // add what u want the buttons to do here
+        case 0: // the order is according to the position you placed the button in the array
             stage = "SELECT";
             break;
         case 1:
             g_bQuitGame = true;
             break;
-        default:
+        default:// if no button is clicked, it will give a larger number and will come here
             break;
         }
     }
@@ -2001,6 +2002,12 @@ void renderHUD()
             scoreboard.append(std::to_string(level));
             highscore = "Level Record: Level ";
             highscore.append(std::to_string(highestLVL));
+        }
+        if (g_eGameState == S_GAMEMODE2)
+        {
+            objective = "Kills: ";
+            objective.append(std::to_string(player->getKills()));
+            objective.append(" Time: ");
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);

@@ -92,6 +92,7 @@ int noP; //no. of Police
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
+int noCCTV;
 //Position endPoint[9];
 //Position spawnPoint[9];
 //Position safezone[9];
@@ -550,12 +551,17 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         spd = 0.2;
         cdtime = 3;
         noW = 10;
+        noCCTV = 0;
     }
     else if (level < 6)
     {
         noC++;
         spd += 0.05;
         cdtime = 2.5;
+        if (level % 2 == 1)
+        {
+            noCCTV++;
+        }
     }
     else if (level < 15)
     {
@@ -566,6 +572,10 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
             noC++;
             noP = level - 5;
         }
+        if (level == 7 || level == 10)
+        {
+            noCCTV++;
+        }
     }
     else
     {
@@ -573,13 +583,14 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         cdtime = 1;
         noP = 5;
         noC = 15;
+        noCCTV = 5;
     }
 
     set_points();
     spawnWall(noW);
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    spawnCCTV(2);
+    spawnCCTV(noCCTV);
     
 }
 
@@ -764,7 +775,7 @@ void enterEndless()
         
     }
 
-    for (int i = 0; i < NPCLimit; i++)
+   /* for (int i = 0; i < NPCLimit; i++)
     {
         if (NPCs[i] != nullptr)
         {
@@ -777,7 +788,7 @@ void enterEndless()
                 NPCs[i] = nullptr;
             }
         }
-    }
+    }*/
     if (lose)
     {
         totalhostile = NPC::getnoHostile();
@@ -2241,7 +2252,7 @@ bool checkifinscreen(COORD c)
 bool inZone(Position* pos, Zone& zone)
 {
     
-    if ((int)pos->get_x() <= zone.getpos(5)->get_x() + 1 && (int)pos->get_y() <= zone.getpos(7)->get_y() + 1 && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
+    if ((int)pos->get_x() <= zone.getpos(5)->get_x() && (int)pos->get_y() <= zone.getpos(7)->get_y() && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
     {
         return true;
     }

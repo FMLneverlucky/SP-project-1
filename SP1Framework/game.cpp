@@ -135,6 +135,16 @@ double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
+
+bool heldKey[6] = { false, false, false, false, false, false };
+int playerVelocityX = 0;
+int playerVelocityY = 0;
+bool liftedW = true;
+bool liftedA = true;
+bool liftedS = true;
+bool liftedD = true;
+
+
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_MAINMENU; // initial state
@@ -370,14 +380,59 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
         g_skKeyEvent[key].keyDown = keyboardEvent.bKeyDown;
         if (g_skKeyEvent[key].keyDown)
+        {
             buttonHoldPress(key);
+            switch (key)
+            {
+            case 0:
+                playerVelocityX += (playerVelocityX < 1 && liftedW) ? 1 : 0;
+                liftedW = false;
+                break;
+            case 1:
+                playerVelocityX += (playerVelocityX > -1 && liftedS) ? -1 : 0;
+                liftedS = false;
+                break;
+            case 2:
+                playerVelocityY += (playerVelocityY > -1 && liftedA) ? -1 : 0;
+                liftedA = false;
+                break;
+            case 3:
+                playerVelocityY += (playerVelocityY < 1 && liftedD) ? 1 : 0;
+                liftedD = false;
+                break;
+            default:
+                break;
+            }
+        }
         g_skKeyEvent[key].keyReleased = !keyboardEvent.bKeyDown;
         if (g_skKeyEvent[key].keyReleased)
+        {
             buttonHoldRelease(key);
+            switch (key)
+            {
+            case 0:
+                playerVelocityX += playerVelocityX > -1 ? -1 : 0;
+                liftedW = true;
+                break;
+            case 1:
+                playerVelocityX += playerVelocityX < 1 ? 1 : 0;
+                liftedS = true;
+                break;
+            case 2:
+                playerVelocityY += playerVelocityY < 1 ? 1 : 0;
+                liftedA = true;
+                break;
+            case 3:
+                playerVelocityY += playerVelocityY > -1 ? -1 : 0;
+                liftedD = true;
+                break;
+            default:
+                break;
+            }
+        }
     }    
 }
 
-bool heldKey[6] = {false, false, false, false, false, false};
 void buttonHoldPress(EKEYS key)
 {
     for (int i = 0; i < 6; i++)
@@ -395,11 +450,48 @@ int getButtonHold()
     {
         if (heldKey[i] == true)
         {
+            if (playerVelocityX == 0 && (i == 0 || i == 1))
+            { // incase they counterstrafe
+                break;
+            }
+            if (playerVelocityY == 0 && (i == 2 || i == 3))
+            { // incase they counterstrafe
+                break;
+            }
             return i;
         }
     }
+    if (playerVelocityX > 0)
+        return 0;
+    if (playerVelocityX < 0)
+        return 1;
+    if (playerVelocityY < 0)
+        return 2;
+    if (playerVelocityY > 0)
+        return 3;
     return 7;
 }
+//int playerDirection()
+//{
+//    switch (getButtonHold())
+//    {
+//    case 0:
+//        playerVelocityX -= playerVelocityX < 1 ? 0 : 1;
+//        break;
+//    case 1:
+//        playerVelocityX -= playerVelocityX > -1 ? 0 : 1;
+//        break;
+//    case 2:
+//        playerVelocityY -= playerVelocityY > -1 ? 0 : 1;
+//        break;
+//    case 3:
+//        playerVelocityY += playerVelocityY < 1 ? 0 : 1;
+//        break;
+//    default:
+//        break;
+//
+//    }
+//}
 
 //--------------------------------------------------------------
 // Purpose  : This is the mouse handler in the game state. Whenever there is a mouse event in the game state, this function will be called.

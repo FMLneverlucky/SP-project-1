@@ -196,9 +196,10 @@ int checkButtonClicks(Object**, int);// check if player clicked a button
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent);      // define this function for the console to call when there are mouse events
-void buttonHoldPress(EKEYS key);
-void buttonHoldRelease(EKEYS key); 
-int getButtonHold();
+void buttonHoldPress(EKEYS key); // only WASD
+void buttonHoldRelease(EKEYS key); // only WASD
+int getButtonHold(); // the last button held only for WASD
+//int playerDirection();
 
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 

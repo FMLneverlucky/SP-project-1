@@ -2333,7 +2333,7 @@ void renderCCTV()
                 colour = 0x8F;
                 radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
                 radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
-                if (checkifinscreen(radarpos))
+                if (checkifinscreen(radarpos) && CCTVs[c]->getRadarPos(r)->get_x() < 80 && CCTVs[c]->getRadarPos(r)->get_x() > -1 && CCTVs[c]->getRadarPos(r)->get_y() > 0 && CCTVs[c]->getRadarPos(r)->get_y() < 25)
                 {
                     g_Console.writeToBuffer(radarpos, (char)177, colour);
                 }

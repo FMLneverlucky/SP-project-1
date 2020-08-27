@@ -8,6 +8,7 @@ private:
     bool flash; //whether player is flashing or not
     bool lethal; //powerup buff
     int lethality_duration; //power up duration
+    char prevDamage; // the thing that it got damaged by last
 
 public:
     Player();
@@ -18,6 +19,7 @@ public:
     int get_maxHP();
     bool get_flash();
     int get_lethalstatus();
+    char getPrevDamaged();
 
     //Setters
     void resetHP(); //sets HP to maxHP
@@ -28,7 +30,8 @@ public:
     void set_lethal(); //set buff to true and set duration
     void update_ld(); //lethality duration timer ish
     void resetlethality(); // reset buff stats 
-    
+    void prevDamaged(char); // store what it got hit by latest
+
     char type();  // return char to tell what type of entity this is
 
 };

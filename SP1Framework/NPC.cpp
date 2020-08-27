@@ -37,11 +37,6 @@ void NPC::anger()
 	noHostile++;
 }
 
-void NPC::calmdown()
-{
-	angry = false;
-}
-
 void NPC::set_count(int a)
 {
 	counter = a;

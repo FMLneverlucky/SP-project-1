@@ -588,13 +588,14 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         noC = 15;
         noCCTV = 5;
     }
-
-    set_points();
+    spawnAll();
+}
+void spawnAll()
+{
     spawnWall(noW);
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
     spawnCCTV(noCCTV);
-    
 }
 
 void set_points()
@@ -664,10 +665,11 @@ void level_set() //deletes everyth
     resetSpawns();
    
     player->resetHP();
-    player->resetlethality();
     NPC::resetnoHostile();
+    player->resetlethality();
     level++;
 
+    set_points();
     set_spawn();
     clear = false;
     NGameState = N_LEVEL;
@@ -2042,7 +2044,6 @@ int checkButtonClicks(Object** buttons, int arrayLength)
 }
 
 
-
 void limitprojectile()
 {
     for (int p = 0; p < particle_limit; p++)
@@ -2089,8 +2090,10 @@ void check_collision()
                     NPCs[i]->cooldownstart();
                     NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                     player->set_pos(spawnPoint.getpos(4)->get_x(), spawnPoint.getpos(4)->get_y());
-                    resetallNPCs();
+                    resetSpawns();
+                    spawnAll();
                     NPC::resetnoHostile();
+                    player->resetlethality();
                     break;
                 case S_GAMEMODE2:
                     player->set_pos(safeZone.getpos(4)->get_x(), safeZone.getpos(4)->get_y());
@@ -2107,19 +2110,6 @@ void check_collision()
     }
 }
 
-void resetallNPCs()
-{
-    for (int i = 0; i < NPCLimit; i++)
-    {
-        if (NPCs[i] != nullptr)
-        {
-            if (NPCs[i]->isHostile())
-            {
-                NPCs[i]->calmdown();
-            }
-        }
-    }
-}
 
 void renderPoints()
 {

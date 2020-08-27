@@ -36,7 +36,6 @@ public:
     void set_lifespan(float lifespan);
 
     bool isHostile(); //returns angry
-    void calmdown(); //sets angry to false
     void anger(); //sets angry to true
     void update_pos(double dtime); //moves NPCs by no of sqrs per frame, depending on their direction
     void cooldownstart(); //sets onCD to true

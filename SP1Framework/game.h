@@ -37,6 +37,7 @@ enum EKEYS
     K_S,
     K_A,
     K_D,
+    K_M,
     K_ESCAPE,
     K_SPACE,
     K_COUNT
@@ -196,4 +197,7 @@ int getButtonHold();
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 
 
+//Audio
+void playSound(std::string filename, std::string filetype, bool loop);
+void muteBGM();
 #endif // _GAME_H

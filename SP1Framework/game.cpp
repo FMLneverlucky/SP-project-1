@@ -800,7 +800,7 @@ void enterEndless()
 
     updateGame();
 
-    if (player->get_HP() == 0)
+    if (player->get_HP() <= 0)
     {
         lose = true;
         

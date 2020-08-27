@@ -103,9 +103,17 @@ int noCCTV;
 //Position spawnPoint[9];
 //Position safezone[9];
 
+//stored data
 int highestLVL = 0;
-int totalhostile = 0;
+double highestKPM = 0;
+double bestTime = 0;
+int highestKill = 0;
+std::string highestLevelFile = "highestLevel.txt";
+std::string highestKPMFile = "highestKPM.txt";
+std::string bestTimeFile = "bestTime.txt";
+std::string highestKillFile = "highestKill.txt";
 
+int totalhostile = 0;
 
 //for temp use in code
 int tempcounter;
@@ -118,6 +126,9 @@ std::string text = " ";
 
 //map aesthetics
 int prevcol = 0x88;
+
+double e_dElapsedTime; // time passed in endless mode
+double kpm;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -197,7 +208,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    std::ifstream file("highestLevel.txt");
+    /*std::ifstream file("highestLevel.txt");
     if (is_empty(file))
     {
         file.close();
@@ -214,7 +225,11 @@ void init( void )
         std::getline(file, temp);
         highestLVL = std::stoi(temp);
         file.close();
-    }
+    }*/
+    initStoredData(highestLevelFile, highestLVL);
+    initStoredData(highestKillFile, highestKill);
+    initStoredData(bestTimeFile, bestTime);
+    initStoredData(highestKPMFile, highestKPM);
 }
 
 //--------------------------------------------------------------
@@ -724,12 +739,7 @@ void playLevel()
 
     if (lose)
     {
-        updateScore("highestLevel.txt", level);
-
-        if (level > highestLVL)//in case theres problem opening that file
-        { 
-            highestLVL = level;
-        }
+        updateScore(highestLevelFile, level, &highestLVL);
         resetSpawns();
         NGameState = N_LOSE;
 
@@ -753,11 +763,13 @@ void playEndless()
 
 void InitEndless()
 {
+    player->resetKills();
     lose = false;
     totalhostile = 0;
     player->resetHP();
     NPC::resetnoHostile();
     tempcounter = 0;
+    e_dElapsedTime = 0;
 
     player->set_pos(40, 12);
     g_sChar.m_cLocation.X = 40;
@@ -777,7 +789,9 @@ void InitEndless()
 
 void enterEndless()
 {
+    e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
+    kpm = player->getKills() / (e_dElapsedTime / 60);
     if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
         spawnNPC(false, 1, 0.6, 1);
@@ -812,6 +826,9 @@ void enterEndless()
     }
     if (lose)
     {
+        updateScore(bestTimeFile, e_dElapsedTime, &bestTime);
+        updateScore(highestKillFile, player->getKills(), &highestKill);
+        updateScore(highestKPMFile, highestKPM, &highestKPM);
         totalhostile = NPC::getnoHostile();
         resetSpawns();
         EGameState = E_LOSE;
@@ -2029,6 +2046,11 @@ void renderHUD()
             objective = "Kills: ";
             objective.append(std::to_string(player->getKills()));
             objective.append(" Time: ");
+            objective.append(std::to_string(e_dElapsedTime));
+            scoreboard = "KPM: ";
+            scoreboard.append(std::to_string(kpm));
+            highscore = "Best KPM: ";
+            highscore.append(std::to_string(highestKPM));
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
@@ -2062,10 +2084,10 @@ int checkButtonClicks(Object** buttons, int arrayLength)
             mouseY = g_mouseEvent.mousePosition.Y;
             for (int i = 0; i < arrayLength; i++)
             {//check all the objects in the given array
-                if (mouseX >= buttons[i]->referencePosition()->get_x() - 1 &&
+                if (mouseX >= buttons[i]->referencePosition()->get_x() + 1 &&
                     mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
                     mouseY >= buttons[i]->referencePosition()->get_y() - 1 &&
-                    mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
+                    mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height() - 1)
                 {// check if mouse is within this Object
                     return i;
                 }
@@ -2429,7 +2451,7 @@ bool is_empty(std::ifstream& pFile)
     return pFile.peek() == std::ifstream::traits_type::eof();
 }
 
-void updateScore(std::string fileName, int score)
+void updateScore(std::string fileName, int score, int* sessionBest)
 {
     std::string prevScore;
     std::ifstream file(fileName);
@@ -2445,6 +2467,77 @@ void updateScore(std::string fileName, int score)
                 file << std::to_string(score);
                 file.close();
             }
+        }
+    }
+    if (score > *sessionBest)//in case theres problem opening that file
+    {
+        *sessionBest = score;
+    }
+}
+void updateScore(std::string fileName, double score, double* sessionBest)
+{
+    std::string prevScore;
+    std::ifstream file(fileName);
+    if (file.is_open()) //check if file is successfully opened
+    {
+        std::getline(file, prevScore);//get the previous highscore and store in this temp string
+        file.close();
+        if (level > std::stod(prevScore))
+        {
+            std::ofstream file(fileName);
+            if (file.is_open())
+            {
+                file << std::to_string(score);
+                file.close();
+            }
+        }
+    }
+    if (score > * sessionBest)//in case theres problem opening that file
+    {
+        *sessionBest = score;
+    }
+}
+
+void initStoredData(std::string fileName, double data)
+{
+    std::ifstream file(fileName);
+    if (is_empty(file))
+    {
+        file.close();
+        std::ofstream file(fileName);
+        if (file.is_open())
+        {
+            file << std::to_string(0);
+            file.close();
+        }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        data = std::stod(temp);
+        file.close();
+    }
+}
+void initStoredData(std::string fileName, int data)
+{
+    std::ifstream file(fileName);
+    if (is_empty(file))
+    {
+        file.close();
+        std::ofstream file(fileName);
+        if (file.is_open())
+        {
+            file << std::to_string(0);
+            file.close();
+        }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        data = std::stoi(temp);
+        file.close();
         }
     }
 }

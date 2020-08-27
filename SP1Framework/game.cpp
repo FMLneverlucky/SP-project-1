@@ -951,11 +951,11 @@ void checkAll()
     {
         if (CCTVs[c] != nullptr)
         {   
-            //rotates CCTVs radar every second
+            //rotates CCTVs radar every 2 seconds
             if (CCTVs[c]->getCD() == 0)
             {
                 CCTVs[c]->update_cctv();
-                CCTVs[c]->setCD(1 / g_dDeltaTime);
+                CCTVs[c]->setCD(2 / g_dDeltaTime);
             }
             else
             {

@@ -37,7 +37,7 @@ enum EKEYS
     K_S,
     K_A,
     K_D,
-    K_M,
+    //K_M,
     K_ESCAPE,
     K_SPACE,
     K_COUNT

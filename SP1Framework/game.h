@@ -117,6 +117,8 @@ void renderInputEvents();   // renders the status of input events
 
 bool is_empty(std::ifstream& pFile); // check if a file is empty
 
+void updateScore(std::string fileName, int score); // store highscore to memory
+
 void checkAll();
 
 //Game Modes
@@ -124,6 +126,7 @@ void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
+void spawnAll();
 void resetSpawns();
 void level_set();
 void playEndless();
@@ -133,7 +136,7 @@ void renderPoints();
 void set_points();
 void rendersafezone();
 bool inZone(Position* pos, Zone& zone);
-void resetallNPCs();
+
 
 //Tutorials
 void playTutorial();

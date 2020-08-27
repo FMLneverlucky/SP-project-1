@@ -1,5 +1,5 @@
 #include "Player.h"
-Player::Player() : maxHP(5), flash(false), lethal(false), lethality_duration(0)
+Player::Player() : maxHP(5), flash(false), lethal(false), lethality_duration(0), kills(0)
 {
 	HP = maxHP;
 }
@@ -110,4 +110,24 @@ void Player::resetlethality()
 {
 	lethal = false;
 	lethality_duration = 0;
+}
+
+void Player::prevDamaged(char e)
+{
+	prevDamage = e;
+}
+
+char Player::getPrevDamaged()
+{
+	return prevDamage;
+}
+
+void Player::addKills(int no)
+{
+	kills += no;
+}
+
+int Player::getKills()
+{
+	return kills;
 }

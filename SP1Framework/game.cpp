@@ -31,6 +31,9 @@ std::string gameMode3 = "Tutorial (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
+std::string deathByCCTV = "How'd they catch you in 4k?!";
+std::string deathByCivilian = "You got beaten up lol";
+std::string deathByPolice = "Get fined scrub";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Restart";
 std::string mainMenuMessage = "Main Menu";
@@ -95,11 +98,12 @@ int noP; //no. of Police
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int noW; //no of walls
+int noCCTV;
 //Position endPoint[9];
 //Position spawnPoint[9];
 //Position safezone[9];
 
-int highestLVL;
+int highestLVL = 0;
 int totalhostile = 0;
 
 
@@ -191,10 +195,6 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     std::ifstream file("highestLevel.txt");
-    if (file.is_open())
-    {
-        file.close();
-    }
     if (is_empty(file))
     {
         file.close();
@@ -204,6 +204,13 @@ void init( void )
             file << std::to_string(0);
             file.close();
         }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        highestLVL = std::stoi(temp);
+        file.close();
     }
 }
 
@@ -554,12 +561,17 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         spd = 0.2;
         cdtime = 3;
         noW = 10;
+        noCCTV = 0;
     }
     else if (level < 6)
     {
         noC++;
         spd += 0.05;
         cdtime = 2.5;
+        if (level % 2 == 1)
+        {
+            noCCTV++;
+        }
     }
     else if (level < 15)
     {
@@ -570,6 +582,10 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
             noC++;
             noP = level - 5;
         }
+        if (level == 7 || level == 10)
+        {
+            noCCTV++;
+        }
     }
     else
     {
@@ -577,29 +593,45 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
         cdtime = 1;
         noP = 5;
         noC = 15;
+        noCCTV = 5;
     }
-
-    set_points();
+    spawnAll();
+}
+void spawnAll()
+{
     spawnWall(noW);
     spawnNPC(false, noC, spd, cdtime);
     spawnNPC(true, noP, spd, cdtime);
-    spawnCCTV(2);
-    
+    spawnCCTV(noCCTV);
 }
 
 void set_points()
 {
     spawnPoint.setpos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
 
-    Position tempp;
+    bool overlap;
+    Position temppos;
     do
     {
-        tempp.set_x((rand() % 78) + 1);
-        tempp.set_y((rand() % 21) + 2);
+        overlap = false;
+        temppos.set_x((rand() % 78) + 1);
+        temppos.set_y((rand() % 21) + 2);
 
-    } while (occupied(&tempp) != nullptr);
+        endPoint.setpos(temppos.get_x(), temppos.get_y());
 
-    endPoint.setpos(tempp.get_x(), tempp.get_y());
+        for (int s = 0; s < 9; s++)
+        {
+            for (int e = 0; e < 9; e++)
+            {
+                if (spawnPoint.getpos(s)->get_x() == endPoint.getpos(e)->get_x() && spawnPoint.getpos(s)->get_x() == endPoint.getpos(e)->get_y())
+                {
+                    overlap = true;
+                }
+            }
+        }
+    } while (occupied(&temppos) != nullptr || inZone(&temppos, spawnPoint) || overlap);
+
+    
  
 }
 
@@ -654,10 +686,11 @@ void level_set() //deletes everyth
     resetSpawns();
    
     player->resetHP();
-    player->resetlethality();
     NPC::resetnoHostile();
+    player->resetlethality();
     level++;
 
+    set_points();
     set_spawn();
     clear = false;
     NGameState = N_LEVEL;
@@ -688,22 +721,8 @@ void playLevel()
 
     if (lose)
     {
-        std::string prevHigh;
-        std::ifstream file("highestLevel.txt");
-        if (file.is_open()) //check if file is successfully opened
-        {
-            std::getline(file, prevHigh);//get the previous highscore and store in this temp string
-            file.close();
-            if (level > std::stoi(prevHigh))
-            {
-                std::ofstream myfile("highestLevel.txt");
-                if (myfile.is_open())
-                {
-                    myfile << std::to_string(level);
-                    myfile.close();
-                }
-            }
-        }
+        updateScore("highestLevel.txt", level);
+
         if (level > highestLVL)//in case theres problem opening that file
         { 
             highestLVL = level;
@@ -744,7 +763,9 @@ void InitEndless()
 
     spawnWall(10);
     spawnNPC(false, 5, 0.6, 1);
-    //spawnNPC(true, 1, 0.5, 1);
+    spawnNPC(true, 3, 0.7, 1);
+    spawnCCTV(5);
+    
 
     initHUD();
 
@@ -772,13 +793,17 @@ void enterEndless()
     {
         if (NPCs[i] != nullptr)
         {
-            COORD npcpos;
-            npcpos.X = NPCs[i]->getposx() - static_cast<int>(player->getposx()) + 40;
-            npcpos.Y = NPCs[i]->getposy() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(npcpos) == false)
+            if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
             {
-                delete NPCs[i];
-                NPCs[i] = nullptr;
+                if (NPCs[i]->get_lifespan() <= 0)
+                {
+                    delete NPCs[i];
+                    NPCs[i] = nullptr;
+                }
+                else
+                {
+                    NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
+                }
             }
         }
     }
@@ -903,6 +928,7 @@ void checkAll()
                             {
                                 if (occupied(CCTVs[c]->getRadarPos(r))->type() == 'P')
                                 {
+                                    player->prevDamaged(CCTVs[c]->type());
                                     lose = true;
                                     break;
                                 }
@@ -943,11 +969,11 @@ void checkAll()
     {
         if (CCTVs[c] != nullptr)
         {   
-            //rotates CCTVs radar every second
+            //rotates CCTVs radar every 2 seconds
             if (CCTVs[c]->getCD() == 0)
             {
                 CCTVs[c]->update_cctv();
-                CCTVs[c]->setCD(1 / g_dDeltaTime);
+                CCTVs[c]->setCD(2 / g_dDeltaTime);
             }
             else
             {
@@ -988,11 +1014,13 @@ void checkAll()
                             NPCs[i]->anger();
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                            NPCs[i]->set_lifespan(20 / g_dDeltaTime);
 
                         }
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
                         {
+                            player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
                         }
@@ -1383,9 +1411,9 @@ void spawnPowerUp()
     if (powerup == nullptr)
     {
         int r = rand() % 1000;
-        int a = rand() % 1000;
 
-        if (r == a)//chance of spawning completely random
+
+        if (r == 45)//chance of spawning completely random
         {
             powerup = new PowerUp;
 
@@ -1758,18 +1786,18 @@ void renderBox(Object* box, int colour, std::string text = " ")
 }
 
 void renderMainMenu()
-{
+{// put this in render loop
     if (stage == "MAIN")
-    {
-        title.move(consoleSize.X / 2, consoleSize.Y / 4);
+    {// create the object classes outside (scroll to top)
+        title.move(consoleSize.X / 2, consoleSize.Y / 4);// use move function to move it to where u want it to be
         gamemodeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
         quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
-        MMButtons[0] = &gamemodeButton;
-        MMButtons[1] = &quitButton;
+        MMButtons[0] = &gamemodeButton;// create an array for the clickable functions
+        MMButtons[1] = &quitButton;// add the object objects that are used as buttons into the array
 
-        renderBox(&gamemodeButton, 0x78, gamemodes);
-        renderBox(&quitButton, 0x78, quit);
+        renderBox(&gamemodeButton, 0x78, gamemodes);// use this renderbox function to render the object
+        renderBox(&quitButton, 0x78, quit); // 3rd parameter(text) is optional. text length must be smaller than or equal to length of box
     }
     if (stage == "SELECT")
     {
@@ -1796,18 +1824,18 @@ void renderMainMenu()
 }
 
 void mainMenuWait()
-{
+{// put this in update loop
     if (stage == "MAIN")
     {
         switch (checkButtonClicks(MMButtons, MMButtonCount))
-        {
-        case 0:
+        { // add what u want the buttons to do here
+        case 0: // the order is according to the position you placed the button in the array
             stage = "SELECT";
             break;
         case 1:
             g_bQuitGame = true;
             break;
-        default:
+        default:// if no button is clicked, it will give a larger number and will come here
             break;
         }
     }
@@ -1873,9 +1901,7 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    std::string* message = win ? &winMessage : &loseMessage;
     Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
-    renderBox(&title, 0x0F, *message);
 
     continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
     restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
@@ -1886,6 +1912,28 @@ void renderWinLoseMenu(bool win)
     WLButtons[1] = &mainMenuButton;
     WLButtons[2] = win ? &continueButton : &restartButton;
 
+    char killedBy = player->getPrevDamaged();
+    std::string* message = &winMessage;
+    if (!win)
+    {
+        if (killedBy == 'R') // killed by cctv
+        {
+            message = &deathByCCTV;
+        }
+        else if (killedBy == 'C') // killed by civilian
+        {
+            message = &deathByCivilian;
+        }
+        else if (killedBy == 'B') // killed by police
+        {
+            message = &deathByPolice;
+        }
+        else
+        {
+            message = &loseMessage;
+        }
+    }    
+    renderBox(&title, 0x0F, *message);
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
@@ -1934,6 +1982,7 @@ void renderHUD()
     Object HealthBorder(22, 1, Position(19 / 2 + 1, 2));
     Object Objective(30, 1 ,Position(consoleSize.X / 2, consoleSize.Y * 9 / 10 + 1));
     Object Scoreboard(16, 1, Position(consoleSize.X / 2, 1));
+    Object highScore(25, 1, Position(Scoreboard.position()->get_x(), Scoreboard.position()->get_y() + 1));
     if (player->get_HP() != currentHP)
     {
         currentHP = player->get_HP();
@@ -1969,13 +2018,22 @@ void renderHUD()
                 objective.append("escape");
             scoreboard = "Level ";
             scoreboard.append(std::to_string(level));
+            highscore = "Level Record: Level ";
+            highscore.append(std::to_string(highestLVL));
+        }
+        if (g_eGameState == S_GAMEMODE2)
+        {
+            objective = "Kills: ";
+            objective.append(std::to_string(player->getKills()));
+            objective.append(" Time: ");
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
-        renderBox(&coughBar, 0x20);
+        renderBox(&coughBar, player->get_lethalstatus() == 1 ? 0x55 : 0xAA);
         renderBox(&Objective, 0x70, objective);
         renderBox(&Scoreboard, 0x07, scoreboard);
+        renderBox(&highScore, 0x07, highscore);
     }
 }
 
@@ -2019,7 +2077,6 @@ int checkButtonClicks(Object** buttons, int arrayLength)
 }
 
 
-
 void limitprojectile()
 {
     for (int p = 0; p < particle_limit; p++)
@@ -2058,6 +2115,7 @@ void check_collision()
                 //timer >3, run else dont;
                 
                 player->loseHP(NPCs[i]->get_damage());
+                player->prevDamaged(NPCs[i]->type());
                 flashcount = 1 / g_dDeltaTime;
                 player->set_flash(true);
                 switch (g_eGameState)
@@ -2066,8 +2124,10 @@ void check_collision()
                     NPCs[i]->cooldownstart();
                     NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                     player->set_pos(spawnPoint.getpos(4)->get_x(), spawnPoint.getpos(4)->get_y());
-                    resetallNPCs();
+                    resetSpawns();
+                    spawnAll();
                     NPC::resetnoHostile();
+                    player->resetlethality();
                     break;
                 case S_GAMEMODE2:
                     player->set_pos(safeZone.getpos(4)->get_x(), safeZone.getpos(4)->get_y());
@@ -2084,19 +2144,6 @@ void check_collision()
     }
 }
 
-void resetallNPCs()
-{
-    for (int i = 0; i < NPCLimit; i++)
-    {
-        if (NPCs[i] != nullptr)
-        {
-            if (NPCs[i]->isHostile())
-            {
-                NPCs[i]->calmdown();
-            }
-        }
-    }
-}
 
 void renderPoints()
 {
@@ -2245,7 +2292,7 @@ bool checkifinscreen(COORD c)
 bool inZone(Position* pos, Zone& zone)
 {
     
-    if ((int)pos->get_x() <= zone.getpos(5)->get_x() + 1 && (int)pos->get_y() <= zone.getpos(7)->get_y() + 1 && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
+    if ((int)pos->get_x() <= zone.getpos(5)->get_x() && (int)pos->get_y() <= zone.getpos(7)->get_y() && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
     {
         return true;
     }
@@ -2320,7 +2367,7 @@ void renderCCTV()
                 colour = 0x8F;
                 radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
                 radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
-                if (checkifinscreen(radarpos))
+                if (checkifinscreen(radarpos) && CCTVs[c]->getRadarPos(r)->get_x() < 80 && CCTVs[c]->getRadarPos(r)->get_x() > -1 && CCTVs[c]->getRadarPos(r)->get_y() > 0 && CCTVs[c]->getRadarPos(r)->get_y() < 25)
                 {
                     g_Console.writeToBuffer(radarpos, (char)177, colour);
                 }
@@ -2377,6 +2424,27 @@ void spawnCCTV(int no)
 bool is_empty(std::ifstream& pFile)
 {
     return pFile.peek() == std::ifstream::traits_type::eof();
+}
+
+void updateScore(std::string fileName, int score)
+{
+    std::string prevScore;
+    std::ifstream file(fileName);
+    if (file.is_open()) //check if file is successfully opened
+    {
+        std::getline(file, prevScore);//get the previous highscore and store in this temp string
+        file.close();
+        if (level > std::stoi(prevScore))
+        {
+            std::ofstream file(fileName);
+            if (file.is_open())
+            {
+                file << std::to_string(score);
+                file.close();
+            }
+        }
+    }
+}
 }
 
 void playSound(std::string filename, std::string filetype, bool loop)

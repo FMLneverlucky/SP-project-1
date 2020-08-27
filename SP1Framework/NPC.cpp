@@ -2,13 +2,13 @@
 int NPC::noHostile = 0;
 int NPC::total = 0;
 
-NPC::NPC(int cd) :angry(false), dead(false), counter(0), speed(0.1), damage(1), freezetime(cd), onCD(false)
+NPC::NPC(int cd) :angry(false), counter(0), speed(0.1), damage(1), freezetime(cd), onCD(false), lifespan(0)
 {
 	//normal civilians use this
 	total++;
 }
 
-NPC::NPC() :angry(false), dead(false), counter(0), speed(0.1), damage(5), freezetime(1), onCD(false)
+NPC::NPC() :angry(false), counter(0), speed(0.1), damage(5), freezetime(1), onCD(false), lifespan(0)
 {
 	//police use this
 	total++;
@@ -35,11 +35,6 @@ void NPC::anger()
 	angry = true;
 	counter = 0;
 	noHostile++;
-}
-
-void NPC::calmdown()
-{
-	angry = false;
 }
 
 void NPC::set_count(int a)
@@ -75,6 +70,16 @@ int NPC::get_damage()
 float NPC::get_ftime()
 {
 	return freezetime;
+}
+
+float NPC::get_lifespan()
+{
+	return lifespan;
+}
+
+void NPC::set_lifespan(float lifespan)
+{
+	this->lifespan = lifespan;
 }
 
 Position* NPC::new_pos(double dtime)

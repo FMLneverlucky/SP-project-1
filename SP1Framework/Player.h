@@ -23,7 +23,7 @@ public:
     int get_lethalstatus();
     char getPrevDamaged();
     int getKills();
-
+    char type();  // return char to tell what type of entity this is
     //Setters
     void resetHP(); //sets HP to maxHP
     void loseHP(int ack); //reduce HP by ack(damage of npc passed in)
@@ -35,7 +35,8 @@ public:
     void resetlethality(); // reset buff stats 
     void prevDamaged(char); // store what it got hit by latest
     void addKills(int); // add no. of kills
-    char type();  // return char to tell what type of entity this is
+    void resetKills();// kills = 0
+    
 
 };
 

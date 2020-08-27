@@ -131,3 +131,8 @@ int Player::getKills()
 {
 	return kills;
 }
+
+void Player::resetKills()
+{
+	kills = 0;
+}

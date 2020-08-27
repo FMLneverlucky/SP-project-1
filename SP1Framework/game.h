@@ -125,6 +125,7 @@ void InitNormal();
 void playNormal();
 void playLevel();
 void set_spawn();
+void spawnAll();
 void resetSpawns();
 void level_set();
 void playEndless();
@@ -134,7 +135,7 @@ void renderPoints();
 void set_points();
 void rendersafezone();
 bool inZone(Position* pos, Zone& zone);
-void resetallNPCs();
+
 
 //Tutorials
 void playTutorial();

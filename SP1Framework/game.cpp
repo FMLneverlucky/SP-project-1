@@ -96,7 +96,7 @@ int noW; //no of walls
 //Position spawnPoint[9];
 //Position safezone[9];
 
-int highestLVL;
+int highestLVL = 0;
 int totalhostile = 0;
 
 
@@ -188,10 +188,6 @@ void init( void )
     g_Console.setMouseHandler(mouseHandler);
 
     std::ifstream file("highestLevel.txt");
-    if (file.is_open())
-    {
-        file.close();
-    }
     if (is_empty(file))
     {
         file.close();
@@ -201,6 +197,13 @@ void init( void )
             file << std::to_string(0);
             file.close();
         }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        highestLVL = std::stoi(temp);
+        file.close();
     }
 }
 
@@ -684,22 +687,24 @@ void playLevel()
 
     if (lose)
     {
-        std::string prevHigh;
-        std::ifstream file("highestLevel.txt");
-        if (file.is_open()) //check if file is successfully opened
-        {
-            std::getline(file, prevHigh);//get the previous highscore and store in this temp string
-            file.close();
-            if (level > std::stoi(prevHigh))
-            {
-                std::ofstream myfile("highestLevel.txt");
-                if (myfile.is_open())
-                {
-                    myfile << std::to_string(level);
-                    myfile.close();
-                }
-            }
-        }
+        //std::string prevHigh;
+        //std::ifstream file("highestLevel.txt");
+        //if (file.is_open()) //check if file is successfully opened
+        //{
+        //    std::getline(file, prevHigh);//get the previous highscore and store in this temp string
+        //    file.close();
+        //    if (level > std::stoi(prevHigh))
+        //    {
+        //        std::ofstream file("highestLevel.txt");
+        //        if (file.is_open())
+        //        {
+        //            file << std::to_string(level);
+        //            file.close();
+        //        }
+        //    }
+        //}
+        updateScore("highestLevel.txt", level);
+
         if (level > highestLVL)//in case theres problem opening that file
         { 
             highestLVL = level;
@@ -1930,6 +1935,7 @@ void renderHUD()
     Object HealthBorder(22, 1, Position(19 / 2 + 1, 2));
     Object Objective(30, 1 ,Position(consoleSize.X / 2, consoleSize.Y * 9 / 10 + 1));
     Object Scoreboard(16, 1, Position(consoleSize.X / 2, 1));
+    Object highScore(25, 1, Position(Scoreboard.position()->get_x(), Scoreboard.position()->get_y() + 1));
     if (player->get_HP() != currentHP)
     {
         currentHP = player->get_HP();
@@ -1965,6 +1971,8 @@ void renderHUD()
                 objective.append("escape");
             scoreboard = "Level ";
             scoreboard.append(std::to_string(level));
+            highscore = "Level Record: Level ";
+            highscore.append(std::to_string(highestLVL));
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
@@ -1972,6 +1980,7 @@ void renderHUD()
         renderBox(&coughBar, 0x20);
         renderBox(&Objective, 0x70, objective);
         renderBox(&Scoreboard, 0x07, scoreboard);
+        renderBox(&highScore, 0x07, highscore);
     }
 }
 
@@ -2373,4 +2382,24 @@ void spawnCCTV(int no)
 bool is_empty(std::ifstream& pFile)
 {
     return pFile.peek() == std::ifstream::traits_type::eof();
+}
+
+void updateScore(std::string fileName, int score)
+{
+    std::string prevScore;
+    std::ifstream file(fileName);
+    if (file.is_open()) //check if file is successfully opened
+    {
+        std::getline(file, prevScore);//get the previous highscore and store in this temp string
+        file.close();
+        if (level > std::stoi(prevScore))
+        {
+            std::ofstream file(fileName);
+            if (file.is_open())
+            {
+                file << std::to_string(score);
+                file.close();
+            }
+        }
+    }
 }

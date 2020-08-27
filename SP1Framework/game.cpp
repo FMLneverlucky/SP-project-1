@@ -654,8 +654,8 @@ void playLevel()
     updateGame();
     renderHUD();
 
-    if (player->get_lethalstatus() == 1)
-        player->update_ld();
+    if (player->get_lethalstatus() == 1) // if powerup picked up before
+        player->update_ld(); //- 1 each time run tis code(runs by frame)
 
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint.getpos(4)->get_x() && static_cast<int>(player->getposy()) == endPoint.getpos(4)->get_y())
     {
@@ -937,7 +937,7 @@ void checkAll()
 
                         }
 
-                        if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1)
+                        if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
                         {
                             delete NPCs[i];
                             NPCs[i] = nullptr;
@@ -1318,7 +1318,7 @@ void renderPowerUp()
             colour = 0xB6;
             if (checkifinscreen(pu))
             {
-                g_Console.writeToBuffer(pu, (char)232, colour);
+                g_Console.writeToBuffer(pu, (char)232, colour); //powerup aqua with yellow ascii tile
             }
     }
     
@@ -1331,7 +1331,7 @@ void spawnPowerUp()
         int r = rand() % 1000;
         int a = rand() % 1000;
 
-        if (r == a)
+        if (r == a)//chance of spawning completely random
         {
             powerup = new PowerUp;
 
@@ -1341,7 +1341,7 @@ void spawnPowerUp()
                 powerup->set_ycoord((rand() % 24) + 1); 
             } while (occupied(powerup->get_pos()) != nullptr);
 
-            powerup->set_detime(2250);
+            powerup->set_detime(2250);//abt 25 sec to despawn
         }
     }
 }
@@ -1350,19 +1350,19 @@ void deletePowerUp()
 {
     if (powerup != nullptr)
     {
-        if ((g_sChar.m_cLocation.X == powerup->get_xcoord()) && (g_sChar.m_cLocation.Y == powerup->get_ycoord()))
+        if ((g_sChar.m_cLocation.X == powerup->get_xcoord()) && (g_sChar.m_cLocation.Y == powerup->get_ycoord())) //when player walks over powerup
         {
-            player->set_lethal();
+            player->set_lethal(); //set buff duration and buff is true
             delete powerup;
             powerup = nullptr;
         }
 
         else if (powerup->get_detime() != 0)
-            powerup->set_detime(powerup->get_detime() - 1);
+            powerup->set_detime(powerup->get_detime() - 1);//when despawn time hasnt run out, minus 1
 
         else
         {
-            delete powerup;
+            delete powerup; //deletes powerup when despawn time runs out
             powerup = nullptr;
         }
     }
@@ -1672,7 +1672,7 @@ void renderprojectile()
             pr.X = static_cast<int>(projectile[p]->get_px()) - static_cast<int>(player->getposx()) + 40;
             pr.Y = static_cast<int>(projectile[p]->get_py()) - static_cast<int>(player->getposy()) + 12;
 
-            if (player->get_lethalstatus() == 1)
+            if (player->get_lethalstatus() == 1)// changes projectile colour to purple when in buffed state
                 colour = 0x55;
             else
                 colour = 0xA1;

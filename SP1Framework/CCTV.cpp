@@ -21,19 +21,9 @@ CCTV::CCTV(int dir, bool iscw) : rotateCD(0), cw(iscw)
 	case 4:
 		direction = RIGHT;
 		break;
-	case 5:
-		direction = TOPLEFT;
-		break;
-	case 6:
-		direction = TOPRIGHT;
-		break;
-	case 7:
-		direction = BOTTOMLEFT;
-		break;
-	case 8:
-		direction = BOTTOMLEFT;
-		break;
+	
 	}
+
 }
 
 void CCTV::setCD(double count)
@@ -54,29 +44,18 @@ void CCTV::update_cctv()
 		switch (direction)
 		{
 		case UP:
-			direction = TOPRIGHT;
-			break;
-		case DOWN:
-			direction = BOTTOMLEFT;
-			break;
-		case LEFT:
-			direction = TOPLEFT;
-			break;
-		case RIGHT:
-			direction = BOTTOMRIGHT;
-			break;
-		case TOPLEFT:
-			direction = UP;
-			break;
-		case TOPRIGHT:
 			direction = RIGHT;
 			break;
-		case BOTTOMLEFT:
+		case DOWN:
 			direction = LEFT;
 			break;
-		case BOTTOMRIGHT:
+		case LEFT:
+			direction = UP;
+			break;
+		case RIGHT:
 			direction = DOWN;
 			break;
+		
 		}
 	}
 	else
@@ -84,28 +63,16 @@ void CCTV::update_cctv()
 		switch (direction)
 		{
 		case UP:
-			direction = TOPLEFT;
-			break;
-		case DOWN:
-			direction = BOTTOMRIGHT;
-			break;
-		case LEFT:
-			direction = BOTTOMLEFT;
-			break;
-		case RIGHT:
-			direction = TOPRIGHT;
-			break;
-		case TOPLEFT:
 			direction = LEFT;
 			break;
-		case TOPRIGHT:
-			direction = UP;
+		case DOWN:
+			direction = RIGHT;
 			break;
-		case BOTTOMLEFT:
+		case LEFT:
 			direction = DOWN;
 			break;
-		case BOTTOMRIGHT:
-			direction = RIGHT;
+		case RIGHT:
+			direction = UP;
 			break;
 		}
 	}
@@ -114,51 +81,79 @@ void CCTV::update_cctv()
 	switch (direction)
 	{
 	case UP:
-		for (int r = 0; r < 20; r++)
+		radar[0].set_pos(pos.get_x(), pos.get_y() - 1);
+		for (int r = -1; r < 2; r++)
 		{
-			radar[r].set_pos(pos.get_x(), pos.get_y() + r + 1);
+			radar[2 + r].set_pos(pos.get_x() + r, pos.get_y() - 2);
+		}
+		for (int r = -2; r < 3; r++)
+		{
+			radar[6 + r].set_pos(pos.get_x() + r, pos.get_y() - 3);
+		}
+		for (int r = -3; r < 4; r++)
+		{
+			radar[12 + r].set_pos(pos.get_x() + r, pos.get_y() - 4);
+		}
+		for (int r = -4; r < 5; r++)
+		{
+			radar[20 + r].set_pos(pos.get_x() + r, pos.get_y() - 5);
 		}
 		break;
 	case DOWN:
-		for (int r = 0; r < 20; r++)
+		radar[0].set_pos(pos.get_x(), pos.get_y() + 1);
+		for (int r = -1; r < 2; r++)
 		{
-			radar[r].set_pos(pos.get_x(), pos.get_y() - r - 1);
+			radar[2 + r].set_pos(pos.get_x() + r, pos.get_y() + 2);
+		}
+		for (int r = -2; r < 3; r++)
+		{
+			radar[6 + r].set_pos(pos.get_x() + r, pos.get_y() + 3);
+		}
+		for (int r = -3; r < 4; r++)
+		{
+			radar[12 + r].set_pos(pos.get_x() + r, pos.get_y() + 4);
+		}
+		for (int r = -4; r < 5; r++)
+		{
+			radar[20 + r].set_pos(pos.get_x() + r, pos.get_y() + 5);
 		}
 		break;
 	case LEFT:
-		for (int r = 0; r < 20; r++)
+		radar[0].set_pos(pos.get_x() - 1, pos.get_y());
+		for (int r = -1; r < 2; r++)
 		{
-			radar[r].set_pos(pos.get_x() - r - 1, pos.get_y());
+			radar[2 + r].set_pos(pos.get_x() - 2, pos.get_y() + r);
+		}
+		for (int r = -2; r < 3; r++)
+		{
+			radar[6 + r].set_pos(pos.get_x() - 3, pos.get_y() + r);
+		}
+		for (int r = -3; r < 4; r++)
+		{
+			radar[12 + r].set_pos(pos.get_x() - 4, pos.get_y() + r);
+		}
+		for (int r = -4; r < 5; r++)
+		{
+			radar[20 + r].set_pos(pos.get_x() - 5, pos.get_y() + r);
 		}
 		break;
 	case RIGHT:
-		for (int r = 0; r < 20; r++)
+		radar[0].set_pos(pos.get_x() + 1, pos.get_y());
+		for (int r = -1; r < 2; r++)
 		{
-			radar[r].set_pos(pos.get_x() + r + 1, pos.get_y());
+			radar[2 + r].set_pos(pos.get_x() + 2, pos.get_y() + r);
 		}
-		break;
-	case TOPLEFT:
-		for (int r = 0; r < 20; r++)
+		for (int r = -2; r < 3; r++)
 		{
-			radar[r].set_pos(pos.get_x() - r - 1, pos.get_y() + r + 1);
+			radar[6 + r].set_pos(pos.get_x() + 3, pos.get_y() + r);
 		}
-		break;
-	case TOPRIGHT:
-		for (int r = 0; r < 20; r++)
+		for (int r = -3; r < 4; r++)
 		{
-			radar[r].set_pos(pos.get_x() + r + 1, pos.get_y() + r + 1);
+			radar[12 + r].set_pos(pos.get_x() +4, pos.get_y() + r);
 		}
-		break;
-	case BOTTOMLEFT:
-		for (int r = 0; r < 20; r++)
+		for (int r = -4; r < 5; r++)
 		{
-			radar[r].set_pos(pos.get_x() - r - 1, pos.get_y() - r - 1);
-		}
-		break;
-	case BOTTOMRIGHT:
-		for (int r = 0; r < 20; r++)
-		{
-			radar[r].set_pos(pos.get_x() + r + 1, pos.get_y() - r - 1);
+			radar[20 + r].set_pos(pos.get_x() + 5, pos.get_y() + r);
 		}
 		break;
 	}
@@ -168,6 +163,107 @@ void CCTV::update_cctv()
 Position* CCTV::getRadarPos(int index)
 {
 	return &radar[index];
+}
+
+bool CCTV::isSameRow(int index, int index2)
+{
+	switch (index)
+	{
+	case 0:
+		return true;
+	case 1:
+		if (index2 == 4 || index2 == 9 || index2 == 16)
+		{
+			return true;
+		}
+		break;
+	case 2:
+		if (index2 == 5 || index2 == 6 || index2 == 7 || (index2 <= 14 && index2 >= 10) || (index2 <= 23 && index2 >= 17))
+		{
+			return true;
+		}
+		break;
+	case 3:
+		if (index2 == 8 || index2 == 15 || index2 == 24)
+		{
+			return true;
+		}
+		break;
+	case 4:
+		if (index2 == 9 || index2 == 16)
+		{
+			return true;
+		}
+		break;
+	case 5:
+		if (index2 == 10 || index2 == 11 || index2 == 17 || index2 == 18 || index2 == 19)
+		{
+			return true;
+		}
+		break;
+	case 6:
+		if (index2 == 12 || index2 == 20)
+		{
+			return true;
+		}
+		break;
+	case 7:
+		if (index2 == 13 || index2 == 14 || index2 == 21 || index2 == 22 || index2 == 23)
+		{
+			return true;
+		}
+		break;
+	case 8:
+		if (index2 == 15 || index2 == 24)
+		{
+			return true;
+		}
+		break;
+	case 9:
+		if (index2 == 16 || index2 == 17)
+		{
+			return true;
+		}
+		break;
+	case 10:
+		if (index2 == 17 || index2 == 18)
+		{
+			return true;
+		}
+		break;
+	case 11:
+		if (index2 == 18 || index2 == 19)
+		{
+			return true;
+		}
+		break;
+	case 12:
+		if (index2 == 20 || index2 == 21)
+		{
+			return true;
+		}
+		break;
+	case 13:
+		if (index2 == 21 || index2 == 22)
+		{
+			return true;
+		}
+		break;
+	case 14:
+		if (index2 == 22 || index2 == 23)
+		{
+			return true;
+		}
+		break;
+	case 15:
+		if (index2 == 23 || index2 == 24)
+		{
+			return true;
+		}
+		break;
+	
+	}
+	return false;
 }
 
 char CCTV::type()
@@ -184,4 +280,16 @@ Position* CCTV::new_pos(double dtime)
 {
 	//no codes
 	return &radar[0];
+}
+
+void CCTV::disable(int index)
+{
+	radar[index].set_pos(pos.get_x(), pos.get_y());
+	for (int i = index + 1; i < 25; i++)
+	{
+		if (isSameRow(index, i))
+		{
+			radar[i].set_pos(pos.get_x(), pos.get_y());
+		}
+	}
 }

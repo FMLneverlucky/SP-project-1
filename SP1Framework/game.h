@@ -114,6 +114,8 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+bool is_empty(std::ifstream& pFile); // check if a file is empty
+
 void checkAll();
 
 //Game Modes
@@ -181,8 +183,6 @@ void renderWinLoseMenu(bool);
 void winLoseMenuWait();
 void initHUD();//init ONCE
 void renderHUD();// renders HUD
-//void updateHUD();
-
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
 int checkButtonClicks(Object**, int);// check if player clicked a button
 

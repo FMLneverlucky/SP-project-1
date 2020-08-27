@@ -12,6 +12,8 @@
 #include "PowerUp.h"
 #include "CCTV.h"
 
+#include <fstream>
+
 //FOR TESTING
 bool checkInputs = false;
 bool checkTimeElapsed = false;
@@ -35,6 +37,8 @@ std::string back = "Back";
 std::string gamemodes = "Play";
 
 std::string objective = "";
+std::string scoreboard = "";
+std::string highscore = "";
 
 //MAINMENU
 Object title(71, 3);
@@ -48,7 +52,7 @@ Object* MMButtons[2];
 const int MMButtonCount = 2; 
 Object* MGButtons[5];
 const int MGButtonCount = 5;
-std::string stage = "SELECT";
+std::string stage = "MAIN";
 
 //QUICK FIX
 bool isMousePressed = false;
@@ -183,9 +187,21 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    //spawnWall(10);
-    //spawnNPC(false, 3, 0.1, 3);
-    //spawnNPC(true, 2, 0.1, 3);
+    std::ifstream file("highestLevel.txt");
+    if (file.is_open())
+    {
+        file.close();
+    }
+    if (is_empty(file))
+    {
+        file.close();
+        std::ofstream file("highestLevel.txt");
+        if (file.is_open())
+        {
+            file << std::to_string(0);
+            file.close();
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -208,8 +224,6 @@ void shutdown(void)
     {
         delete powerup;
     }
-    
-    //delete player;
 }
 
 //--------------------------------------------------------------
@@ -670,7 +684,26 @@ void playLevel()
 
     if (lose)
     {
-        highestLVL = level;
+        std::string prevHigh;
+        std::ifstream file("highestLevel.txt");
+        if (file.is_open()) //check if file is successfully opened
+        {
+            std::getline(file, prevHigh);//get the previous highscore and store in this temp string
+            file.close();
+            if (level > std::stoi(prevHigh))
+            {
+                std::ofstream myfile("highestLevel.txt");
+                if (myfile.is_open())
+                {
+                    myfile << std::to_string(level);
+                    myfile.close();
+                }
+            }
+        }
+        if (level > highestLVL)//in case theres problem opening that file
+        { 
+            highestLVL = level;
+        }
         resetSpawns();
         NGameState = N_LOSE;
 
@@ -841,26 +874,26 @@ void moveCharacter()
 
 void checkAll()
 {
-    //cough
+    //Cough related checks and updates
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         for (int p = 0; p < particle_limit; p++)
         {
             if (projectile[p] == nullptr)
             {
-                //cough
+                //Coughs if there are projectiles available
                 projectile[p] = new Projectile;
                 projectile[p]->set_ppos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
 
-                //checking if player is within cctv radar when coughing
+                //checking if player is within cctv radar when coughing - lose game condition
                 for (int c = 0; c < CCTVLimit; c++)
                 {
                     if (CCTVs[c] != nullptr)
                     {
-                        for (int r = 0; r < 20; r++)
+                        for (int r = 0; r < 25; r++)
                         {
                             if (occupied(CCTVs[c]->getRadarPos(r)) != nullptr)
                             {
@@ -901,11 +934,12 @@ void checkAll()
     check_collision(); //checks for HostileNPC-Player Collision
     limitprojectile(); //moves/updates projectiles
 
-    //rotates CCTVs radar every second
+    //CCTV related checks/updates
     for (int c = 0; c < CCTVLimit; c++)
     {
         if (CCTVs[c] != nullptr)
-        {
+        {   
+            //rotates CCTVs radar every second
             if (CCTVs[c]->getCD() == 0)
             {
                 CCTVs[c]->update_cctv();
@@ -915,8 +949,24 @@ void checkAll()
             {
                 CCTVs[c]->setCD(CCTVs[c]->getCD() - 1);
             }
+            
+            //checks for walls, block CCTV line of sight
+            for (int i = 0; i < 25; i++)
+            {
+                if (occupied(CCTVs[c]->getRadarPos(i)) != nullptr)
+                {
+                    if (occupied(CCTVs[c]->getRadarPos(i))->type() == 'W')
+                    {
+                        CCTVs[c]->disable(i);
+                    }
+                }
+            }
+
         }
-    }
+    } 
+
+   
+   
 
     //checks if cough projectile is on the same block as an NPC, and turns them hostile if so
     for (int p = 0; p < particle_limit; p++)
@@ -1260,7 +1310,7 @@ void spawnWall(int no)                                                          
                     isSpaceinZone = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 79) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivotx = (rand() % 78) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
                     int Pivoty = (rand() % 20) + 3;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
@@ -1697,7 +1747,7 @@ void renderBox(Object* box, int colour, std::string text = " ")
         for (int x = 0; x < box->length(); x++)
         {
             c.X++;
-            g_Console.writeToBuffer(c, temp = (x >= ((box->length() + 1) / 2) - 1 - text.length() / 2 && x < ((box->length() + 1) / 2) + text.length() / 2  && y == box->height() / 2) ? text[i++] : ' ', colour);
+            g_Console.writeToBuffer(c, temp = (x >= ((box->length() + 1) / 2) - (text.length() + 1) / 2 && x < ((box->length() + 1) / 2) + ((text.length() + 1) / 2)  && y == box->height() / 2) ? text[i++] : ' ', colour);
         }
         c.Y++;
     }
@@ -1840,6 +1890,7 @@ void renderWinLoseMenu(bool win)
 
 void winLoseMenuWait()
 {
+    showHUD = false;
     switch (checkButtonClicks(WLButtons, WLButtonCount))
     {
     case 0:
@@ -1847,10 +1898,14 @@ void winLoseMenuWait()
         break;
     case 1:
         g_eGameState = S_MAINMENU;
+        NGameState = N_INIT;
+        EGameState = E_INIT;
+        showHUD = true;
         break;
     case 2:
         NGameState = N_INIT;
         EGameState = E_INIT;
+        showHUD = true;
         break;
     default:
         break;
@@ -1874,6 +1929,7 @@ void renderHUD()
     Object HealthText(22, 1, Position(19 / 2 + 1, 1));
     Object HealthBorder(22, 1, Position(19 / 2 + 1, 2));
     Object Objective(30, 1 ,Position(consoleSize.X / 2, consoleSize.Y * 9 / 10 + 1));
+    Object Scoreboard(16, 1, Position(consoleSize.X / 2, 1));
     if (player->get_HP() != currentHP)
     {
         currentHP = player->get_HP();
@@ -1882,7 +1938,7 @@ void renderHUD()
         healthBar.setPivot(healthBar.referencePosition()->get_x(), healthBar.referencePosition()->get_y());
         healthBar.scale((float)currentHP / player->get_maxHP (), 1);
     }
-    int counter = 0;
+    int counter = 0;// count projectiles on board
     for (int i = 0; i < particle_limit; i++)
         counter += projectile[i] != nullptr ? 1 : 0;
     coughBar.resize(30, 1);
@@ -1893,12 +1949,11 @@ void renderHUD()
     {
         if (g_eGameState == S_GAMEMODE1)
         {
-            counter = 0;
+            counter = 0; // this time to count npcs alive
             for (int i = 0; i < NPCLimit; i++)
             {
-                counter += (NPCs[i] != nullptr && NPCs[i]->type() == 'C') ? 1 : 0;
+                counter += (NPCs[i] != nullptr && NPCs[i]->type() == 'C' && !NPCs[i]->isHostile()) ? 1 : 0;
             }
-            counter -= NPC::getnoHostile();
             objective = "Objective:";
             if (counter > 0)
             {
@@ -1908,13 +1963,15 @@ void renderHUD()
             }
             else
                 objective.append("escape");
-                
+            scoreboard = "Level ";
+            scoreboard.append(std::to_string(level));
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
         renderBox(&coughBar, 0x20);
         renderBox(&Objective, 0x70, objective);
+        renderBox(&Scoreboard, 0x07, scoreboard);
     }
 }
 
@@ -2253,6 +2310,18 @@ void renderCCTV()
     {
         if (CCTVs[c] != nullptr)
         {
+            //rendering of CCTV's line of sight
+            for (int r = 0; r < 25; r++)
+            {
+                colour = 0x8F;
+                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
+                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
+                if (checkifinscreen(radarpos))
+                {
+                    g_Console.writeToBuffer(radarpos, (char)177, colour);
+                }
+            }
+
             //rendering of CCTV
             colour = 0x7A;
             cctvpos.X = CCTVs[c]->getrposx();
@@ -2263,17 +2332,6 @@ void renderCCTV()
                 g_Console.writeToBuffer(cctvpos, (char)233 , colour);
             }
 
-            //rendering of CCTV's line of sight
-            for (int r = 0; r < 20; r++)
-            {
-                colour = 0x8F;
-                radarpos.X = CCTVs[c]->getRadarPos(r)->get_x() - static_cast<int>(player->getposx()) + 40;
-                radarpos.Y = CCTVs[c]->getRadarPos(r)->get_y() - static_cast<int>(player->getposy()) + 12;
-                if (checkifinscreen(radarpos))
-                {
-                    g_Console.writeToBuffer(radarpos, (char)177, colour);
-                }
-            }
         }
     }
 }
@@ -2300,7 +2358,7 @@ void spawnCCTV(int no)
         {
             if (CCTVs[c] == nullptr)
             {
-                CCTVs[c] = new CCTV((rand() % 8) + 1, (rand() % 2));
+                CCTVs[c] = new CCTV((rand() % 4) + 1, (rand() % 2));
                 entities[c + 61] = CCTVs[c];
                 CCTVs[c]->set_pos(temp.get_x(), temp.get_y());
                 CCTVs[c]->setCD(1 / g_dDeltaTime);
@@ -2310,4 +2368,9 @@ void spawnCCTV(int no)
         }
 
     }
+}
+
+bool is_empty(std::ifstream& pFile)
+{
+    return pFile.peek() == std::ifstream::traits_type::eof();
 }

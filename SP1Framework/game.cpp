@@ -1988,7 +1988,7 @@ void renderHUD()
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
-        renderBox(&coughBar, 0x20);
+        renderBox(&coughBar, player->get_lethalstatus() == 1 ? 0x50 : 0xA0);
         renderBox(&Objective, 0x70, objective);
         renderBox(&Scoreboard, 0x07, scoreboard);
         renderBox(&highScore, 0x07, highscore);

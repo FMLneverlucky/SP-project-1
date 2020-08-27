@@ -1404,9 +1404,9 @@ void spawnPowerUp()
     if (powerup == nullptr)
     {
         int r = rand() % 1000;
-        int a = rand() % 1000;
 
-        if (r == a)//chance of spawning completely random
+
+        if (r == 45)//chance of spawning completely random
         {
             powerup = new PowerUp;
 

@@ -37,6 +37,7 @@ enum EKEYS
     K_S,
     K_A,
     K_D,
+    //K_M,
     K_ESCAPE,
     K_SPACE,
     K_COUNT
@@ -114,9 +115,12 @@ void renderFramerate();     // renders debug information, frame rate, elapsed ti
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 
+//memory storage stuff
 bool is_empty(std::ifstream& pFile); // check if a file is empty
-
-void updateScore(std::string fileName, int score); // store highscore to memory
+void updateScore(std::string fileName, int score, int* sessionBest); // store highscore to memory
+void updateScore(std::string fileName, double score, double* sessionBest); // store highscore to memory
+void initStoredData(std::string fileName, int*); // create file if it doesnt exist
+void initStoredData(std::string fileName, double*); // create file if it doesnt exist
 
 void checkAll();
 
@@ -180,7 +184,7 @@ void deletePowerUp();
 //UI, Map Objects
 void renderMainMenu();// main menu.
 void mainMenuWait();// checks for cliks in main menu
-void renderPauseMenu();// d
+void renderPauseMenu();
 void pauseMenuWait();
 void renderWinLoseMenu(bool);
 void winLoseMenuWait();
@@ -199,4 +203,7 @@ int getButtonHold();
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 
 
+//Audio
+void playSound(std::string filename, std::string filetype, bool loop);
+void muteBGM();
 #endif // _GAME_H

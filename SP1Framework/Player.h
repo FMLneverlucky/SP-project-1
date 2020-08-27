@@ -9,6 +9,8 @@ private:
     bool lethal; //powerup buff
     int lethality_duration; //power up duration
     char prevDamage; // the thing that it got damaged by last
+    int kills; // no of kills player get
+
 
 public:
     Player();
@@ -20,7 +22,8 @@ public:
     bool get_flash();
     int get_lethalstatus();
     char getPrevDamaged();
-
+    int getKills();
+    char type();  // return char to tell what type of entity this is
     //Setters
     void resetHP(); //sets HP to maxHP
     void loseHP(int ack); //reduce HP by ack(damage of npc passed in)
@@ -31,8 +34,9 @@ public:
     void update_ld(); //lethality duration timer ish
     void resetlethality(); // reset buff stats 
     void prevDamaged(char); // store what it got hit by latest
-
-    char type();  // return char to tell what type of entity this is
+    void addKills(int); // add no. of kills
+    void resetKills();// kills = 0
+    
 
 };
 

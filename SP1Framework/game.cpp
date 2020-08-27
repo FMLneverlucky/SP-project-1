@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <irrKlang.h>
+#include <fstream>
 #include "game.h"
 #include "Framework\console.h"
 #include "time.h"
@@ -13,7 +14,9 @@
 #include "CCTV.h"
 #include "Question.h"
 
-#include <fstream>
+#pragma comment(lib, "irrklang.lib")
+
+using namespace irrklang;
 
 //FOR TESTING
 bool checkInputs = false;
@@ -103,9 +106,17 @@ int noCCTV;
 //Position spawnPoint[9];
 //Position safezone[9];
 
+//stored data
 int highestLVL = 0;
-int totalhostile = 0;
+double highestKPM = 0;
+double bestTime = 0;
+int highestKill = 0;
+std::string highestLevelFile = "highestLevel.txt";
+std::string highestKPMFile = "highestKPM.txt";
+std::string bestTimeFile = "bestTime.txt";
+std::string highestKillFile = "highestKill.txt";
 
+int totalhostile = 0;
 
 //for temp use in code
 int tempcounter;
@@ -118,6 +129,9 @@ std::string text = " ";
 
 //map aesthetics
 int prevcol = 0x88;
+
+double e_dElapsedTime; // time passed in endless mode
+double kpm;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -138,7 +152,7 @@ Entity* entities[66] = { player,
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //Walls
-                        nullptr, nullptr, nullptr, nullptr, nullptr};                                             //6 rows //CCTVs
+                        nullptr, nullptr, nullptr, nullptr, nullptr};                                             //CCTVs
 const int entityLimit = 66;
 
 NPC* NPCs[20] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 
@@ -162,6 +176,9 @@ const int CCTVLimit = 5;
 Zone spawnPoint;
 Zone endPoint;
 Zone safeZone;
+
+//Audio
+ISoundEngine* engine = createIrrKlangDevice();
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -194,7 +211,7 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    std::ifstream file("highestLevel.txt");
+    /*std::ifstream file("highestLevel.txt");
     if (is_empty(file))
     {
         file.close();
@@ -211,7 +228,11 @@ void init( void )
         std::getline(file, temp);
         highestLVL = std::stoi(temp);
         file.close();
-    }
+    }*/
+    initStoredData(highestLevelFile, &highestLVL);
+    initStoredData(highestKillFile, &highestKill);
+    initStoredData(bestTimeFile, &bestTime);
+    initStoredData(highestKPMFile, &highestKPM);
 }
 
 //--------------------------------------------------------------
@@ -340,6 +361,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_S; break;
     case 0x41: key = K_A; break;
     case 0x44: key = K_D; break;
+    //case 0x4D: key = K_M; break;
     case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break; 
     }
@@ -720,12 +742,7 @@ void playLevel()
 
     if (lose)
     {
-        updateScore("highestLevel.txt", level);
-
-        if (level > highestLVL)//in case theres problem opening that file
-        { 
-            highestLVL = level;
-        }
+        updateScore(highestLevelFile, level, &highestLVL);
         resetSpawns();
         NGameState = N_LOSE;
 
@@ -749,11 +766,13 @@ void playEndless()
 
 void InitEndless()
 {
+    player->resetKills();
     lose = false;
     totalhostile = 0;
     player->resetHP();
     NPC::resetnoHostile();
     tempcounter = 0;
+    e_dElapsedTime = 0;
 
     player->set_pos(40, 12);
     g_sChar.m_cLocation.X = 40;
@@ -773,7 +792,9 @@ void InitEndless()
 
 void enterEndless()
 {
+    e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
+    kpm = player->getKills() / (e_dElapsedTime / 60);
     if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
         spawnNPC(false, 1, 0.6, 1);
@@ -782,7 +803,7 @@ void enterEndless()
 
     updateGame();
 
-    if (player->get_HP() == 0)
+    if (player->get_HP() <= 0)
     {
         lose = true;
         
@@ -808,6 +829,9 @@ void enterEndless()
     }
     if (lose)
     {
+        updateScore(bestTimeFile, e_dElapsedTime, &bestTime);
+        updateScore(highestKillFile, player->getKills(), &highestKill);
+        updateScore(highestKPMFile, highestKPM, &highestKPM);
         totalhostile = NPC::getnoHostile();
         resetSpawns();
         EGameState = E_LOSE;
@@ -1019,6 +1043,7 @@ void checkAll()
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
                         {
+                            player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
                         }
@@ -1784,18 +1809,18 @@ void renderBox(Object* box, int colour, std::string text = " ")
 }
 
 void renderMainMenu()
-{
+{// put this in render loop
     if (stage == "MAIN")
-    {
-        title.move(consoleSize.X / 2, consoleSize.Y / 4);
+    {// create the object classes outside (scroll to top)
+        title.move(consoleSize.X / 2, consoleSize.Y / 4);// use move function to move it to where u want it to be
         gamemodeButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 4);
         quitButton.move(consoleSize.X / 2, consoleSize.Y * 3 / 4);
 
-        MMButtons[0] = &gamemodeButton;
-        MMButtons[1] = &quitButton;
+        MMButtons[0] = &gamemodeButton;// create an array for the clickable functions
+        MMButtons[1] = &quitButton;// add the object objects that are used as buttons into the array
 
-        renderBox(&gamemodeButton, 0x78, gamemodes);
-        renderBox(&quitButton, 0x78, quit);
+        renderBox(&gamemodeButton, 0x78, gamemodes);// use this renderbox function to render the object
+        renderBox(&quitButton, 0x78, quit); // 3rd parameter(text) is optional. text length must be smaller than or equal to length of box
     }
     if (stage == "SELECT")
     {
@@ -1822,18 +1847,18 @@ void renderMainMenu()
 }
 
 void mainMenuWait()
-{
+{// put this in update loop
     if (stage == "MAIN")
     {
         switch (checkButtonClicks(MMButtons, MMButtonCount))
-        {
-        case 0:
+        { // add what u want the buttons to do here
+        case 0: // the order is according to the position you placed the button in the array
             stage = "SELECT";
             break;
         case 1:
             g_bQuitGame = true;
             break;
-        default:
+        default:// if no button is clicked, it will give a larger number and will come here
             break;
         }
     }
@@ -2019,6 +2044,17 @@ void renderHUD()
             highscore = "Level Record: Level ";
             highscore.append(std::to_string(highestLVL));
         }
+        if (g_eGameState == S_GAMEMODE2)
+        {
+            objective = "Kills: ";
+            objective.append(std::to_string(player->getKills()));
+            objective.append(" Time: ");
+            objective.append(std::to_string(e_dElapsedTime));
+            scoreboard = "KPM: ";
+            scoreboard.append(std::to_string(kpm));
+            highscore = "Best KPM: ";
+            highscore.append(std::to_string(highestKPM));
+        }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
         renderBox(&healthBar, 0x40);
@@ -2051,10 +2087,10 @@ int checkButtonClicks(Object** buttons, int arrayLength)
             mouseY = g_mouseEvent.mousePosition.Y;
             for (int i = 0; i < arrayLength; i++)
             {//check all the objects in the given array
-                if (mouseX >= buttons[i]->referencePosition()->get_x() - 1 &&
+                if (mouseX >= buttons[i]->referencePosition()->get_x() + 1 &&
                     mouseX <= buttons[i]->referencePosition()->get_x() + buttons[i]->length() &&
                     mouseY >= buttons[i]->referencePosition()->get_y() - 1 &&
-                    mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height())
+                    mouseY <= buttons[i]->referencePosition()->get_y() + buttons[i]->height() - 1)
                 {// check if mouse is within this Object
                     return i;
                 }
@@ -2418,7 +2454,7 @@ bool is_empty(std::ifstream& pFile)
     return pFile.peek() == std::ifstream::traits_type::eof();
 }
 
-void updateScore(std::string fileName, int score)
+void updateScore(std::string fileName, int score, int* sessionBest)
 {
     std::string prevScore;
     std::ifstream file(fileName);
@@ -2436,4 +2472,92 @@ void updateScore(std::string fileName, int score)
             }
         }
     }
+    if (score > *sessionBest)//in case theres problem opening that file
+    {
+        *sessionBest = score;
+    }
 }
+void updateScore(std::string fileName, double score, double* sessionBest)
+{
+    std::string prevScore;
+    std::ifstream file(fileName);
+    if (file.is_open()) //check if file is successfully opened
+    {
+        std::getline(file, prevScore);//get the previous highscore and store in this temp string
+        file.close();
+        if (level > std::stod(prevScore))
+        {
+            std::ofstream file(fileName);
+            if (file.is_open())
+            {
+                file << std::to_string(score);
+                file.close();
+            }
+        }
+    }
+    if (score > * sessionBest)//in case theres problem opening that file
+    {
+        *sessionBest = score;
+    }
+}
+
+void initStoredData(std::string fileName, double* data)
+{
+    std::ifstream file(fileName);
+    if (is_empty(file))
+    {
+        file.close();
+        std::ofstream file(fileName);
+        if (file.is_open())
+        {
+            file << std::to_string(0);
+            file.close();
+        }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        *data = std::stod(temp);
+        file.close();
+    }
+}
+void initStoredData(std::string fileName, int* data)
+{
+    std::ifstream file(fileName);
+    if (is_empty(file))
+    {
+        file.close();
+        std::ofstream file(fileName);
+        if (file.is_open())
+        {
+            file << std::to_string(0);
+            file.close();
+        }
+    }
+    else
+    {
+        std::string temp;
+        std::getline(file, temp);
+        *data = std::stoi(temp);
+        file.close();
+    }
+}
+
+
+//void playSound(std::string filename, std::string filetype, bool loop)
+//{
+//    
+//    
+//    std::string songFile = "media/" + filename + '.' + filetype;
+//
+//    engine->play2D("songFile", loop);
+//}
+//
+//void muteBGM()
+//{
+//    if (g_skKeyEvent[K_M].keyReleased)
+//    {
+//        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
+//    }
+//}

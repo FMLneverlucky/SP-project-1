@@ -11,6 +11,7 @@
 #include "Wall.h"
 #include "PowerUp.h"
 #include "CCTV.h"
+#include "Question.h"
 
 #include <fstream>
 
@@ -23,7 +24,7 @@ float splashScreenTime = 0.5;
 //UI NAMES
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
-std::string gameMode2 = "Endless";
+std::string gameMode2 = "Nightmare";
 std::string gameMode3 = "Tutorial (under construction)";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
@@ -78,9 +79,11 @@ const int WLButtonCount = 3;
 Object healthBar(1, 1);
 Object coughBar(1, 1);
 Object NPCremaining(1, 1);
+Question QNS;
 int currentHP;
 int cooldownLength;
 bool showHUD = true;
+
 
 //NORMAL MODE
 NormalMode NGameState = N_INIT;

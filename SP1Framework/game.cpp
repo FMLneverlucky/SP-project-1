@@ -751,7 +751,9 @@ void InitEndless()
 
     spawnWall(10);
     spawnNPC(false, 5, 0.6, 1);
-    //spawnNPC(true, 1, 0.5, 1);
+    spawnNPC(true, 3, 0.7, 1);
+    spawnCCTV(5);
+    
 
     initHUD();
 
@@ -775,20 +777,24 @@ void enterEndless()
         
     }
 
-   /* for (int i = 0; i < NPCLimit; i++)
+    for (int i = 0; i < NPCLimit; i++)
     {
         if (NPCs[i] != nullptr)
         {
-            COORD npcpos;
-            npcpos.X = NPCs[i]->getposx() - static_cast<int>(player->getposx()) + 40;
-            npcpos.Y = NPCs[i]->getposy() - static_cast<int>(player->getposy()) + 12;
-            if (checkifinscreen(npcpos) == false)
+            if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
             {
-                delete NPCs[i];
-                NPCs[i] = nullptr;
+                if (NPCs[i]->get_lifespan() <= 0)
+                {
+                    delete NPCs[i];
+                    NPCs[i] = nullptr;
+                }
+                else
+                {
+                    NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
+                }
             }
         }
-    }*/
+    }
     if (lose)
     {
         totalhostile = NPC::getnoHostile();
@@ -995,6 +1001,7 @@ void checkAll()
                             NPCs[i]->anger();
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
+                            NPCs[i]->set_lifespan(20 / g_dDeltaTime);
 
                         }
 

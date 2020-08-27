@@ -5,9 +5,9 @@ class NPC :
 {
 private:
     bool angry; //whether NPC is hostile or not
-    bool dead; //checks if NPC is alive or not
     int damage; //damage of NPC
     float speed; //speed of NPC relative to player
+    float lifespan; //lifespan of NPCs in Endless mode
     static int noHostile; //total number of NPCs turned Hostile
     static int total; //total number of NPCs
 
@@ -24,14 +24,16 @@ public:
 
     //Getters
     int get_count();
-    float get_speed();
     int get_damage();
+    float get_speed();
     float get_ftime();
+    float get_lifespan();
     bool isonCD();
 
     //Setters
     void set_count(int a);
     void set_speed(float spd);
+    void set_lifespan(float lifespan);
 
     bool isHostile(); //returns angry
     void calmdown(); //sets angry to false

@@ -53,7 +53,7 @@ void Question::SetNewQns()
 		break;
 	case AVERAGE:
 		var3 = (rand() % 10) + 1;
-		var1 = (rand() % 1000) + 1;
+		var1 = (rand() % 50) + 1;
 		var2 = ((rand() % 50) + 1) * var3 - var1;
 		break;
 	}

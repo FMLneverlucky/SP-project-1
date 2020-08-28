@@ -358,9 +358,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_S; break;
     case 0x41: key = K_A; break;
     case 0x44: key = K_D; break;
-    //case 0x4D: key = K_M; break;
+    case 0x4D: key = K_M; break;
     case VK_SPACE: key = K_SPACE; break;
-    case VK_ESCAPE: key = K_ESCAPE; break; 
+    case VK_ESCAPE: key = K_ESCAPE; break;
+
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -2538,7 +2539,6 @@ void initStoredData(std::string fileName, int data)
         std::getline(file, temp);
         data = std::stoi(temp);
         file.close();
-        }
     }
 }
 
@@ -2550,11 +2550,12 @@ void initStoredData(std::string fileName, int data)
 //
 //    engine->play2D("songFile", loop);
 //}
-//
-//void muteBGM()
-//{
-//    if (g_skKeyEvent[K_M].keyReleased)
-//    {
-//        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
-//    }
-//}
+
+void muteBGM()
+{
+    if (g_skKeyEvent[K_M].keyReleased)
+    {
+        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
+        engine->drop();
+    }
+}

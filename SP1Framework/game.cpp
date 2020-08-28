@@ -611,7 +611,6 @@ void playNormal()
         level_set();
     case N_LOSE:
         winLoseMenuWait();
-        engine->stopAllSounds();
         break;
     }
 }
@@ -796,11 +795,14 @@ void playLevel()
     {
         clear = true;
         NGameState = N_NEXTLEVEL;
+        //Audio for Win
     }
     //end game condition
     if (player->get_HP() <= 0)
     {
         lose = true;
+        engine->stopAllSounds();
+        //Audio for Lose
     }
     //tabulating of highest level cleared and deleting of remaining entities once player loses
     if (lose)
@@ -1089,8 +1091,7 @@ void checkAll()
                 }
             }
         }
-
-        
+        //engine->play2D(".mp3", false); Audio for police to turn angry
     }
 
     check_collision(); //checks for HostileNPC-Player Collision
@@ -1145,7 +1146,7 @@ void checkAll()
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                             NPCs[i]->set_lifespan(20 / g_dDeltaTime);
-
+                            engine->play2D("media/NPCHostile.mp3", false);
                         }
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
@@ -1153,6 +1154,7 @@ void checkAll()
                             player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
+                            //audio for killing NPC
                         }
                     }
                 }
@@ -1565,6 +1567,7 @@ void deletePowerUp()
             player->set_lethal(); //set buff duration and buff is true
             delete powerup;
             powerup = nullptr;
+            //Audio for pickup
         }
 
         else if (powerup->get_detime() != 0)

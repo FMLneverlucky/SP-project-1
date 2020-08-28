@@ -880,6 +880,7 @@ void enterEndless()
         horrorFreeze(true);
         initMathHorror();
         horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
+        //Audio for when jumpscare
     }
     else
     {
@@ -1091,6 +1092,7 @@ void checkAll()
             {
                 CCTVs[c]->update_cctv();
                 CCTVs[c]->setCD(2 / g_dDeltaTime);
+                //Audio for cctv update
             }
             else
             {
@@ -2319,8 +2321,8 @@ void check_collision()
                 
                 g_sChar.m_cLocation.Y = player->getposy(); //moves player char to player's pos
                 g_sChar.m_cLocation.X = player->getposx(); 
+                //Audio for player hurt
             }
- 
         }
     }
 }

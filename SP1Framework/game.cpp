@@ -862,25 +862,25 @@ void enterEndless()
     }
     else
     {
-        horrorChanceCount--;
+        horrorChanceCount --;
     }
 
     if (horror)
     {
         if (showCooldown <= 0 && hideCooldown <= 0)
-            showCooldown = 3;
-        if (showCooldown > 0)
+            hideCooldown = 1;
+        if (hideCooldown > 0)
         {
-            showCooldown -= g_dDeltaTime;
-            if (showCooldown <= 0)
-                hideCooldown = rand() % 2 + 1;
+            hideCooldown -= g_dDeltaTime;
+            if (hideCooldown <= 0)
+                showCooldown = rand() % 2 + 3;
         }
         else
-            hideCooldown -= g_dDeltaTime;
+            showCooldown -= g_dDeltaTime;
         if (paused)
         {
-            showCooldown = 0;
             hideCooldown = 1;
+            showCooldown = 0;
         }
 
     }
@@ -2110,14 +2110,25 @@ void renderHorror()
         g_Console.clearBuffer(0x00);
         int lines = 0;
         lines = (question.length() + 70) / 70;
+        std::size_t startPos = 0;
+        std::size_t endPos;
+
         for (int i = 0; i < lines; i++)
         {
+            endPos = startPos + 60;
+            std::string temp;
+            if (endPos < question.length())
+            {
+                temp = question.substr(endPos);
+                endPos += temp.find(" ");
+                temp = question.substr(startPos, endPos - startPos);
+                startPos = endPos;
+            }
+            else
+                temp = question.substr(startPos);
             Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
-            std::string temp = question.substr((question.length() * i) / lines, question.length() / lines);
-            renderBox(&qns, 0xF0, temp);
+            renderBox(&qns, 0x0F, temp);
         }
-
-
     }
     else
     {

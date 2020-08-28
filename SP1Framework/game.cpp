@@ -615,6 +615,7 @@ void InitNormal()
     initHUD();
     
     NGameState = N_LEVEL;
+    engine->play2D("media/NModeBGM.mp3", true);
 }
  
 void set_spawn() //sets variables and npc stats based on level and spawns entities accordingly
@@ -1020,6 +1021,7 @@ void checkAll()
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
+                engine->play2D("media/CoughSFX.mp3", false);
 
                 //checking if player is within cctv radar when coughing - lose game condition
                 for (int c = 0; c < CCTVLimit; c++)

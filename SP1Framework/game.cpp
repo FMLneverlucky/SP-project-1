@@ -2099,16 +2099,18 @@ void initMathHorror()
 
 void renderHorror()
 {
-    int lines = 0;
     if (showCooldown > 0)
     {
         //render stuff
         g_Console.clearBuffer(0x00);
-        /*lines = question.length() / 80;
+        int lines = 0;
+        lines = (question.length() + 70) / 70;
         for (int i = 0; i < lines; i++)
         {
-
-        }*/
+            Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
+            std::string temp = question.substr((question.length() * i) / lines, question.length() / lines);
+            renderBox(&qns, 0xF0, temp);
+        }
 
 
     }

@@ -848,7 +848,12 @@ void enterEndless()
     e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
     kpm = player->getKills() / (e_dElapsedTime / 60);
+    spawnPowerUp();
+    deletePowerUp();
     updateGame();
+
+    if (player->get_lethalstatus() == 1) // if powerup picked up before
+        player->update_ld(); //- 1 each time run tis code(runs by frame)
     //chance of Math Horror Jumpscare
     if (horrorChanceCount <= 0)
     {
@@ -858,25 +863,25 @@ void enterEndless()
     }
     else
     {
-        horrorChanceCount--;
+        horrorChanceCount --;
     }
 
     if (horror)
     {
         if (showCooldown <= 0 && hideCooldown <= 0)
-            showCooldown = 3;
-        if (showCooldown > 0)
+            hideCooldown = 1;
+        if (hideCooldown > 0)
         {
-            showCooldown -= g_dDeltaTime;
-            if (showCooldown <= 0)
-                hideCooldown = rand() % 2 + 1;
+            hideCooldown -= g_dDeltaTime;
+            if (hideCooldown <= 0)
+                showCooldown = rand() % 2 + 3;
         }
         else
-            hideCooldown -= g_dDeltaTime;
+            showCooldown -= g_dDeltaTime;
         if (paused)
         {
-            showCooldown = 0;
             hideCooldown = 1;
+            showCooldown = 0;
         }
 
     }
@@ -1436,14 +1441,14 @@ void spawnWall(int no)                                                          
             if (Walls[w] == nullptr)                                                                                                //checks if wall entity is unassigned on map
             {
                 Walls[w] = new Wall;
-                entities[w + 20] = Walls[w];
+                entities[w + 21] = Walls[w];
 
                 do
                 {
                     isSpaceinZone = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 78) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivotx = (rand() % 77) + 2;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
                     int Pivoty = (rand() % 20) + 3;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
@@ -1478,8 +1483,8 @@ void spawnWall(int no)                                                          
                 for (int i = 1; i < 4; i++)
                 {
                     Walls[w + WallLimit * i] = new Wall;                                                                              //set element of array as new object under wall class
-                    entities[w + 20 + WallLimit * i] = Walls[w + WallLimit * i];                                                        //set element from wall array to corresponding element on entity array
-                    entities[w + 20 + WallLimit * i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
+                    entities[w + 21 + WallLimit * i] = Walls[w + WallLimit * i];                                                        //set element from wall array to corresponding element on entity array
+                    entities[w + 21 + WallLimit * i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
                 }
                 break;
             }
@@ -1511,7 +1516,7 @@ void spawnPowerUp()
 {
     if (powerup == nullptr)
     {
-        int r = rand() % 1000;
+        int r = rand() % 1350;
 
 
         if (r == 45)//chance of spawning completely random
@@ -2101,18 +2106,31 @@ void initMathHorror()
 
 void renderHorror()
 {
-    int lines = 0;
     if (showCooldown > 0)
     {
         //render stuff
         g_Console.clearBuffer(0x00);
-        /*lines = question.length() / 80;
+        int lines = 0;
+        lines = (question.length() + 70) / 70;
+        std::size_t startPos = 0;
+        std::size_t endPos;
+
         for (int i = 0; i < lines; i++)
         {
-
-        }*/
-
-
+            endPos = startPos + 60;
+            std::string temp;
+            if (endPos < question.length())
+            {
+                temp = question.substr(endPos);
+                endPos += temp.find(" ");
+                temp = question.substr(startPos, endPos - startPos);
+                startPos = endPos;
+            }
+            else
+                temp = question.substr(startPos);
+            Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
+            renderBox(&qns, 0x0F, temp);
+        }
     }
     else
     {

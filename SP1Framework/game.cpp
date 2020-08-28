@@ -1439,7 +1439,7 @@ void spawnWall(int no)                                                          
             if (Walls[w] == nullptr)                                                                                                //checks if wall entity is unassigned on map
             {
                 Walls[w] = new Wall;
-                entities[w + 20] = Walls[w];
+                entities[w + 21] = Walls[w];
 
                 do
                 {
@@ -1481,8 +1481,8 @@ void spawnWall(int no)                                                          
                 for (int i = 1; i < 4; i++)
                 {
                     Walls[w + WallLimit * i] = new Wall;                                                                              //set element of array as new object under wall class
-                    entities[w + 20 + WallLimit * i] = Walls[w + WallLimit * i];                                                        //set element from wall array to corresponding element on entity array
-                    entities[w + 20 + WallLimit * i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
+                    entities[w + 21 + WallLimit * i] = Walls[w + WallLimit * i];                                                        //set element from wall array to corresponding element on entity array
+                    entities[w + 21 + WallLimit * i]->set_pos(Walls[w]->getPos(i)->get_x(), Walls[w]->getPos(i)->get_y());            //set position of the temp wall entity to an element in the entity array
                 }
                 break;
             }

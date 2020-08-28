@@ -37,9 +37,9 @@ enum EKEYS
     K_S,
     K_A,
     K_D,
-    //K_M,
     K_ESCAPE,
     K_SPACE,
+    K_M,
     K_COUNT
 };
 // Enumeration for the different screen states
@@ -77,8 +77,7 @@ enum EndlessMode
 {
     E_INIT,
     E_PLAY,
-    E_LOSE,
-    E_HORROR
+    E_LOSE
 };
 
 enum Test
@@ -179,7 +178,8 @@ void renderPauseMenu();
 void pauseMenuWait();
 void renderWinLoseMenu(bool);
 void winLoseMenuWait();
-void mathHorrorWait();
+void renderHorror();
+void initMathHorror();
 void initHUD();//init ONCE
 void renderHUD();// renders HUD
 void renderBox(Object*, int, std::string); // draw box. can add text if you want

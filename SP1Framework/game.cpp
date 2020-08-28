@@ -80,10 +80,19 @@ const int WLButtonCount = 3;
 Object healthBar(1, 1);
 Object coughBar(1, 1);
 Object NPCremaining(1, 1);
-Question QNS;
 int currentHP;
 int cooldownLength;
 bool showHUD = true;
+
+//Math horror th9ing
+Question QNS;
+Object correctAnswer(1,1);
+Object wrongAnswer1(1, 1);
+Object wrongAnswer2(1, 1);
+Object wrongAnswer3(1, 1);
+double showCooldown = 0;
+double hideCooldown = 0;
+std::string question;
 
 //RENDERING
 int BGcol;
@@ -106,6 +115,7 @@ float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
 int horrorChanceCount = 0; //counter for math horror jumpscare
 bool invert = false;
+bool horror = false;
 
 //stored data
 int highestLVL = 0;
@@ -342,9 +352,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_S; break;
     case 0x41: key = K_A; break;
     case 0x44: key = K_D; break;
-    //case 0x4D: key = K_M; break;
+    case 0x4D: key = K_M; break;
     case VK_SPACE: key = K_SPACE; break;
-    case VK_ESCAPE: key = K_ESCAPE; break; 
+    case VK_ESCAPE: key = K_ESCAPE; break;
+
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -799,9 +810,6 @@ void playEndless()
     case E_LOSE:
         winLoseMenuWait();
         break;
-    case E_HORROR:
-        mathHorrorWait();
-        break;
     }
 }
 
@@ -839,57 +847,76 @@ void enterEndless()
     e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
     kpm = player->getKills() / (e_dElapsedTime / 60);
-
-    //spawns NPCs every 3 seconds if there are < 20 already on the Map
-    if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
-    {
-        spawnNPC(false, 1, 0.6, 1);
-        tempcounter = 0;
-    }
-
- /*   //chance of Math Horror Jumpscare
-    if (horrorChanceCount <= 0)
-    {
-        EGameState = E_HORROR;
-        horrorFreeze(true);
-        horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
-    }
-    else
-    {
-        horrorChanceCount--;
-    }
-*/
     spawnPowerUp();
     deletePowerUp();
     updateGame();
 
     if (player->get_lethalstatus() == 1) // if powerup picked up before
         player->update_ld(); //- 1 each time run tis code(runs by frame)
+    //chance of Math Horror Jumpscare
+    if (horrorChanceCount <= 0)
+    {
+        horrorFreeze(true);
+        initMathHorror();
+        horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
+    }
+    else
+    {
+        horrorChanceCount--;
+    }
 
+    if (horror)
+    {
+        if (showCooldown <= 0 && hideCooldown <= 0)
+            showCooldown = 3;
+        if (showCooldown > 0)
+        {
+            showCooldown -= g_dDeltaTime;
+            if (showCooldown <= 0)
+                hideCooldown = rand() % 2 + 1;
+        }
+        else
+            hideCooldown -= g_dDeltaTime;
+        if (paused)
+        {
+            showCooldown = 0;
+            hideCooldown = 1;
+        }
+
+    }
+    else
+    {
+        //spawns NPCs every 3 seconds if there are < 20 already on the Map
+        if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
+        {
+            spawnNPC(false, 1, 0.6, 1);
+            tempcounter = 0;
+        }
+
+        //despawning Hostile NPCs once their lifespan runs out (lifespan is set once they turn hostile)
+        for (int i = 0; i < NPCLimit; i++)
+        {
+            if (NPCs[i] != nullptr)
+            {
+                if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
+                {
+                    if (NPCs[i]->get_lifespan() <= 0)
+                    {
+                        delete NPCs[i];
+                        NPCs[i] = nullptr;
+                    }
+                    else
+                    {
+                        NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
+                    }
+                }
+            }
+        }
+    }
     //end game condition
     if (player->get_HP() <= 0)
     {
         lose = true;
-    }
-
-    //despawning Hostile NPCs once their lifespan runs out (lifespan is set once they turn hostile)
-    for (int i = 0; i < NPCLimit; i++)
-    {
-        if (NPCs[i] != nullptr)
-        {
-            if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
-            {
-                if (NPCs[i]->get_lifespan() <= 0)
-                {
-                    delete NPCs[i];
-                    NPCs[i] = nullptr;
-                }
-                else
-                {
-                    NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
-                }
-            }
-        }
     }
 
     //tabulating and resetting of variables once player loses
@@ -939,43 +966,46 @@ void rendersafezone()
 }
 
 void moveCharacter()
-{   
-    // Updating the location of the character based on the key being held
-    if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
+{
+    if(!horror)
     {
-        player->set_direction(1);
-    }
-    else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
-    {
-        player->set_direction(3);
-    }
-    else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
-    {
-        player->set_direction(2);
-    }
-    else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
-    {   
-        player->set_direction(4);
-    }
-    else
-    {
-        player->set_direction(0);
-    }
+        // Updating the location of the character based on the key being held
+        if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
+        {
+            player->set_direction(1);
+        }
+        else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
+        {
+            player->set_direction(3);
+        }
+        else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+        {
+            player->set_direction(2);
+        }
+        else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+        {
+            player->set_direction(4);
+        }
+        else
+        {
+            player->set_direction(0);
+        }
 
 
-    //conditions such that player cannot move; got wall etc
-    if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
-    {
-        player->set_direction(0);
+        //conditions such that player cannot move; got wall etc
+        if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
+        {
+            player->set_direction(0);
+        }
+        if (!inZone(player->getpos(), safeZone) && g_eGameState == S_GAMEMODE2 && inZone(player->new_pos(g_dDeltaTime), safeZone))
+        {
+            player->set_direction(0);
+        }
+
+        player->update_pos(g_dDeltaTime); //sets pos of player
+        g_sChar.m_cLocation.Y = player->getposy(); //moves player
+        g_sChar.m_cLocation.X = player->getposx(); //moves player
     }
-    if (!inZone(player->getpos(), safeZone) && g_eGameState == S_GAMEMODE2 && inZone(player->new_pos(g_dDeltaTime), safeZone))
-    {
-        player->set_direction(0);
-    }
-    
-    player->update_pos(g_dDeltaTime); //sets pos of player
-    g_sChar.m_cLocation.Y = player->getposy(); //moves player
-    g_sChar.m_cLocation.X = player->getposx(); //moves player
     
     moveall(); //moves all NPCs
 }
@@ -1208,6 +1238,10 @@ void renderGame()
     setallrpos();       //sets relative position for all entities for camera lock
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
+    if (horror)
+    {
+        renderHorror();
+    }
     if (paused)
         renderPauseMenu();
     else
@@ -1971,10 +2005,12 @@ void pauseMenuWait()
     {
     case 0:
         paused = false;
+        horrorFreeze(false);
         break;
     case 1:
         g_eGameState = S_MAINMENU;
         paused = false;
+        horrorFreeze(false);
         break;
     default:
         break;
@@ -2047,23 +2083,11 @@ void winLoseMenuWait()
     }
 }
 
-void mathHorrorWait()
+void initMathHorror()
 {
-    processUserInput();
-    if (paused)
-    {
-        pauseMenuWait();
-        showHUD = false;
-    }
-    else
-    {
-        moveall();
-        checkAll();
-    }
-
     //FUNCTIONS YOULL NEED BELOW AAAAAAAA >--|-O
     QNS.SetNewQns(); //generates new question
-    QNS.get_question(); //returns the question in string
+    question = QNS.get_question(); //returns the question in string
     QNS.get_answer(); //returns answer to the question in int 
     //returns the 3 wrong other choices
     QNS.get_choice(0);
@@ -2076,6 +2100,27 @@ void mathHorrorWait()
 
     //dont forget to make sure u dont block the player we must make the player watch the npcs slowly approach them
     //must make them suffer 
+}
+
+void renderHorror()
+{
+    int lines = 0;
+    if (showCooldown > 0)
+    {
+        //render stuff
+        g_Console.clearBuffer(0x00);
+        /*lines = question.length() / 80;
+        for (int i = 0; i < lines; i++)
+        {
+
+        }*/
+
+
+    }
+    else
+    {
+        //dont render stuff
+    }
 }
 
 void initHUD()
@@ -2528,6 +2573,7 @@ void spawnCCTV(int no)
 
 void horrorFreeze(bool on)
 {
+    horror = on ? true : false;
     float changeinspd;
     if (on)
     {
@@ -2653,11 +2699,12 @@ void initStoredData(std::string fileName, int* data)
 //
 //    engine->play2D("songFile", loop);
 //}
-//
-//void muteBGM()
-//{
-//    if (g_skKeyEvent[K_M].keyReleased)
-//    {
-//        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
-//    }
-//}
+
+void muteBGM()
+{
+    if (g_skKeyEvent[K_M].keyReleased)
+    {
+        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
+        engine->drop();
+    }
+}

@@ -298,8 +298,8 @@ void getInput( void )
 // Output   : void
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{    
-    gameplayKBHandler(keyboardEvent);
+{   if (EGameState != E_HORROR)
+        gameplayKBHandler(keyboardEvent);
 }
 
 //--------------------------------------------------------------
@@ -1211,14 +1211,17 @@ void renderGame()
 
 void renderMap()
 {
+    renderCCTV();
+    renderNPC();
+    renderWall();
+    
     if (invert == false)
     {
-        renderCCTV();
+        
         renderprojectile();
         renderPowerUp();
     }
-    renderNPC();
-    renderWall();
+    
     
 }
 
@@ -2041,7 +2044,9 @@ void winLoseMenuWait()
 
 void mathHorrorWait()
 {
-    updateGame();
+    processUserInput();
+    moveall();
+    checkAll();
 
     //FUNCTIONS YOULL NEED BELOW AAAAAAAA >--|-O
     QNS.SetNewQns(); //generates new question
@@ -2510,7 +2515,7 @@ void spawnCCTV(int no)
 
 void horrorFreeze(bool on)
 {
-    int changeinspd;
+    float changeinspd;
     if (on)
     {
         changeinspd = 0.1;

@@ -248,54 +248,54 @@ void Wall::setPosForAll()
         //checks if next wall is 'S' piece and the different rotations of said piece
         case 17:
         {
-            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_x(wallPos[0].get_x() - 1); //0P
             wallPos[1].set_y(wallPos[0].get_y());
 
-            wallPos[2].set_x(wallPos[0].get_x() - 1);
-            wallPos[2].set_y(wallPos[0].get_y() + 1);
+            wallPos[2].set_x(wallPos[0].get_x() - 1); //0P
+            wallPos[2].set_y(wallPos[0].get_y() + 1); //0
 
-            wallPos[3].set_x(wallPos[0].get_x() - 2);
-            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            wallPos[3].set_x(wallPos[0].get_x() - 2); // 0P
+            wallPos[3].set_y(wallPos[0].get_y() + 1); //00
             break;
         }
 
         case 18:
         {
-            wallPos[1].set_x(wallPos[0].get_x());
-            wallPos[1].set_y(wallPos[0].get_y() - 1);
+            wallPos[1].set_x(wallPos[0].get_x());     //0
+            wallPos[1].set_y(wallPos[0].get_y() - 1); //P
 
-            wallPos[2].set_x(wallPos[0].get_x() - 1);
-            wallPos[2].set_y(wallPos[0].get_y() + 1);
+            wallPos[2].set_x(wallPos[0].get_x() + 1); // 00
+            wallPos[2].set_y(wallPos[0].get_y() - 1); // P
 
-            wallPos[3].set_x(wallPos[0].get_x() - 1);
-            wallPos[3].set_y(wallPos[0].get_y() + 2);
-            break;
+            wallPos[3].set_x(wallPos[0].get_x() + 1); //  0
+            wallPos[3].set_y(wallPos[0].get_y() - 2); // 00
+            break;                                    // P
         }
 
         case 19:
         {
-            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_x(wallPos[0].get_x() + 1); // p0
             wallPos[1].set_y(wallPos[0].get_y());
 
-            wallPos[2].set_x(wallPos[0].get_x() + 1);
-            wallPos[2].set_y(wallPos[0].get_y() - 1);
+            wallPos[2].set_x(wallPos[0].get_x() + 1); //  0
+            wallPos[2].set_y(wallPos[0].get_y() - 1); // p0
 
-            wallPos[3].set_x(wallPos[0].get_x() + 2);
-            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            wallPos[3].set_x(wallPos[0].get_x() + 2); //  00
+            wallPos[3].set_y(wallPos[0].get_y() - 1); // p0
             break;
         }
 
         case 20:
         {
-            wallPos[1].set_x(wallPos[0].get_x());
-            wallPos[1].set_y(wallPos[0].get_y() + 1);
+            wallPos[1].set_x(wallPos[0].get_x());     // p
+            wallPos[1].set_y(wallPos[0].get_y() + 1); // 0
 
-            wallPos[2].set_x(wallPos[0].get_x() + 1);
-            wallPos[2].set_y(wallPos[0].get_y() - 1);
+            wallPos[2].set_x(wallPos[0].get_x() + 1); // p
+            wallPos[2].set_y(wallPos[0].get_y() + 1); // 00
 
-            wallPos[3].set_x(wallPos[0].get_x() + 1);
-            wallPos[3].set_y(wallPos[0].get_y() - 2);
-            break;
+            wallPos[3].set_x(wallPos[0].get_x() + 1); // P
+            wallPos[3].set_y(wallPos[0].get_y() + 2); // 00
+            break;                                    //  0
         }
 
         //checks if next wall is 'T' piece and the different rotations of said piece
@@ -354,54 +354,54 @@ void Wall::setPosForAll()
         //checks if next wall is 'Z' piece and the different rotations of said piece
         case 25:
         {
-            wallPos[1].set_x(wallPos[0].get_x() + 1);
+            wallPos[1].set_x(wallPos[0].get_x() + 1); // p0
             wallPos[1].set_y(wallPos[0].get_y());
 
-            wallPos[2].set_x(wallPos[0].get_x() + 1);
-            wallPos[2].set_y(wallPos[0].get_y() + 1);
+            wallPos[2].set_x(wallPos[0].get_x() + 1); // p0
+            wallPos[2].set_y(wallPos[0].get_y() + 1); //  0
 
-            wallPos[3].set_x(wallPos[0].get_x() + 2);
-            wallPos[3].set_y(wallPos[0].get_y() + 1);
+            wallPos[3].set_x(wallPos[0].get_x() + 2); // p0
+            wallPos[3].set_y(wallPos[0].get_y() + 1); //  00
             break;
         }
 
         case 26:
         {
-            wallPos[1].set_x(wallPos[0].get_x());
-            wallPos[1].set_y(wallPos[0].get_y() + 1);
+            wallPos[1].set_x(wallPos[0].get_x());     // p
+            wallPos[1].set_y(wallPos[0].get_y() + 1); // 0
 
-            wallPos[2].set_x(wallPos[0].get_x() + 1);
-            wallPos[2].set_y(wallPos[0].get_y() + 1);
+            wallPos[2].set_x(wallPos[0].get_x() - 1); //  p
+            wallPos[2].set_y(wallPos[0].get_y() + 1); // 00
 
-            wallPos[3].set_x(wallPos[0].get_x() + 1);
-            wallPos[3].set_y(wallPos[0].get_y() + 2);
-            break;
+            wallPos[3].set_x(wallPos[0].get_x() - 1); //  p
+            wallPos[3].set_y(wallPos[0].get_y() + 2); // 00
+            break;                                    // 0
         }
 
         case 27:
         {
-            wallPos[1].set_x(wallPos[0].get_x() - 1);
+            wallPos[1].set_x(wallPos[0].get_x() - 1); // 0p
             wallPos[1].set_y(wallPos[0].get_y());
 
-            wallPos[2].set_x(wallPos[0].get_x() - 1);
-            wallPos[2].set_y(wallPos[0].get_y() - 1);
+            wallPos[2].set_x(wallPos[0].get_x() - 1); // 0p
+            wallPos[2].set_y(wallPos[0].get_y() + 1); // 0
 
-            wallPos[3].set_x(wallPos[0].get_x() - 2);
-            wallPos[3].set_y(wallPos[0].get_y() - 1);
+            wallPos[3].set_x(wallPos[0].get_x() - 2); //  0p
+            wallPos[3].set_y(wallPos[0].get_y() + 1); // 00
             break;
         }
 
         case 28:
         {
-            wallPos[1].set_x(wallPos[0].get_x());
-            wallPos[1].set_y(wallPos[0].get_y() - 1);
+            wallPos[1].set_x(wallPos[0].get_x());     // 0
+            wallPos[1].set_y(wallPos[0].get_y() - 1); // p
 
-            wallPos[2].set_x(wallPos[0].get_x() - 1);
-            wallPos[2].set_y(wallPos[0].get_y() - 1);
+            wallPos[2].set_x(wallPos[0].get_x() - 1); // 00
+            wallPos[2].set_y(wallPos[0].get_y() - 1); //  p
 
-            wallPos[3].set_x(wallPos[0].get_x() - 1);
-            wallPos[3].set_y(wallPos[0].get_y() - 2);
-            break;
+            wallPos[3].set_x(wallPos[0].get_x() - 1); // 0
+            wallPos[3].set_y(wallPos[0].get_y() - 2); // 00
+            break;                                    //  p
         }
 
         default:                                                                                        //checks if next wall is a default 1x1 piece

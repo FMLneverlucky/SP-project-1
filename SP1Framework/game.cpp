@@ -847,7 +847,12 @@ void enterEndless()
     e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
     kpm = player->getKills() / (e_dElapsedTime / 60);
+    spawnPowerUp();
+    deletePowerUp();
     updateGame();
+
+    if (player->get_lethalstatus() == 1) // if powerup picked up before
+        player->update_ld(); //- 1 each time run tis code(runs by frame)
     //chance of Math Horror Jumpscare
     if (horrorChanceCount <= 0)
     {
@@ -1441,7 +1446,7 @@ void spawnWall(int no)                                                          
                     isSpaceinZone = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 78) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivotx = (rand() % 77) + 2;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
                     int Pivoty = (rand() % 20) + 3;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
@@ -1509,7 +1514,7 @@ void spawnPowerUp()
 {
     if (powerup == nullptr)
     {
-        int r = rand() % 1000;
+        int r = rand() % 1350;
 
 
         if (r == 45)//chance of spawning completely random
@@ -2099,16 +2104,18 @@ void initMathHorror()
 
 void renderHorror()
 {
-    int lines = 0;
     if (showCooldown > 0)
     {
         //render stuff
         g_Console.clearBuffer(0x00);
-        /*lines = question.length() / 80;
+        int lines = 0;
+        lines = (question.length() + 70) / 70;
         for (int i = 0; i < lines; i++)
         {
-
-        }*/
+            Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
+            std::string temp = question.substr((question.length() * i) / lines, question.length() / lines);
+            renderBox(&qns, 0xF0, temp);
+        }
 
 
     }

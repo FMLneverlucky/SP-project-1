@@ -86,10 +86,12 @@ bool showHUD = true;
 
 //Math horror th9ing
 Question QNS;
-Object correctAnswer(1,1);
-Object wrongAnswer1(1, 1);
-Object wrongAnswer2(1, 1);
-Object wrongAnswer3(1, 1);
+Object* MAButtons[4];
+const int MAButtonCount = 4;
+Object correctAnswer(9, 3);
+Object wrongAnswer1(9, 3);
+Object wrongAnswer2(9, 3);
+Object wrongAnswer3(9, 3);
 double showCooldown = 0;
 double hideCooldown = 0;
 std::string question;
@@ -844,6 +846,7 @@ void InitEndless()
     g_sChar.m_cLocation.X = 40;
     g_sChar.m_cLocation.X = 12;
     safeZone.setpos(40, 12);
+    horrorFreeze(false);
     horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
 
     //spawning of entities
@@ -1053,10 +1056,7 @@ void checkAll()
                         }
                     }
                 }
-
                 break;
-
-                
             }
         }
 
@@ -2101,6 +2101,32 @@ void initMathHorror()
     QNS.get_choice(1);
     QNS.get_choice(2);
 
+    bool takenNo[4] = { false, false, false, false };
+    Object* tempButtons[4] = { &correctAnswer, &wrongAnswer1, &wrongAnswer2 , &wrongAnswer3 };
+    for (int i = 0; i < MAButtonCount; i++)
+    {
+        int place = rand() % 4;
+        while (takenNo[place])
+            place = rand() % 4;
+        takenNo[place] = true;
+        switch (place)
+        {
+        case 0:
+            tempButtons[i]->move(consoleSize.X / 4 - 4, consoleSize.Y * 7 / 12);
+            break;
+        case 1:
+            tempButtons[i]->move(consoleSize.X / 4 - 4, consoleSize.Y * 10 / 12);
+            break;
+        case 2:
+            tempButtons[i]->move(consoleSize.X * 3 / 4 + 4, consoleSize.Y * 7 / 12);
+            break;
+        case 3:
+            tempButtons[i]->move(consoleSize.X * 3 / 4 + 4, consoleSize.Y * 10 / 12);
+            break;
+        default:
+            break;
+        }
+    }
     //once player chooses an option set EGameState back to E_PLAY and call horrorFreeze(false);
     //EGameState = E_PLAY;
     //horrorFreeze(false);
@@ -2112,10 +2138,10 @@ void initMathHorror()
 void renderHorror()
 {
     //render stuff
-    Object boarderLeft(consoleSize.X / 2 - 4, consoleSize.Y, Position(consoleSize.X / 4 - 4, consoleSize.Y / 2));
-    Object boarderRight(consoleSize.X / 2 - 4, consoleSize.Y, Position(consoleSize.X * 3 / 4 + 4, consoleSize.Y / 2));
-    Object boarderTop(consoleSize.X, consoleSize.Y / 2 - 2, Position(consoleSize.X / 2, consoleSize.Y / 4 - 2));
-    Object boarderBottom(consoleSize.X, consoleSize.Y / 2 - 2, Position(consoleSize.X / 2, consoleSize.Y * 3 / 4 + 2));
+    Object boarderLeft(consoleSize.X / 2 - 10, consoleSize.Y, Position(consoleSize.X / 4 - 10, consoleSize.Y / 2));
+    Object boarderRight(consoleSize.X / 2 - 10, consoleSize.Y, Position(consoleSize.X * 3 / 4 + 10, consoleSize.Y / 2));
+    Object boarderTop(consoleSize.X, consoleSize.Y / 2 - 5, Position(consoleSize.X / 2, consoleSize.Y / 4 - 5));
+    Object boarderBottom(consoleSize.X, consoleSize.Y / 2 - 5, Position(consoleSize.X / 2, consoleSize.Y * 3 / 4 + 5));
     renderBox(&boarderLeft, 0x00);
     renderBox(&boarderRight, 0x00);
     renderBox(&boarderTop, 0x00);
@@ -2142,7 +2168,42 @@ void renderHorror()
         Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
         renderBox(&qns, 0x0F, temp);
     }
+
+    MAButtons[0] = &correctAnswer;
+    MAButtons[1] = &wrongAnswer1;
+    MAButtons[2] = &wrongAnswer2;
+    MAButtons[3] = &wrongAnswer3;
+
+    renderBox(&correctAnswer, 0x0F, std::to_string(QNS.get_answer()));
+    renderBox(&wrongAnswer1, 0x0F, std::to_string(QNS.get_choice(0)));
+    renderBox(&wrongAnswer2, 0x0F, std::to_string(QNS.get_choice(1)));
+    renderBox(&wrongAnswer3, 0x0F, std::to_string(QNS.get_choice(2)));
 }
+
+void waitMathHorror()
+{
+    switch (checkButtonClicks(MAButtons, MAButtonCount))
+    {
+    case 0:
+        g_bQuitGame = true;
+        break;
+    case 1:
+        g_eGameState = S_MAINMENU;
+        NGameState = N_INIT;
+        EGameState = E_INIT;
+        showHUD = true;
+        break;
+    case 2:
+        NGameState = N_INIT;
+        EGameState = E_INIT;
+        showHUD = true;
+        break;
+    case 3:
+    default:
+        break;
+    }
+}
+
 void initHUD()
 {
     currentHP = player->get_maxHP();

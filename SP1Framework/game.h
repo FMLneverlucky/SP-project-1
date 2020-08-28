@@ -181,6 +181,7 @@ void renderWinLoseMenu(bool);
 void winLoseMenuWait();
 void renderHorror();
 void initMathHorror();
+void waitMathHorror();
 void initHUD();//init ONCE
 void renderHUD();// renders HUD
 void renderBox(Object*, int, std::string); // draw box. can add text if you want

@@ -86,7 +86,7 @@ void CCTV::update_cctv()
 		{
 			radar[2 + r].set_pos(pos.get_x() + r, pos.get_y() - 2);
 		}
-		for (int r = -2; r < 3; r++)
+		for (int r = -2; r < 2; r++)
 		{
 			radar[6 + r].set_pos(pos.get_x() + r, pos.get_y() - 3);
 		}
@@ -94,7 +94,7 @@ void CCTV::update_cctv()
 		{
 			radar[12 + r].set_pos(pos.get_x() + r, pos.get_y() - 4);
 		}
-		for (int r = -4; r < 5; r++)
+		for (int r = -4; r < 4; r++)
 		{
 			radar[20 + r].set_pos(pos.get_x() + r, pos.get_y() - 5);
 		}

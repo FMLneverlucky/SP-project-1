@@ -145,7 +145,7 @@ SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 bool isMousePressed = false;
-bool heldKey[6] = { false, false, false, false, false, false };
+bool heldKey[8] = { false, false, false, false, false, false, false, false };
 int playerVelocityX = 0;
 int playerVelocityY = 0;
 bool liftedW = true;
@@ -195,6 +195,7 @@ Zone safeZone;
 
 //Audio
 ISoundEngine* engine = createIrrKlangDevice();
+float vol = 0.5; //for granula adjustments
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -352,10 +353,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_S; break;
     case 0x41: key = K_A; break;
     case 0x44: key = K_D; break;
-    case 0x4D: key = K_M; break;
+    case VK_UP: key = K_UP; break;
+    case VK_DOWN: key = K_DOWN; break;
     case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
-
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -385,6 +386,14 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
                 playerVelocityY += (playerVelocityY < 1 && liftedD) ? 1 : 0;
                 liftedD = false;
                 break;
+            case 4:
+                if (vol < 1)
+                    vol += 0.1;
+                    break;
+            case 5:
+                if (vol >= 0)
+                    vol -= 0.1;
+                    break;
             default:
                 break;
             }
@@ -420,7 +429,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
 
 void buttonHoldPress(EKEYS key)
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < K_COUNT; i++)
     {
         heldKey[i] = (i == key) ? true : false;
     }
@@ -431,7 +440,7 @@ void buttonHoldRelease(EKEYS key)
 }
 int getButtonHold()
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < K_COUNT; i++)
     {
         if (heldKey[i] == true)
         {
@@ -543,12 +552,14 @@ void updateGame()       // gameplay logic
     {
         moveCharacter();    // moves the character, collision detection, physics, etc
         checkAll();
-        showHUD = true;                   // sound can be played here too.
+        showHUD = true;       
+        engine->setAllSoundsPaused(false);// sound can be played here too.
     }
     else
     {
         pauseMenuWait();
         showHUD = false;
+        engine->setAllSoundsPaused();
     }                
     
 }
@@ -615,6 +626,8 @@ void InitNormal()
     initHUD();
     
     NGameState = N_LEVEL;
+
+    //Audio
     engine->play2D("media/NModeBGM.mp3", true);
 }
  
@@ -782,11 +795,14 @@ void playLevel()
     {
         clear = true;
         NGameState = N_NEXTLEVEL;
+        //Audio for Win
     }
     //end game condition
     if (player->get_HP() <= 0)
     {
         lose = true;
+        engine->stopAllSounds();
+        //Audio for Lose
     }
     //tabulating of highest level cleared and deleting of remaining entities once player loses
     if (lose)
@@ -810,6 +826,7 @@ void playEndless()
         break;
     case E_LOSE:
         winLoseMenuWait();
+        engine->stopAllSounds();
         break;
     }
 }
@@ -841,6 +858,9 @@ void InitEndless()
     initHUD();
 
     EGameState = E_PLAY;
+
+    //Audio
+    engine->play2D("media/EModeBGM.mp3", true);
 }
 
 void enterEndless()
@@ -854,9 +874,8 @@ void enterEndless()
 
     if (player->get_lethalstatus() == 1) // if powerup picked up before
         player->update_ld(); //- 1 each time run tis code(runs by frame)
-
     //chance of Math Horror Jumpscare
-    if (horrorChanceCount <= 0)
+    if (horrorChanceCount <= 0 && !horror)
     {
         horrorFreeze(true);
         initMathHorror();
@@ -869,21 +888,6 @@ void enterEndless()
 
     if (horror)
     {
-        if (showCooldown <= 0 && hideCooldown <= 0)
-            hideCooldown = 1;
-        if (hideCooldown > 0)
-        {
-            hideCooldown -= g_dDeltaTime;
-            if (hideCooldown <= 0)
-                showCooldown = rand() % 2 + 3;
-        }
-        else
-            showCooldown -= g_dDeltaTime;
-        if (paused)
-        {
-            hideCooldown = 1;
-            showCooldown = 0;
-        }
 
     }
     else
@@ -931,7 +935,6 @@ void enterEndless()
         totalhostile = NPC::getnoHostile();
         resetSpawns();
         EGameState = E_LOSE;
-        
     }
 }
 
@@ -1028,6 +1031,8 @@ void checkAll()
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
+
+                //Audio
                 engine->play2D("media/CoughSFX.mp3", false);
 
                 //checking if player is within cctv radar when coughing - lose game condition
@@ -1070,7 +1075,7 @@ void checkAll()
                 }
             }
         }
-        
+        //engine->play2D(".mp3", false); Audio for police to turn angry
     }
 
     check_collision(); //checks for HostileNPC-Player Collision
@@ -1125,7 +1130,7 @@ void checkAll()
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                             NPCs[i]->set_lifespan(20 / g_dDeltaTime);
-
+                            engine->play2D("media/NPCHostile.mp3", false);
                         }
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
@@ -1133,6 +1138,7 @@ void checkAll()
                             player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
+                            //audio for killing NPC
                         }
                     }
                 }
@@ -1146,7 +1152,8 @@ void processUserInput()
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
         paused = paused ? false : true;
-        //g_bQuitGame = true;    
+        //g_bQuitGame = true;
+    engine->setSoundVolume(vol);
 }
 
 //--------------------------------------------------------------
@@ -1544,6 +1551,7 @@ void deletePowerUp()
             player->set_lethal(); //set buff duration and buff is true
             delete powerup;
             powerup = nullptr;
+            //Audio for pickup
         }
 
         else if (powerup->get_detime() != 0)
@@ -1740,8 +1748,6 @@ void moveall()
 
                     NPCs[i]->set_direction(0);
                 }
-
-                
             }
             else if (NPCs[i]->isonCD()) //npc is hostile but on cooldown
             {
@@ -1907,6 +1913,7 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {// put this in render loop
+    engine->stopAllSounds();
     if (stage == "MAIN")
     {// create the object classes outside (scroll to top)
         title.move(consoleSize.X / 2, consoleSize.Y / 4);// use move function to move it to where u want it to be
@@ -2107,38 +2114,38 @@ void initMathHorror()
 
 void renderHorror()
 {
-    if (showCooldown > 0)
-    {
-        //render stuff
-        g_Console.clearBuffer(0x00);
-        int lines = 0;
-        lines = (question.length() + 70) / 70;
-        std::size_t startPos = 0;
-        std::size_t endPos;
+    //render stuff
+    Object boarderLeft(consoleSize.X / 2 - 4, consoleSize.Y, Position(consoleSize.X / 4 - 4, consoleSize.Y / 2));
+    Object boarderRight(consoleSize.X / 2 - 4, consoleSize.Y, Position(consoleSize.X * 3 / 4 + 4, consoleSize.Y / 2));
+    Object boarderTop(consoleSize.X, consoleSize.Y / 2 - 2, Position(consoleSize.X / 2, consoleSize.Y / 4 - 2));
+    Object boarderBottom(consoleSize.X, consoleSize.Y / 2 - 2, Position(consoleSize.X / 2, consoleSize.Y * 3 / 4 + 2));
+    renderBox(&boarderLeft, 0x00);
+    renderBox(&boarderRight, 0x00);
+    renderBox(&boarderTop, 0x00);
+    renderBox(&boarderBottom, 0x00);
 
-        for (int i = 0; i < lines; i++)
-        {
-            endPos = startPos + 60;
-            std::string temp;
-            if (endPos < question.length())
-            {
-                temp = question.substr(endPos);
-                endPos += temp.find(" ");
-                temp = question.substr(startPos, endPos - startPos);
-                startPos = endPos;
-            }
-            else
-                temp = question.substr(startPos);
-            Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
-            renderBox(&qns, 0x0F, temp);
-        }
-    }
-    else
+    int lines = 0;
+    lines = (question.length() + 70) / 70;
+    std::size_t startPos = 0;
+    std::size_t endPos;
+
+    for (int i = 0; i < lines; i++)
     {
-        //dont render stuff
+        endPos = startPos + 60;
+        std::string temp;
+        if (endPos < question.length())
+        {
+            temp = question.substr(endPos);
+            endPos += temp.find(" ");
+            temp = question.substr(startPos, endPos - startPos);
+            startPos = endPos;
+        }
+        else
+            temp = question.substr(startPos);
+        Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
+        renderBox(&qns, 0x0F, temp);
     }
 }
-
 void initHUD()
 {
     currentHP = player->get_maxHP();
@@ -2714,12 +2721,3 @@ void initStoredData(std::string fileName, int* data)
 //
 //    engine->play2D("songFile", loop);
 //}
-
-void muteBGM()
-{
-    if (g_skKeyEvent[K_M].keyReleased)
-    {
-        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
-        engine->drop();
-    }
-}

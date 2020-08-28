@@ -37,9 +37,10 @@ enum EKEYS
     K_S,
     K_A,
     K_D,
+    K_UP,
+    K_DOWN,
     K_ESCAPE,
     K_SPACE,
-    K_M,
     K_COUNT
 };
 // Enumeration for the different screen states

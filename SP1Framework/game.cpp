@@ -145,7 +145,7 @@ SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 bool isMousePressed = false;
-bool heldKey[6] = { false, false, false, false, false, false };
+bool heldKey[8] = { false, false, false, false, false, false, false, false };
 int playerVelocityX = 0;
 int playerVelocityY = 0;
 bool liftedW = true;
@@ -195,6 +195,7 @@ Zone safeZone;
 
 //Audio
 ISoundEngine* engine = createIrrKlangDevice();
+float vol = 0.5; //for granula adjustments
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
@@ -352,10 +353,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_S; break;
     case 0x41: key = K_A; break;
     case 0x44: key = K_D; break;
-    case 0x4D: key = K_M; break;
+    case VK_UP: key = K_UP; break;
+    case VK_DOWN: key = K_DOWN; break;
     case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
-
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -385,6 +386,14 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
                 playerVelocityY += (playerVelocityY < 1 && liftedD) ? 1 : 0;
                 liftedD = false;
                 break;
+            case 4:
+                if (vol < 1)
+                    vol += 0.1;
+                    break;
+            case 5:
+                if (vol >= 0)
+                    vol -= 0.1;
+                    break;
             default:
                 break;
             }
@@ -420,7 +429,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
 
 void buttonHoldPress(EKEYS key)
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < K_COUNT; i++)
     {
         heldKey[i] = (i == key) ? true : false;
     }
@@ -431,7 +440,7 @@ void buttonHoldRelease(EKEYS key)
 }
 int getButtonHold()
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < K_COUNT; i++)
     {
         if (heldKey[i] == true)
         {
@@ -544,12 +553,14 @@ void updateGame()       // gameplay logic
     {
         moveCharacter();    // moves the character, collision detection, physics, etc
         checkAll();
-        showHUD = true;                   // sound can be played here too.
+        showHUD = true;       
+        engine->setAllSoundsPaused(false);// sound can be played here too.
     }
     else
     {
         pauseMenuWait();
         showHUD = false;
+        engine->setAllSoundsPaused();
     }                
     
 }
@@ -600,6 +611,7 @@ void playNormal()
         level_set();
     case N_LOSE:
         winLoseMenuWait();
+        engine->stopAllSounds();
         break;
     }
 }
@@ -615,6 +627,8 @@ void InitNormal()
     initHUD();
     
     NGameState = N_LEVEL;
+
+    //Audio
     engine->play2D("media/NModeBGM.mp3", true);
 }
  
@@ -810,6 +824,7 @@ void playEndless()
         break;
     case E_LOSE:
         winLoseMenuWait();
+        engine->stopAllSounds();
         break;
     }
 }
@@ -841,6 +856,9 @@ void InitEndless()
     initHUD();
 
     EGameState = E_PLAY;
+
+    //Audio
+    engine->play2D("media/EModeBGM.mp3", true);
 }
 
 void enterEndless()
@@ -1026,6 +1044,8 @@ void checkAll()
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
+
+                //Audio
                 engine->play2D("media/CoughSFX.mp3", false);
 
                 //checking if player is within cctv radar when coughing - lose game condition
@@ -1145,7 +1165,8 @@ void processUserInput()
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
         paused = paused ? false : true;
-        //g_bQuitGame = true;    
+        //g_bQuitGame = true;
+    engine->setSoundVolume(vol);
 }
 
 //--------------------------------------------------------------
@@ -1906,6 +1927,7 @@ void renderBox(Object* box, int colour, std::string text = " ")
 
 void renderMainMenu()
 {// put this in render loop
+    engine->stopAllSounds();
     if (stage == "MAIN")
     {// create the object classes outside (scroll to top)
         title.move(consoleSize.X / 2, consoleSize.Y / 4);// use move function to move it to where u want it to be
@@ -2714,12 +2736,3 @@ void initStoredData(std::string fileName, int* data)
 //
 //    engine->play2D("songFile", loop);
 //}
-
-void muteBGM()
-{
-    if (g_skKeyEvent[K_M].keyReleased)
-    {
-        //for all sound, use bool array to store state of M key, if true, drop engine, kill sound, if false, create engine, sound functions should all work
-        engine->drop();
-    }
-}

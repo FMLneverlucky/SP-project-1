@@ -48,7 +48,6 @@ enum EGAMESTATES
     S_MAINMENU,
     S_GAMEMODE1,
     S_GAMEMODE2,
-    S_TUTORIAL,
     S_TEST,
     S_COUNT
 };
@@ -88,12 +87,6 @@ enum Test
     T_END
 };
 
-enum Tutorial
-{
-    TUT_GAMEPLAY,
-    TUT_POLICE,
-    TUT_POWERUP
-};
 
 void init        ( void );      // initialize your variables, allocate memory, etc
 void getInput    ( void );      // get input from player
@@ -104,7 +97,8 @@ void deleteEntities(); // delete all entities in entities array
 
 void splashScreenWait();    // waits for time to pass in splash screen
 void updateGame();          // gameplay logic
-void moveCharacter();       // moves the character, collision detection, physics, etc
+void moveCharacter();       // moves the character and all NPCs
+void checkAll();            //collision detection, physics etc
 void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
 void clearScreen();         // clears the current screen and draw from scratch 
 void renderSplashScreen();  // renders the splash screen
@@ -122,30 +116,23 @@ void updateScore(std::string fileName, double score, double* sessionBest); // st
 void initStoredData(std::string fileName, int*); // create file if it doesnt exist
 void initStoredData(std::string fileName, double*); // create file if it doesnt exist
 
-void checkAll();
-
-//Game Modes
-void InitNormal();
+//For Game Modes
+void resetSpawns(); //deletes any existing entities, sets all ptrs to nullptr
+bool inZone(Position* pos, Zone& zone); //checks if passed in position lies within a zone(spawnendpoint/safezone)
+//Normal mode
 void playNormal();
+void InitNormal();
 void playLevel();
-void set_spawn();
-void spawnAll();
-void resetSpawns();
-void level_set();
+void set_spawn(); //sets variables and npc stats based on level and spawns entities accordingly
+void spawnAll(); //spawns all entities according to variables
+void level_set(); //prepares for next level
+void renderPoints(); //renders spawn and end points
+void set_points(); //sets position of spawn and end points
+//Endless Mode
 void playEndless();
 void InitEndless();
 void enterEndless();
-void renderPoints();
-void set_points();
-void rendersafezone();
-bool inZone(Position* pos, Zone& zone);
-
-
-//Tutorials
-void playTutorial();
-void renderText();
-void initTutGP();
-void playTutGP();
+void rendersafezone(); //renders safezone
 
 //Testing area
 void testStates();
@@ -158,23 +145,25 @@ void spawnWall(int no);
 void renderWall();
 
 //CCTV
-void renderCCTV();
-void spawnCCTV(int no);
+void renderCCTV(); //renders CCTVs and their radar onto map
+void spawnCCTV(int no); //spawns CCTVs
 
-//aesthetics
-void renderBG(int col);
-void setallrpos();
-bool checkifinscreen(COORD c);
-
+//Others
+void renderBG(int col); //renders background map and play area boundary/walll surrounding play area
+void setallrpos(); //sets relative position of all entities
+bool checkifinscreen(COORD c); //checks if a certain coordinate lies within the console's dimensions
 
 //NPCs 
 void spawnNPC(bool isPolice, int no, float spd, float cooldowntime); //spawns NPCs
 void moveall(); //moves all NPCs
 void renderNPC(); //draws NPCs on map
 Entity* occupied(Position*);//if no entity occupy that position, return nullptr
+void check_collision(); //checks for collision between Hostile NPC and Player and does following actions
+
+//Projectile
 void renderprojectile(); //set projectile colour and draw on map
 void limitprojectile();
-void check_collision();
+
 
 //PowerUp
 void spawnPowerUp();

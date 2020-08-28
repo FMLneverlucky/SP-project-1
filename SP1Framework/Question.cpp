@@ -140,6 +140,7 @@ void Question::setQuestion()
 			question = std::to_string(var1) + " people died from the corona virus in Singapore. " + std::to_string(var2) + " people died from the corona virus in Malaysia. How many people did the corona virus take the lives of in both countries?";
 			break;
 		case 3:
+			question = name1 + " has " + std::to_string(var2) + " rolls of toilet paper. If " + name2 + " gives " + name1 + std::to_string(var1) + " rolls of toilet paper, How many rolls of toilet paper will " + name1 + " have in total?";
 			break;
 		}
 		break;
@@ -170,9 +171,10 @@ void Question::setQuestion()
 			question = "If " + name1 + " uses " + std::to_string(var1) + " rolls of toilet paper every month, how many rolls of toilet paper should he buy to sustain himself for " + std::to_string(var2) + " months?";
 			break;
 		case 2:
-			question = std::to_string(var1) + " people are infected with the corona virus everyday. In " + std::to_string(var2) + " days, how many people will be infected with corona?";
+			question = "If " + std::to_string(var1) + " people are infected with the corona virus everyday. In " + std::to_string(var2) + " days, how many people will be infected with corona?";
 			break;
 		case 3:
+			question = "If one mask costs $" + std::to_string(var1) + ", how much will " + std::to_string(var2) + " masks cost?";
 			break;
 		}
 		break;
@@ -189,6 +191,7 @@ void Question::setQuestion()
 			question = name1 + " earnt a profit of $" + std::to_string(var2) + " selling masks over a period of " + std::to_string(var1) + " days. How much did he earn on average per day?";
 			break;
 		case 3:
+			question = "If the Australian bushfires killed a total of " + std::to_string(var2) + " people in " + std::to_string(var1) + " days, how many people died on average each day?";
 			break;
 		}
 		break;
@@ -202,8 +205,10 @@ void Question::setQuestion()
 			question = name1 + " bought a packet of " + std::to_string(var1) + " masks from NTUC and another packet of " + std::to_string(var2) + " masks from Giant for his family of " + std::to_string(var3) + ". How many masks can each member use?";
 			break;
 		case 2:
+			question = "If " + name1 + " has " + std::to_string(var1) + "litres of water. " + name2 + " has " + std::to_string(var2) + "litres of water. If there are " + std::to_string(var3) + " bushfires, How many litres of water can be used on each bushfire?";
 			break;
 		case 3:
+			question = "If the number of people infected with the corona virus over the past " + std::to_string(var3) + " days in Singapore and Malaysia was " + std::to_string(var1) + " and " + std::to_string(var2) + "respectively, in total, how many people were infected on average each day in the two countries?";
 			break;
 		}
 		break;

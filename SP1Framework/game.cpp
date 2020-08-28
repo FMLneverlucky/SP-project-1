@@ -85,6 +85,11 @@ int currentHP;
 int cooldownLength;
 bool showHUD = true;
 
+//RENDERING
+int BGcol;
+int Wallcol;
+int HNPCcol;
+int HPolcol;
 
 //GAME MODE
 NormalMode NGameState = N_INIT;
@@ -95,10 +100,12 @@ bool lose = false; //end game
 bool clear = false;
 int noC; //no. of civilian
 int noP; //no. of Police
+int noW; //no. of walls
+int noCCTV; //no. of CCTVs
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
-int noW; //no of walls
-int noCCTV;
+int horrorChanceCount = 0; //counter for math horror jumpscare
+bool invert = false;
 
 //stored data
 int highestLVL = 0;
@@ -791,6 +798,10 @@ void playEndless()
         break;
     case E_LOSE:
         winLoseMenuWait();
+        break;
+    case E_HORROR:
+        mathHorrorWait();
+        break;
     }
 }
 
@@ -809,6 +820,7 @@ void InitEndless()
     g_sChar.m_cLocation.X = 40;
     g_sChar.m_cLocation.X = 12;
     safeZone.setpos(40, 12);
+    horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
 
     //spawning of entities
     spawnWall(10);
@@ -833,6 +845,18 @@ void enterEndless()
     {
         spawnNPC(false, 1, 0.6, 1);
         tempcounter = 0;
+    }
+
+    //chance of Math Horror Jumpscare
+    if (horrorChanceCount <= 0)
+    {
+        EGameState = E_HORROR;
+        horrorFreeze(true);
+        horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
+    }
+    else
+    {
+        horrorChanceCount--;
     }
 
     updateGame();
@@ -1098,6 +1122,22 @@ void processUserInput()
 void render()
 {
     clearScreen();      // clears the current screen and draw from scratch 
+
+    if (invert)
+    {
+        BGcol = 0x00;
+        Wallcol = 0x88;
+        HNPCcol = 0x55;
+        HPolcol = 0xDD;
+    }
+    else
+    {
+        BGcol = 0x88;
+        Wallcol = 0x00;
+        HNPCcol = 0x44;
+        HPolcol = 0xCC;
+    }
+
     switch (g_eGameState)
     {
     case S_MAINMENU: 
@@ -1171,12 +1211,15 @@ void renderGame()
 
 void renderMap()
 {
-    renderCCTV();
+    if (invert == false)
+    {
+        renderCCTV();
+        renderprojectile();
+        renderPowerUp();
+    }
     renderNPC();
-    renderprojectile();
     renderWall();
     
-    renderPowerUp();
 }
 
 void renderCharacter()
@@ -1208,6 +1251,10 @@ void renderCharacter()
     if (g_sChar.m_bActive)
     {
         charColor = 0x09;
+    }
+    if (invert)
+    {
+        charColor = 0xF4;
     }
     COORD c;
     c.X = player->getrposx();
@@ -1320,7 +1367,7 @@ void renderInputEvents()
 void renderWall()
 {
     COORD c;
-    int colour;
+    //int colour;
     for (int i = 0; i < WallLimit*4; i++)
     {
         if (Walls[i] != nullptr)
@@ -1328,11 +1375,11 @@ void renderWall()
             c.X = Walls[i]->getposx() - static_cast<int>(player->getposx()) + 40;
             c.Y = Walls[i]->getposy() - static_cast<int>(player->getposy()) + 12;
 
-            colour = 0x00;
+            //colour = 0x00;
 
             if (checkifinscreen(c))
             {
-                g_Console.writeToBuffer(c, "W", colour);
+                g_Console.writeToBuffer(c, "W", Wallcol);
             }
         }
     }
@@ -1480,22 +1527,22 @@ void renderNPC()
             c.X = NPCs[i]->getrposx();
             c.Y = NPCs[i]->getrposy();
 
-            if (NPCs[i]->type() == 'B')
+            if (NPCs[i]->type() == 'B') //Police
             {
                 if (NPCs[i]->isHostile())
                 {
-                    colour = 0xC3;
+                    colour = HPolcol;
                 }
                 else
                 {
                     colour = 0x11;
                 }
             }
-            else
+            else //Civillian
             {
                 if (NPCs[i]->isHostile())
                 {
-                    colour = 0x4D;
+                    colour = HNPCcol;
                 }
                 else
                 {
@@ -1503,11 +1550,14 @@ void renderNPC()
                 }
             }
 
-           /* if (NPCs[i]->get_ftime() != 0)
-            {
-                colour = 0x3C;
-            }*/
-            if (checkifinscreen(c))
+            if (invert)
+            { 
+                if (NPCs[i]->isHostile() && checkifinscreen(c))
+                {
+                    g_Console.writeToBuffer(c, " ", colour);
+                }
+            }
+            else if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
@@ -1989,6 +2039,27 @@ void winLoseMenuWait()
     }
 }
 
+void mathHorrorWait()
+{
+    updateGame();
+
+    //FUNCTIONS YOULL NEED BELOW AAAAAAAA >--|-O
+    QNS.SetNewQns(); //generates new question
+    QNS.get_question(); //returns the question in string
+    QNS.get_answer(); //returns answer to the question in int 
+    //returns the 3 wrong other choices
+    QNS.get_choice(0);
+    QNS.get_choice(1);
+    QNS.get_choice(2);
+
+    //once player chooses an option set EGameState back to E_PLAY and call horrorFreeze(false);
+    //EGameState = E_PLAY;
+    //horrorFreeze(false);
+
+    //dont forget to make sure u dont block the player we must make the player watch the npcs slowly approach them
+    //must make them suffer 
+}
+
 void initHUD()
 {
     currentHP = player->get_maxHP();
@@ -2237,6 +2308,7 @@ void renderPoints()
 void renderBG(int col)
 {
     COORD c;
+    
     for (int x = -1; x < 81; x++)
     {
         if (x == -1 || x == 80)
@@ -2248,20 +2320,21 @@ void renderBG(int col)
 
                 if (checkifinscreen(c))
                 {
-                    g_Console.writeToBuffer(c, " ", 0x00);
+                    g_Console.writeToBuffer(c, " ", Wallcol);
                 }
             }
         }
         else
         {
-
+   
+       
             for (int y = 1; y < 25; y++) //rendering of playarea background/map
             {
                 c.X = x - static_cast<int>(player->getposx()) + 40;
                 c.Y = y - static_cast<int>(player->getposy()) + 12;
                 if (checkifinscreen(c))
                 {
-                    g_Console.writeToBuffer(c, " ", col);
+                    g_Console.writeToBuffer(c, " ", BGcol);
                 }
             }
 
@@ -2271,14 +2344,14 @@ void renderBG(int col)
 
             if (checkifinscreen(c))
             {
-                g_Console.writeToBuffer(c, " ", 0x00);
+                g_Console.writeToBuffer(c, " ", Wallcol);
             }
 
             c.Y = 25 - static_cast<int>(player->getposy()) + 12;
 
             if (checkifinscreen(c))
             {
-                g_Console.writeToBuffer(c, " ", 0x00);
+                g_Console.writeToBuffer(c, " ", Wallcol);
             }
 
         }
@@ -2433,6 +2506,29 @@ void spawnCCTV(int no)
         }
 
     }
+}
+
+void horrorFreeze(bool on)
+{
+    int changeinspd;
+    if (on)
+    {
+        changeinspd = 0.1;
+    }
+    else
+    {
+        changeinspd = 10;
+    }
+
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            NPCs[i]->set_speed(NPCs[i]->get_speed() * changeinspd);
+        }
+    }
+
+    invert = on;
 }
 
 bool is_empty(std::ifstream& pFile)

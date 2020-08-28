@@ -77,7 +77,8 @@ enum EndlessMode
 {
     E_INIT,
     E_PLAY,
-    E_LOSE
+    E_LOSE,
+    E_HORROR
 };
 
 enum Test
@@ -133,6 +134,7 @@ void playEndless();
 void InitEndless();
 void enterEndless();
 void rendersafezone(); //renders safezone
+void horrorFreeze(bool on);
 
 //Testing area
 void testStates();
@@ -177,6 +179,7 @@ void renderPauseMenu();
 void pauseMenuWait();
 void renderWinLoseMenu(bool);
 void winLoseMenuWait();
+void mathHorrorWait();
 void initHUD();//init ONCE
 void renderHUD();// renders HUD
 void renderBox(Object*, int, std::string); // draw box. can add text if you want

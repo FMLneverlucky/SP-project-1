@@ -298,8 +298,8 @@ void getInput( void )
 // Output   : void
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{   if (EGameState != E_HORROR)
-        gameplayKBHandler(keyboardEvent);
+{   
+    gameplayKBHandler(keyboardEvent);
 }
 
 //--------------------------------------------------------------
@@ -2045,8 +2045,16 @@ void winLoseMenuWait()
 void mathHorrorWait()
 {
     processUserInput();
-    moveall();
-    checkAll();
+    if (paused)
+    {
+        pauseMenuWait();
+        showHUD = false;
+    }
+    else
+    {
+        moveall();
+        checkAll();
+    }
 
     //FUNCTIONS YOULL NEED BELOW AAAAAAAA >--|-O
     QNS.SetNewQns(); //generates new question
@@ -2221,6 +2229,8 @@ void check_collision()
                 player->prevDamaged(NPCs[i]->type()); //records last NPC type that damaged player
                 flashcount = 1 / g_dDeltaTime; 
                 player->set_flash(true); //makes player flash in red for 1 second to show player has taken damage
+                NPCs[i]->cooldownstart(); //sets NPCs on cooldown
+                NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                 switch (g_eGameState)
                 {
                 case S_GAMEMODE1:
@@ -2231,8 +2241,6 @@ void check_collision()
                     player->resetlethality();
                     break;
                 case S_GAMEMODE2:
-                    NPCs[i]->cooldownstart(); //sets NPCs on cooldown
-                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                     player->set_pos(safeZone.getpos(4)->get_x(), safeZone.getpos(4)->get_y()); //moves player back to safezone
                     break;
                 }
@@ -2489,7 +2497,7 @@ void spawnCCTV(int no)
             temppos.set_pos(rand() % 80, (rand() % 24) + 1); //generates random position
 
             //checks if position is available
-            if (inZone(&temppos, spawnPoint) || inZone(&temppos, endPoint))
+            if (inZone(&temppos, spawnPoint) || inZone(&temppos, endPoint) || inZone(&temppos, safeZone))
             {
                 valid = false;
             }

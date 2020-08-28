@@ -12,6 +12,7 @@
 #include "Wall.h"
 #include "PowerUp.h"
 #include "CCTV.h"
+#include "Question.h"
 
 #pragma comment(lib, "irrklang.lib")
 
@@ -26,8 +27,8 @@ float splashScreenTime = 0.5;
 //UI NAMES
 std::string gameName = "A Very Fun Game";
 std::string gameMode1 = "Normal";
-std::string gameMode2 = "Endless";
-std::string gameMode3 = "Tutorial (under construction)";
+std::string gameMode2 = "Endless Nightmare";
+std::string gameMode3 = "Empty Button";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
@@ -60,8 +61,6 @@ Object* MGButtons[5];
 const int MGButtonCount = 5;
 std::string stage = "MAIN";
 
-//QUICK FIX
-bool isMousePressed = false;
 
 //PAUSE MENU
 bool paused = false;
@@ -81,27 +80,32 @@ const int WLButtonCount = 3;
 Object healthBar(1, 1);
 Object coughBar(1, 1);
 Object NPCremaining(1, 1);
+Question QNS;
 int currentHP;
 int cooldownLength;
 bool showHUD = true;
 
-//NORMAL MODE
+//RENDERING
+int BGcol;
+int Wallcol;
+int HNPCcol;
+int HPolcol;
+
+//GAME MODE
 NormalMode NGameState = N_INIT;
 EndlessMode EGameState = E_INIT;
-Tutorial TutState = TUT_GAMEPLAY;
 Test TGameState = T_INIT;
 int level = 0; //level no.
 bool lose = false; //end game
 bool clear = false;
 int noC; //no. of civilian
 int noP; //no. of Police
+int noW; //no. of walls
+int noCCTV; //no. of CCTVs
 float spd; //spd of NPCs relative to player
 int cdtime; //cooldown time of hostile NPCs after collision w player
-int noW; //no of walls
-int noCCTV;
-//Position endPoint[9];
-//Position spawnPoint[9];
-//Position safezone[9];
+int horrorChanceCount = 0; //counter for math horror jumpscare
+bool invert = false;
 
 //stored data
 int highestLVL = 0;
@@ -119,13 +123,8 @@ int totalhostile = 0;
 int tempcounter;
 int flashcount = 0;
 
-//TUTORIAL
-std::string text = " ";
-//TEST
-//double timer = 0;
-
 //map aesthetics
-int prevcol = 0x88;
+int col = 0x88;
 
 double e_dElapsedTime; // time passed in endless mode
 double kpm;
@@ -134,6 +133,16 @@ double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
+
+bool isMousePressed = false;
+bool heldKey[6] = { false, false, false, false, false, false };
+int playerVelocityX = 0;
+int playerVelocityY = 0;
+bool liftedW = true;
+bool liftedA = true;
+bool liftedS = true;
+bool liftedD = true;
+
 
 // Game specific variables here
 SGameChar   g_sChar;
@@ -226,10 +235,10 @@ void init( void )
         highestLVL = std::stoi(temp);
         file.close();
     }*/
-    initStoredData(highestLevelFile, highestLVL);
-    initStoredData(highestKillFile, highestKill);
-    initStoredData(bestTimeFile, bestTime);
-    initStoredData(highestKPMFile, highestKPM);
+    initStoredData(highestLevelFile, &highestLVL);
+    initStoredData(highestKillFile, &highestKill);
+    initStoredData(bestTimeFile, &bestTime);
+    initStoredData(highestKPMFile, &highestKPM);
 }
 
 //--------------------------------------------------------------
@@ -289,18 +298,7 @@ void getInput( void )
 // Output   : void
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{    
-    //switch (g_eGameState)
-    //{
-    //case S_MAINMENU: gameplayKBHandler(keyboardEvent); // handle thing for the splash screen
-    //    break;
-    //case S_TEST: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
-    //    break;
-    //case S_GAMEMODE1: gameplayKBHandler(keyboardEvent); 
-    //    break;
-    //case S_GAMEMODE2: gameplayKBHandler(keyboardEvent);
-    //    break;
-    //}
+{   
     gameplayKBHandler(keyboardEvent);
 }
 
@@ -322,20 +320,6 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 //--------------------------------------------------------------
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 {    
-    //switch (g_eGameState)
-    //{
-    //case S_MAINMENU: gameplayMouseHandler(mouseEvent); // don't handle anything for the splash screen
-    //    break;
-    //case S_TEST: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-    //    break;
-    //case S_GAMEMODE1: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-    //    break;
-    //case S_GAMEMODE2: gameplayMouseHandler(mouseEvent);
-    //    break;
-    //case S_TUTORIAL: gameplayMouseHandler(mouseEvent);
-    //    break;
-    //}
-
     gameplayMouseHandler(mouseEvent);
 }
 
@@ -371,14 +355,59 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
         g_skKeyEvent[key].keyDown = keyboardEvent.bKeyDown;
         if (g_skKeyEvent[key].keyDown)
+        {
             buttonHoldPress(key);
+            switch (key)
+            {
+            case 0:
+                playerVelocityX += (playerVelocityX < 1 && liftedW) ? 1 : 0;
+                liftedW = false;
+                break;
+            case 1:
+                playerVelocityX += (playerVelocityX > -1 && liftedS) ? -1 : 0;
+                liftedS = false;
+                break;
+            case 2:
+                playerVelocityY += (playerVelocityY > -1 && liftedA) ? -1 : 0;
+                liftedA = false;
+                break;
+            case 3:
+                playerVelocityY += (playerVelocityY < 1 && liftedD) ? 1 : 0;
+                liftedD = false;
+                break;
+            default:
+                break;
+            }
+        }
         g_skKeyEvent[key].keyReleased = !keyboardEvent.bKeyDown;
         if (g_skKeyEvent[key].keyReleased)
+        {
             buttonHoldRelease(key);
+            switch (key)
+            {
+            case 0:
+                playerVelocityX += playerVelocityX > -1 ? -1 : 0;
+                liftedW = true;
+                break;
+            case 1:
+                playerVelocityX += playerVelocityX < 1 ? 1 : 0;
+                liftedS = true;
+                break;
+            case 2:
+                playerVelocityY += playerVelocityY < 1 ? 1 : 0;
+                liftedA = true;
+                break;
+            case 3:
+                playerVelocityY += playerVelocityY > -1 ? -1 : 0;
+                liftedD = true;
+                break;
+            default:
+                break;
+            }
+        }
     }    
 }
 
-bool heldKey[6] = {false, false, false, false, false, false};
 void buttonHoldPress(EKEYS key)
 {
     for (int i = 0; i < 6; i++)
@@ -396,11 +425,48 @@ int getButtonHold()
     {
         if (heldKey[i] == true)
         {
+            if (playerVelocityX == 0 && (i == 0 || i == 1))
+            { // incase they counterstrafe
+                break;
+            }
+            if (playerVelocityY == 0 && (i == 2 || i == 3))
+            { // incase they counterstrafe
+                break;
+            }
             return i;
         }
     }
+    if (playerVelocityX > 0)
+        return 0;
+    if (playerVelocityX < 0)
+        return 1;
+    if (playerVelocityY < 0)
+        return 2;
+    if (playerVelocityY > 0)
+        return 3;
     return 7;
 }
+//int playerDirection()
+//{
+//    switch (getButtonHold())
+//    {
+//    case 0:
+//        playerVelocityX -= playerVelocityX < 1 ? 0 : 1;
+//        break;
+//    case 1:
+//        playerVelocityX -= playerVelocityX > -1 ? 0 : 1;
+//        break;
+//    case 2:
+//        playerVelocityY -= playerVelocityY > -1 ? 0 : 1;
+//        break;
+//    case 3:
+//        playerVelocityY += playerVelocityY < 1 ? 0 : 1;
+//        break;
+//    default:
+//        break;
+//
+//    }
+//}
 
 //--------------------------------------------------------------
 // Purpose  : This is the mouse handler in the game state. Whenever there is a mouse event in the game state, this function will be called.
@@ -447,40 +513,13 @@ void update(double dt)
             break;
         case S_TEST: testStates(); // gameplay logic when we are in the game
             break;
-        case S_GAMEMODE1: playNormal();
+        case S_GAMEMODE1: playNormal(); // normal mode
             break;
-        case S_GAMEMODE2:
-            playEndless();
-            break;
-        case S_TUTORIAL: playTutorial();
+        case S_GAMEMODE2: playEndless(); // endless mode
             break;
     }
 }
 
-void playTutorial()
-{
-    switch (TutState)
-    {
-    case TUT_GAMEPLAY:
-        initTutGP();
-        playTutGP();
-        break;
-    case TUT_POLICE:
-        break;
-    case TUT_POWERUP:
-        break;
-    }
-}
-
-void initTutGP()
-{
-
-}
-
-void playTutGP()
-{
-
-}
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
@@ -565,13 +604,10 @@ void InitNormal()
     level_set();
     initHUD();
     
-    
-    //spawnWall(noW);
-    
     NGameState = N_LEVEL;
 }
  
-void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end points
+void set_spawn() //sets variables and npc stats based on level and spawns entities accordingly
 {
     if (level == 1)
     {
@@ -616,17 +652,18 @@ void set_spawn() //set stats based on level;; spawn NPCs, set spawn and end poin
     }
     spawnAll();
 }
+
 void spawnAll()
 {
-    spawnWall(noW);
-    spawnNPC(false, noC, spd, cdtime);
-    spawnNPC(true, noP, spd, cdtime);
-    spawnCCTV(noCCTV);
+    spawnWall(noW); //spawns walls
+    spawnNPC(false, noC, spd, cdtime); //spawns civillians(NPC)
+    spawnNPC(true, noP, spd, cdtime); //spawns police(NPC)
+    spawnCCTV(noCCTV); //spawns CCTVs
 }
 
 void set_points()
 {
-    spawnPoint.setpos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y);
+    spawnPoint.setpos(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y); //sets spawnpoint to be the current position of the player
 
     bool overlap;
     Position temppos;
@@ -636,8 +673,9 @@ void set_points()
         temppos.set_x((rand() % 78) + 1);
         temppos.set_y((rand() % 21) + 2);
 
-        endPoint.setpos(temppos.get_x(), temppos.get_y());
+        endPoint.setpos(temppos.get_x(), temppos.get_y()); //sets endpoint to randomised position
 
+        //checks if spawn and end points overlap
         for (int s = 0; s < 9; s++)
         {
             for (int e = 0; e < 9; e++)
@@ -648,13 +686,13 @@ void set_points()
                 }
             }
         }
-    } while (occupied(&temppos) != nullptr || inZone(&temppos, spawnPoint) || overlap);
+    } while (occupied(&temppos) != nullptr || inZone(&temppos, spawnPoint) || overlap); //conditions for end point's location to be invalid
 
     
  
 }
 
-void resetSpawns()
+void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
 {
     for (int i = 0; i < NPCLimit; i++)
     {
@@ -699,7 +737,7 @@ void resetSpawns()
     }
 }
 
-void level_set() //deletes everyth
+void level_set() //prepares for next level
 {
     
     resetSpawns();
@@ -707,6 +745,7 @@ void level_set() //deletes everyth
     player->resetHP();
     NPC::resetnoHostile();
     player->resetlethality();
+
     level++;
 
     set_points();
@@ -727,17 +766,18 @@ void playLevel()
     if (player->get_lethalstatus() == 1) // if powerup picked up before
         player->update_ld(); //- 1 each time run tis code(runs by frame)
 
+    //level clear condition
     if (NPC::getnoHostile() == noC + noP && static_cast<int>(player->getposx()) == endPoint.getpos(4)->get_x() && static_cast<int>(player->getposy()) == endPoint.getpos(4)->get_y())
     {
         clear = true;
         NGameState = N_NEXTLEVEL;
     }
-
+    //end game condition
     if (player->get_HP() <= 0)
     {
         lose = true;
     }
-
+    //tabulating of highest level cleared and deleting of remaining entities once player loses
     if (lose)
     {
         updateScore(highestLevelFile, level, &highestLVL);
@@ -752,18 +792,23 @@ void playEndless()
     switch (EGameState)
     {
     case E_INIT:
-        InitEndless();
+        InitEndless(); 
         break;
     case E_PLAY:
-        enterEndless();
+        enterEndless(); 
         break;
     case E_LOSE:
         winLoseMenuWait();
+        break;
+    case E_HORROR:
+        mathHorrorWait();
+        break;
     }
 }
 
 void InitEndless()
 {
+    //resetting variables etc to prepare for Endless
     player->resetKills();
     lose = false;
     totalhostile = 0;
@@ -776,7 +821,9 @@ void InitEndless()
     g_sChar.m_cLocation.X = 40;
     g_sChar.m_cLocation.X = 12;
     safeZone.setpos(40, 12);
+    horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
 
+    //spawning of entities
     spawnWall(10);
     spawnNPC(false, 5, 0.6, 1);
     spawnNPC(true, 3, 0.7, 1);
@@ -793,20 +840,35 @@ void enterEndless()
     e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
     kpm = player->getKills() / (e_dElapsedTime / 60);
+
+    //spawns NPCs every 3 seconds if there are < 20 already on the Map
     if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
     {
         spawnNPC(false, 1, 0.6, 1);
         tempcounter = 0;
     }
 
-    updateGame();
-
-    if (player->get_HP() == 0)
+    //chance of Math Horror Jumpscare
+    if (horrorChanceCount <= 0)
     {
-        lose = true;
-        
+        EGameState = E_HORROR;
+        horrorFreeze(true);
+        horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
+    }
+    else
+    {
+        horrorChanceCount--;
     }
 
+    updateGame();
+
+    //end game condition
+    if (player->get_HP() <= 0)
+    {
+        lose = true;
+    }
+
+    //despawning Hostile NPCs once their lifespan runs out (lifespan is set once they turn hostile)
     for (int i = 0; i < NPCLimit; i++)
     {
         if (NPCs[i] != nullptr)
@@ -825,6 +887,8 @@ void enterEndless()
             }
         }
     }
+
+    //tabulating and resetting of variables once player loses
     if (lose)
     {
         updateScore(bestTimeFile, e_dElapsedTime, &bestTime);
@@ -847,7 +911,7 @@ void rendersafezone()
        
         if (i != 4)
         {
-
+            //rendering of safezone's outer colour
             colour = 0xBB;
             c.X = safeZone.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = safeZone.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -859,6 +923,7 @@ void rendersafezone()
         }
     }
 
+    //rendering of the middle of safezone
     colour = 0x7F;
     c.X = safeZone.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
     c.Y = safeZone.getpos(4)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -871,27 +936,21 @@ void rendersafezone()
 
 void moveCharacter()
 {   
-    // Updating the location of the character based on the key release
-    // providing a beep sound whenver we shift the character
+    // Updating the location of the character based on the key being held
     if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
     {
-        //Beep(1440, 30);
         player->set_direction(1);
-        
     }
     else if (getButtonHold() == K_A && g_sChar.m_cLocation.X > 0)
     {
-        //Beep(1440, 30);
         player->set_direction(3);
     }
     else if (getButtonHold() == K_S && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
-        //Beep(1440, 30);     
         player->set_direction(2);
     }
     else if (getButtonHold() == K_D && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
-    {
-        //Beep(1440, 30);    
+    {   
         player->set_direction(4);
     }
     else
@@ -900,7 +959,7 @@ void moveCharacter()
     }
 
 
-    //conditions such that player cannot move:: got wall etc
+    //conditions such that player cannot move; got wall etc
     if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
     {
         player->set_direction(0);
@@ -910,16 +969,11 @@ void moveCharacter()
         player->set_direction(0);
     }
     
-    //necessary/related updates
-    
     player->update_pos(g_dDeltaTime); //sets pos of player
     g_sChar.m_cLocation.Y = player->getposy(); //moves player
     g_sChar.m_cLocation.X = player->getposx(); //moves player
     
-    moveall(); //moves NPCs
-    
-
-    
+    moveall(); //moves all NPCs
 }
 
 void checkAll()
@@ -1001,7 +1055,7 @@ void checkAll()
                 CCTVs[c]->setCD(CCTVs[c]->getCD() - 1);
             }
             
-            //checks for walls, block CCTV line of sight
+            //checks for walls, and blocks CCTV's line of sight accordingly
             for (int i = 0; i < 25; i++)
             {
                 if (occupied(CCTVs[c]->getRadarPos(i)) != nullptr)
@@ -1017,8 +1071,6 @@ void checkAll()
     } 
 
    
-   
-
     //checks if cough projectile is on the same block as an NPC, and turns them hostile if so
     for (int p = 0; p < particle_limit; p++)
     {
@@ -1071,6 +1123,22 @@ void processUserInput()
 void render()
 {
     clearScreen();      // clears the current screen and draw from scratch 
+
+    if (invert)
+    {
+        BGcol = 0x00;
+        Wallcol = 0x88;
+        HNPCcol = 0x55;
+        HPolcol = 0xDD;
+    }
+    else
+    {
+        BGcol = 0x88;
+        Wallcol = 0x00;
+        HNPCcol = 0x44;
+        HPolcol = 0xCC;
+    }
+
     switch (g_eGameState)
     {
     case S_MAINMENU: 
@@ -1081,7 +1149,7 @@ void render()
         renderGame();
         break;
     case S_GAMEMODE1: 
-        renderBG(prevcol);
+        renderBG(col);
         renderPoints();
         renderGame();
         if (lose)
@@ -1097,11 +1165,6 @@ void render()
         {
             renderWinLoseMenu(false);
         }
-        break;
-    case S_TUTORIAL:
-        renderBG(prevcol);
-        renderGame();
-        renderText();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -1138,51 +1201,29 @@ void renderSplashScreen()  // renders the splash screen
 
 void renderGame()
 {
-    setallrpos();
+    setallrpos();       //sets relative position for all entities for camera lock
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
     if (paused)
         renderPauseMenu();
     else
         renderHUD();
-    /*if (lose)
-    {
-        renderWinLoseMenu(false);
-    }
-    if (clear)
-    {
-        renderWinLoseMenu(true);
-    }*/
-
-    
 }
 
 void renderMap()
 {
-    // Set up sample colours, and output shadings
-    const WORD colors[] = {
-        0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
-        0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
-    };
-
-   /* COORD c;
-    for (int i = 0; i < 12; ++i)
-    {
-        c.X = 5 * i;
-        c.Y = i + 1;
-        colour(colors[i]);
-        g_Console.writeToBuffer(c, " °±²Û", colors[i]);
-        
-    }*/
-
-    
-    //renderPoints();
     renderCCTV();
     renderNPC();
-    renderprojectile();
     renderWall();
     
-    renderPowerUp();
+    if (invert == false)
+    {
+        
+        renderprojectile();
+        renderPowerUp();
+    }
+    
+    
 }
 
 void renderCharacter()
@@ -1214,6 +1255,10 @@ void renderCharacter()
     if (g_sChar.m_bActive)
     {
         charColor = 0x09;
+    }
+    if (invert)
+    {
+        charColor = 0xF4;
     }
     COORD c;
     c.X = player->getrposx();
@@ -1324,9 +1369,9 @@ void renderInputEvents()
 }
 
 void renderWall()
-{//maybe?
+{
     COORD c;
-    int colour;
+    //int colour;
     for (int i = 0; i < WallLimit*4; i++)
     {
         if (Walls[i] != nullptr)
@@ -1334,11 +1379,11 @@ void renderWall()
             c.X = Walls[i]->getposx() - static_cast<int>(player->getposx()) + 40;
             c.Y = Walls[i]->getposy() - static_cast<int>(player->getposy()) + 12;
 
-            colour = 0x00;
+            //colour = 0x00;
 
             if (checkifinscreen(c))
             {
-                g_Console.writeToBuffer(c, "W", colour);
+                g_Console.writeToBuffer(c, "W", Wallcol);
             }
         }
     }
@@ -1486,22 +1531,22 @@ void renderNPC()
             c.X = NPCs[i]->getrposx();
             c.Y = NPCs[i]->getrposy();
 
-            if (NPCs[i]->type() == 'B')
+            if (NPCs[i]->type() == 'B') //Police
             {
                 if (NPCs[i]->isHostile())
                 {
-                    colour = 0xC3;
+                    colour = HPolcol;
                 }
                 else
                 {
                     colour = 0x11;
                 }
             }
-            else
+            else //Civillian
             {
                 if (NPCs[i]->isHostile())
                 {
-                    colour = 0x4D;
+                    colour = HNPCcol;
                 }
                 else
                 {
@@ -1509,11 +1554,14 @@ void renderNPC()
                 }
             }
 
-           /* if (NPCs[i]->get_ftime() != 0)
-            {
-                colour = 0x3C;
-            }*/
-            if (checkifinscreen(c))
+            if (invert)
+            { 
+                if (NPCs[i]->isHostile() && checkifinscreen(c))
+                {
+                    g_Console.writeToBuffer(c, " ", colour);
+                }
+            }
+            else if (checkifinscreen(c))
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
@@ -1524,26 +1572,26 @@ void renderNPC()
     
 }
 
-void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) //spd shud be btw 0.1 and 0.9; spd of 1 = spd of player
+void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) 
 {
     for (int i = 0; i < no; i++)
     {
-        Position temp;
+        Position temppos;
         bool valid; 
 
         do
         {
             valid = true;
-
-            temp.set_x(rand() % 80);
-            temp.set_y((rand() % 23) + 1);
+            //generates random pos
+            temppos.set_x(rand() % 80);
+            temppos.set_y((rand() % 23) + 1);
           
             //check if pos is valid
             switch (g_eGameState)
             {
             case S_GAMEMODE1:
 
-                if (inZone(&temp, spawnPoint) || inZone(&temp, endPoint))
+                if (inZone(&temppos, spawnPoint) || inZone(&temppos, endPoint))
                 {
                     valid = false;
                 }
@@ -1552,26 +1600,28 @@ void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) //spd shud b
             case S_GAMEMODE2:
 
                 COORD t;
-                t.X = temp.get_x() - player->getposx() + 40;
-                t.Y = temp.get_y() - player->getposy() + 12;
-                if (checkifinscreen(t) == false)
+                t.X = temppos.get_x() - player->getposx() + 40;
+                t.Y = temppos.get_y() - player->getposy() + 12;
+
+                if (checkifinscreen(t) == false) //NPCs spawn only within screen in Endless
                 {
                     valid = false;
                 }
 
-                if (inZone(&temp, safeZone))
+                if (inZone(&temppos, safeZone))
                 {
                     valid = false;
                 }
                 break;
             }
 
-        } while (occupied(&temp) != nullptr || valid == false); //while pos is not available
+        } while (occupied(&temppos) != nullptr || valid == false); //while pos is not available
 
         for (int n = 0; n < NPCLimit; n++)
         {
             if (NPCs[n] == nullptr)
             {
+                //creates NPC Object and sets Position and other variables
                 if (isPolice)
                 {
                     NPCs[n] = new Police(cooldowntime);
@@ -1582,7 +1632,7 @@ void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) //spd shud b
                     NPCs[n] = new NPC(cooldowntime);
                     entities[n + 1] = NPCs[n];
                 }
-                entities[n + 1]->set_pos(temp.get_x(), temp.get_y());
+                entities[n + 1]->set_pos(temppos.get_x(), temppos.get_y());
                 NPCs[n]->set_speed(spd);
                 NPCs[n]->set_count(2 / g_dDeltaTime);
                 break;
@@ -1599,15 +1649,15 @@ void moveall()
     {
         if (NPCs[i] != nullptr)
         {
-            if (NPCs[i]->isHostile() == false)
+            if (NPCs[i]->isHostile() == false) //movement for NEUTRAL NPCs
             {
-                int tempcount = ((rand() % 3) + 5) / g_dDeltaTime;
+                int tempcount = ((rand() % 3) + 5) / g_dDeltaTime; //counter which acts as cooldown before NPCs change direction, seconds before changing is randomised so all NPCs change at different timings
 
-                if (NPCs[i]->get_count() < tempcount && NPCs[i]->isHostile() == false)
+                if (NPCs[i]->get_count() < tempcount)
                 {
                     NPCs[i]->set_count(NPCs[i]->get_count() + 1);
 
-                    if (NPCs[i]->get_count() > (0.7 * tempcount))
+                    if (NPCs[i]->get_count() > (0.7 * tempcount)) //stops NPC from moving just before it is about to change directon for smoother movement and change in direction
                     {
                         NPCs[i]->set_direction(0);
                     }
@@ -1615,9 +1665,9 @@ void moveall()
                 else 
                 {
 
-                    NPCs[i]->set_count(0);
+                    NPCs[i]->set_count(0); //resets NPC's count
 
-                    int aaa = (rand() % 7) + 1;
+                    int aaa = (rand() % 7) + 1; //randomises direction 
                     switch (aaa)
                     {
                     case 1: //Up
@@ -1642,6 +1692,8 @@ void moveall()
                     
                 }
 
+                //condition for NPCs to be unable to move in their chosen direction
+                //walls, other entities etc
                 if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i])
                 {
 
@@ -1652,11 +1704,11 @@ void moveall()
             }
             else if (NPCs[i]->isonCD()) //npc is hostile but on cooldown
             {
-                NPCs[i]->set_direction(0);
-                NPCs[i]->set_count(NPCs[i]->get_count() - 1);
+                NPCs[i]->set_direction(0); //NPC does not move
+                NPCs[i]->set_count(NPCs[i]->get_count() - 1); //when hostile, npc's count is used for cooldown instead of direction change since direction is dependant on player and not randomised
                 if (NPCs[i]->get_count() == 0)
                 {
-                    NPCs[i]->cooldownend();
+                    NPCs[i]->cooldownend(); //stops npcs from their cooldown
                 }
                 
             }
@@ -1665,9 +1717,10 @@ void moveall()
                 int diffinx = g_sChar.m_cLocation.X - static_cast<int>(NPCs[i]->getposx());
                 int diffiny = g_sChar.m_cLocation.Y - static_cast<int>(NPCs[i]->getposy());
 
-                if (abs(diffinx) > abs(diffiny))
+                if (abs(diffinx) > abs(diffiny)) //checks if npc is further from the player by x or y
                 {
-                    if (diffinx > 0)
+                    //distance larger by x
+                    if (diffinx > 0) //checks if player is on the left or right
                     {
                         NPCs[i]->set_direction(4);
                     }
@@ -1679,7 +1732,8 @@ void moveall()
                 }
                 else if (abs(diffinx) == abs(diffiny))
                 {
-                    int a = (rand() % 2) + 1;
+                    //distance by x == distance by y
+                    int a = (rand() % 2) + 1; //randomise left/right or up/down so that npcs have a chance to split up instead of moving tgt as one block
                     switch (a)
                     {
                     case 1:
@@ -1704,8 +1758,9 @@ void moveall()
                         }
                     }
                 }
-                else //up or down
+                else 
                 {
+                    //distance by y is larger
                     if (diffiny > 0)
                     {
                         NPCs[i]->set_direction(2);
@@ -1715,6 +1770,8 @@ void moveall()
                         NPCs[i]->set_direction(1);
                     }
                 }
+
+                //conditions where hostile npcs cannot move forward; walls/cctvs
                 if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr)
                 {
                     if (occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'W' || occupied(NPCs[i]->new_pos(g_dDeltaTime))->type() == 'R')
@@ -1726,6 +1783,7 @@ void moveall()
                             
             }
 
+            //conditions where ALL NPCs cannot move forward
             switch (g_eGameState)
             {
             case S_GAMEMODE1:
@@ -1742,7 +1800,7 @@ void moveall()
                 break;
             }
 
-            NPCs[i]->update_pos(g_dDeltaTime);
+            NPCs[i]->update_pos(g_dDeltaTime); //sets pos of and moves all NPCs
         }
       
     }
@@ -1873,7 +1931,7 @@ void mainMenuWait()
             EGameState = E_INIT;
             break;
         case 2:
-            g_eGameState = S_TUTORIAL;
+            //nothing here
             break;
         case 3:
             g_eGameState = S_TEST;
@@ -1983,6 +2041,37 @@ void winLoseMenuWait()
     default:
         break;
     }
+}
+
+void mathHorrorWait()
+{
+    processUserInput();
+    if (paused)
+    {
+        pauseMenuWait();
+        showHUD = false;
+    }
+    else
+    {
+        moveall();
+        checkAll();
+    }
+
+    //FUNCTIONS YOULL NEED BELOW AAAAAAAA >--|-O
+    QNS.SetNewQns(); //generates new question
+    QNS.get_question(); //returns the question in string
+    QNS.get_answer(); //returns answer to the question in int 
+    //returns the 3 wrong other choices
+    QNS.get_choice(0);
+    QNS.get_choice(1);
+    QNS.get_choice(2);
+
+    //once player chooses an option set EGameState back to E_PLAY and call horrorFreeze(false);
+    //EGameState = E_PLAY;
+    //horrorFreeze(false);
+
+    //dont forget to make sure u dont block the player we must make the player watch the npcs slowly approach them
+    //must make them suffer 
 }
 
 void initHUD()
@@ -2137,33 +2226,28 @@ void check_collision()
         {
             if (NPCs[i]->isHostile() && occupied(NPCs[i]->getpos())->type() == 'P' && NPCs[i]->isonCD() == false)
             {
-                //timer += g_dDeltaTime;
-                //timer >3, run else dont;
-                
-                player->loseHP(NPCs[i]->get_damage());
-                player->prevDamaged(NPCs[i]->type());
-                flashcount = 1 / g_dDeltaTime;
-                player->set_flash(true);
+                player->loseHP(NPCs[i]->get_damage()); //player takes damage
+                player->prevDamaged(NPCs[i]->type()); //records last NPC type that damaged player
+                flashcount = 1 / g_dDeltaTime; 
+                player->set_flash(true); //makes player flash in red for 1 second to show player has taken damage
+                NPCs[i]->cooldownstart(); //sets NPCs on cooldown
+                NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                 switch (g_eGameState)
                 {
                 case S_GAMEMODE1:
-                    NPCs[i]->cooldownstart();
-                    NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
-                    player->set_pos(spawnPoint.getpos(4)->get_x(), spawnPoint.getpos(4)->get_y());
-                    resetSpawns();
-                    spawnAll();
+                    player->set_pos(spawnPoint.getpos(4)->get_x(), spawnPoint.getpos(4)->get_y()); //moves player back to spawnPoint
+                    resetSpawns(); //resets objectives
+                    spawnAll(); 
                     NPC::resetnoHostile();
                     player->resetlethality();
                     break;
                 case S_GAMEMODE2:
-                    player->set_pos(safeZone.getpos(4)->get_x(), safeZone.getpos(4)->get_y());
+                    player->set_pos(safeZone.getpos(4)->get_x(), safeZone.getpos(4)->get_y()); //moves player back to safezone
                     break;
                 }
                 
-                
-                g_sChar.m_cLocation.Y = player->getposy(); 
+                g_sChar.m_cLocation.Y = player->getposy(); //moves player char to player's pos
                 g_sChar.m_cLocation.X = player->getposx(); 
-                //timer = 0;
             }
  
         }
@@ -2180,7 +2264,7 @@ void renderPoints()
     {
         if (i == 1)
         {
-  
+            //rendering of top middle of spawn/end point, with labrl 'S' or 'E'
             colour = 0x90;
             c.X = endPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -2188,7 +2272,6 @@ void renderPoints()
             {
                 g_Console.writeToBuffer(c, "E", colour);
             }
-
             colour = 0x30;
             c.X = spawnPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -2199,7 +2282,7 @@ void renderPoints()
         }
         else if (i != 4)
         {
-  
+            //rendering of the rest of outer 8 blocks of spawn and end points
             colour = 0x99;
             c.X = endPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = endPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -2207,7 +2290,6 @@ void renderPoints()
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
-
             colour = 0x33;
             c.X = spawnPoint.getpos(i)->get_x() - static_cast<int>(player->getposx()) + 40;
             c.Y = spawnPoint.getpos(i)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -2218,7 +2300,8 @@ void renderPoints()
 
         }
     }
-    
+
+    //rendering of middle of spawn and end points
     colour = 0x7F;
     c.X = endPoint.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
     c.Y = endPoint.getpos(4)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -2226,7 +2309,6 @@ void renderPoints()
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
-
     colour = 0x7F;
     c.X = spawnPoint.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
     c.Y = spawnPoint.getpos(4)->get_y() - static_cast<int>(player->getposy()) + 12;
@@ -2240,49 +2322,50 @@ void renderPoints()
 void renderBG(int col)
 {
     COORD c;
+    
     for (int x = -1; x < 81; x++)
     {
-    
         if (x == -1 || x == 80)
         {
-            for (int y = 0; y < 26; y++) //for surrounding playarea walls vertically
+            for (int y = 0; y < 26; y++) //rendering of playarea boundary walls vertically
             {
                 c.X = x - static_cast<int>(player->getposx()) + 40;
                 c.Y = y - static_cast<int>(player->getposy()) + 12;
 
                 if (checkifinscreen(c))
                 {
-                    g_Console.writeToBuffer(c, " ", 0x00);
+                    g_Console.writeToBuffer(c, " ", Wallcol);
                 }
             }
         }
         else
         {
-
-            for (int y = 1; y < 25; y++) //for playarea bg
+   
+       
+            for (int y = 1; y < 25; y++) //rendering of playarea background/map
             {
                 c.X = x - static_cast<int>(player->getposx()) + 40;
                 c.Y = y - static_cast<int>(player->getposy()) + 12;
                 if (checkifinscreen(c))
                 {
-                    g_Console.writeToBuffer(c, " ", col);
+                    g_Console.writeToBuffer(c, " ", BGcol);
                 }
             }
 
-            //for surrounding playarea walls horizontally
+            //rendering of playarea boundary walls horizontally
             c.X = x - static_cast<int>(player->getposx()) + 40;
             c.Y = 0 - static_cast<int>(player->getposy()) + 12;
 
             if (checkifinscreen(c))
             {
-                g_Console.writeToBuffer(c, " ", 0x00);
+                g_Console.writeToBuffer(c, " ", Wallcol);
             }
 
             c.Y = 25 - static_cast<int>(player->getposy()) + 12;
 
             if (checkifinscreen(c))
             {
-                g_Console.writeToBuffer(c, " ", 0x00);
+                g_Console.writeToBuffer(c, " ", Wallcol);
             }
 
         }
@@ -2295,6 +2378,7 @@ void setallrpos()
 {
     for (int i = 1; i < entityLimit; i++)
     {
+        //sets relative pos of all entities
         player->set_rpos(40, 12);
         if (entities[i] != nullptr)
         {
@@ -2317,7 +2401,6 @@ bool checkifinscreen(COORD c)
 
 bool inZone(Position* pos, Zone& zone)
 {
-    
     if ((int)pos->get_x() <= zone.getpos(5)->get_x() && (int)pos->get_y() <= zone.getpos(7)->get_y() && (int)pos->get_x() >= zone.getpos(3)->get_x() && (int)pos->get_y() >= zone.getpos(1)->get_y())
     {
         return true;
@@ -2360,22 +2443,12 @@ void deleteEntities()
                     entities[i] = nullptr;
                 }
             }
-            /*delete entities[i];
-            entities[i] = nullptr;*/
             
         }
     }
     delete entities[0];
     player = nullptr;
     entities[0] = nullptr;
-}
-
-void renderText()
-{
-    COORD textpos;
-    textpos.X = 30;
-    textpos.Y = 20;
-    g_Console.writeToBuffer(textpos, text , 0x0F);
 }
 
 void renderCCTV()
@@ -2417,34 +2490,59 @@ void spawnCCTV(int no)
 {
     for (int i = 0; i < no; i++)
     {
-        Position temp;
+        Position temppos;
         bool valid;
         do
         {
             valid = true;
-            temp.set_pos(rand() % 80, (rand() % 24) + 1);
+            temppos.set_pos(rand() % 80, (rand() % 24) + 1); //generates random position
 
-            if (inZone(&temp, spawnPoint) || inZone(&temp, endPoint))
+            //checks if position is available
+            if (inZone(&temppos, spawnPoint) || inZone(&temppos, endPoint) || inZone(&temppos, safeZone))
             {
                 valid = false;
             }
 
-        } while (occupied(&temp) != nullptr || valid == false);
+        } while (occupied(&temppos) != nullptr || valid == false); //conditions for position to be invalid
 
+        //creates cctv objects and assigns its position, rotation(CW/ACW) and initial direction(radar/lineofsight)
         for (int c = 0; c < CCTVLimit; c++)
         {
             if (CCTVs[c] == nullptr)
             {
                 CCTVs[c] = new CCTV((rand() % 4) + 1, (rand() % 2));
                 entities[c + 61] = CCTVs[c];
-                CCTVs[c]->set_pos(temp.get_x(), temp.get_y());
-                CCTVs[c]->setCD(1 / g_dDeltaTime);
-                CCTVs[c]->update_cctv();
+                CCTVs[c]->set_pos(temppos.get_x(), temppos.get_y());
+                CCTVs[c]->setCD(1 / g_dDeltaTime); //cooldown before rotation
+                CCTVs[c]->update_cctv(); //rotate and set all radar pos
                 break;
             }
         }
 
     }
+}
+
+void horrorFreeze(bool on)
+{
+    float changeinspd;
+    if (on)
+    {
+        changeinspd = 0.1;
+    }
+    else
+    {
+        changeinspd = 10;
+    }
+
+    for (int i = 0; i < NPCLimit; i++)
+    {
+        if (NPCs[i] != nullptr)
+        {
+            NPCs[i]->set_speed(NPCs[i]->get_speed() * changeinspd);
+        }
+    }
+
+    invert = on;
 }
 
 bool is_empty(std::ifstream& pFile)
@@ -2499,7 +2597,7 @@ void updateScore(std::string fileName, double score, double* sessionBest)
     }
 }
 
-void initStoredData(std::string fileName, double data)
+void initStoredData(std::string fileName, double* data)
 {
     std::ifstream file(fileName);
     if (is_empty(file))
@@ -2516,11 +2614,11 @@ void initStoredData(std::string fileName, double data)
     {
         std::string temp;
         std::getline(file, temp);
-        data = std::stod(temp);
+        *data = std::stod(temp);
         file.close();
     }
 }
-void initStoredData(std::string fileName, int data)
+void initStoredData(std::string fileName, int* data)
 {
     std::ifstream file(fileName);
     if (is_empty(file))
@@ -2537,10 +2635,11 @@ void initStoredData(std::string fileName, int data)
     {
         std::string temp;
         std::getline(file, temp);
-        data = std::stoi(temp);
+        *data = std::stoi(temp);
         file.close();
     }
 }
+
 
 //void playSound(std::string filename, std::string filetype, bool loop)
 //{

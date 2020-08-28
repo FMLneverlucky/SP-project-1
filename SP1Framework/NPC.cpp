@@ -88,31 +88,41 @@ Position* NPC::new_pos(double dtime)
 	tempp.set_x(pos.get_x());
 	tempp.set_y(pos.get_y());
 
+	float spd;
+	if (isHostile())
+	{
+		spd = speed;
+	}
+	else
+	{
+		spd = 0.15;
+	}
+
 
 	switch (direction)
 	{
 	case UP:
 		if (static_cast<int>(pos.get_y()) > 1)
 		{
-			tempp.set_y(pos.get_y() - (10 * speed * dtime));
+			tempp.set_y(pos.get_y() - (10 * spd * dtime));
 		}
 		break;
 	case DOWN:
 		if (pos.get_y() < 24)
 		{
-			tempp.set_y(pos.get_y() + (10 * speed * dtime));
+			tempp.set_y(pos.get_y() + (10 * spd * dtime));
 		}
 		break;
 	case LEFT:
 		if (pos.get_x() > 0)
 		{
-			tempp.set_x(pos.get_x() - (20 * speed * dtime));
+			tempp.set_x(pos.get_x() - (20 * spd * dtime));
 		}
 		break;
 	case RIGHT:
 		if (pos.get_x() < 79)
 		{
-			tempp.set_x(pos.get_x() + (20 * speed * dtime));
+			tempp.set_x(pos.get_x() + (20 * spd * dtime));
 		}
 		break;
 	case NOT:

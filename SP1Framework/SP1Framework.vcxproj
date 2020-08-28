@@ -94,7 +94,6 @@
     <ClCompile Include="PowerUp.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Question.cpp" />
-    <ClCompile Include="UI.cpp" />
     <ClCompile Include="Wall.cpp" />
     <ClCompile Include="Zone.cpp" />
   </ItemGroup>
@@ -113,7 +112,6 @@
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="Question.h" />
     <ClInclude Include="Wall.h" />
-    <ClInclude Include="UI.h" />
     <ClInclude Include="Zone.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

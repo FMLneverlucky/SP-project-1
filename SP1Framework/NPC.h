@@ -6,7 +6,7 @@ class NPC :
 private:
     bool angry; //whether NPC is hostile or not
     int damage; //damage of NPC
-    float speed; //speed of NPC relative to player
+    float speed; //speed of NPC relative to player when turned hostile
     float lifespan; //lifespan of NPCs in Endless mode
     static int noHostile; //total number of NPCs turned Hostile
     static int total; //total number of NPCs

@@ -132,8 +132,6 @@ Position* NPC::new_pos(double dtime)
 	return &tempp;
 }
 
-
-
 void NPC::update_pos(double dtime)
 {
 	pos.set_x(new_pos(dtime)->get_x());

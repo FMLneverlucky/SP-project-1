@@ -854,6 +854,7 @@ void enterEndless()
 
     if (player->get_lethalstatus() == 1) // if powerup picked up before
         player->update_ld(); //- 1 each time run tis code(runs by frame)
+
     //chance of Math Horror Jumpscare
     if (horrorChanceCount <= 0)
     {
@@ -1069,7 +1070,6 @@ void checkAll()
                 }
             }
         }
-
         
     }
 

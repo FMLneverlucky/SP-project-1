@@ -847,7 +847,7 @@ void enterEndless()
         tempcounter = 0;
     }
 
-    //chance of Math Horror Jumpscare
+ /*   //chance of Math Horror Jumpscare
     if (horrorChanceCount <= 0)
     {
         EGameState = E_HORROR;
@@ -858,8 +858,13 @@ void enterEndless()
     {
         horrorChanceCount--;
     }
-
+*/
+    spawnPowerUp();
+    deletePowerUp();
     updateGame();
+
+    if (player->get_lethalstatus() == 1) // if powerup picked up before
+        player->update_ld(); //- 1 each time run tis code(runs by frame)
 
     //end game condition
     if (player->get_HP() <= 0)
@@ -1407,7 +1412,7 @@ void spawnWall(int no)                                                          
                     isSpaceinZone = false;                                                                                             //used as a second conditon in while loop to ensure no space chosen intersects with the spawn zone
                     isSpaceOccupied = false;
 
-                    int Pivotx = (rand() % 78) + 1;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
+                    int Pivotx = (rand() % 77) + 2;                                                                                     //set x coordinate of variable, wallPos[0], as a number from 0 to 80
                     int Pivoty = (rand() % 20) + 3;                                                                                     //set y coordinate of variable, wallPos[0], as a number from 0 to 24
                     Walls[w]->setPos(Pivotx, Pivoty);
                     
@@ -1475,7 +1480,7 @@ void spawnPowerUp()
 {
     if (powerup == nullptr)
     {
-        int r = rand() % 1000;
+        int r = rand() % 1350;
 
 
         if (r == 45)//chance of spawning completely random

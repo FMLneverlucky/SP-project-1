@@ -875,7 +875,7 @@ void enterEndless()
     if (player->get_lethalstatus() == 1) // if powerup picked up before
         player->update_ld(); //- 1 each time run tis code(runs by frame)
     //chance of Math Horror Jumpscare
-    if (horrorChanceCount <= 0)
+    if (horrorChanceCount <= 0 && !horror)
     {
         horrorFreeze(true);
         initMathHorror();
@@ -888,21 +888,6 @@ void enterEndless()
 
     if (horror)
     {
-        if (showCooldown <= 0 && hideCooldown <= 0)
-            hideCooldown = 1;
-        if (hideCooldown > 0)
-        {
-            hideCooldown -= g_dDeltaTime;
-            if (hideCooldown <= 0)
-                showCooldown = rand() % 2 + 3;
-        }
-        else
-            showCooldown -= g_dDeltaTime;
-        if (paused)
-        {
-            hideCooldown = 1;
-            showCooldown = 0;
-        }
 
     }
     else
@@ -950,7 +935,6 @@ void enterEndless()
         totalhostile = NPC::getnoHostile();
         resetSpawns();
         EGameState = E_LOSE;
-        
     }
 }
 
@@ -1764,8 +1748,6 @@ void moveall()
 
                     NPCs[i]->set_direction(0);
                 }
-
-                
             }
             else if (NPCs[i]->isonCD()) //npc is hostile but on cooldown
             {
@@ -2132,38 +2114,38 @@ void initMathHorror()
 
 void renderHorror()
 {
-    if (showCooldown > 0)
-    {
-        //render stuff
-        g_Console.clearBuffer(0x00);
-        int lines = 0;
-        lines = (question.length() + 70) / 70;
-        std::size_t startPos = 0;
-        std::size_t endPos;
+    //render stuff
+    Object boarderLeft(consoleSize.X / 2 - 4, consoleSize.Y, Position(consoleSize.X / 4 - 4, consoleSize.Y / 2));
+    Object boarderRight(consoleSize.X / 2 - 4, consoleSize.Y, Position(consoleSize.X * 3 / 4 + 4, consoleSize.Y / 2));
+    Object boarderTop(consoleSize.X, consoleSize.Y / 2 - 2, Position(consoleSize.X / 2, consoleSize.Y / 4 - 2));
+    Object boarderBottom(consoleSize.X, consoleSize.Y / 2 - 2, Position(consoleSize.X / 2, consoleSize.Y * 3 / 4 + 2));
+    renderBox(&boarderLeft, 0x00);
+    renderBox(&boarderRight, 0x00);
+    renderBox(&boarderTop, 0x00);
+    renderBox(&boarderBottom, 0x00);
 
-        for (int i = 0; i < lines; i++)
-        {
-            endPos = startPos + 60;
-            std::string temp;
-            if (endPos < question.length())
-            {
-                temp = question.substr(endPos);
-                endPos += temp.find(" ");
-                temp = question.substr(startPos, endPos - startPos);
-                startPos = endPos;
-            }
-            else
-                temp = question.substr(startPos);
-            Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
-            renderBox(&qns, 0x0F, temp);
-        }
-    }
-    else
+    int lines = 0;
+    lines = (question.length() + 70) / 70;
+    std::size_t startPos = 0;
+    std::size_t endPos;
+
+    for (int i = 0; i < lines; i++)
     {
-        //dont render stuff
+        endPos = startPos + 60;
+        std::string temp;
+        if (endPos < question.length())
+        {
+            temp = question.substr(endPos);
+            endPos += temp.find(" ");
+            temp = question.substr(startPos, endPos - startPos);
+            startPos = endPos;
+        }
+        else
+            temp = question.substr(startPos);
+        Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
+        renderBox(&qns, 0x0F, temp);
     }
 }
-
 void initHUD()
 {
     currentHP = player->get_maxHP();

@@ -530,7 +530,6 @@ void update(double dt)
     }
 }
 
-
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_dElapsedTime > splashScreenTime) // wait for set time to switch to game mode, else do nothing
@@ -569,6 +568,7 @@ void testStates()
         break;
     }
 }
+
 //Initialise variables and objects for test area here
 void initTest()
 {
@@ -615,6 +615,7 @@ void InitNormal()
     initHUD();
     
     NGameState = N_LEVEL;
+    engine->play2D("media/NModeBGM.mp3", true);
 }
  
 void set_spawn() //sets variables and npc stats based on level and spawns entities accordingly
@@ -862,25 +863,25 @@ void enterEndless()
     }
     else
     {
-        horrorChanceCount--;
+        horrorChanceCount --;
     }
 
     if (horror)
     {
         if (showCooldown <= 0 && hideCooldown <= 0)
-            showCooldown = 3;
-        if (showCooldown > 0)
+            hideCooldown = 1;
+        if (hideCooldown > 0)
         {
-            showCooldown -= g_dDeltaTime;
-            if (showCooldown <= 0)
-                hideCooldown = rand() % 2 + 1;
+            hideCooldown -= g_dDeltaTime;
+            if (hideCooldown <= 0)
+                showCooldown = rand() % 2 + 3;
         }
         else
-            hideCooldown -= g_dDeltaTime;
+            showCooldown -= g_dDeltaTime;
         if (paused)
         {
-            showCooldown = 0;
             hideCooldown = 1;
+            showCooldown = 0;
         }
 
     }
@@ -913,6 +914,7 @@ void enterEndless()
             }
         }
     }
+
     //end game condition
     if (player->get_HP() <= 0)
     {
@@ -967,7 +969,7 @@ void rendersafezone()
 
 void moveCharacter()
 {
-    if(!horror)
+    if (!horror)
     {
         // Updating the location of the character based on the key being held
         if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
@@ -1025,6 +1027,7 @@ void checkAll()
                 projectile[p]->direction(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y);
                 projectile[p]->set_newpos();
                 projectile[p]->set_pcooldown(100);
+                engine->play2D("media/CoughSFX.mp3", false);
 
                 //checking if player is within cctv radar when coughing - lose game condition
                 for (int c = 0; c < CCTVLimit; c++)
@@ -2110,14 +2113,25 @@ void renderHorror()
         g_Console.clearBuffer(0x00);
         int lines = 0;
         lines = (question.length() + 70) / 70;
+        std::size_t startPos = 0;
+        std::size_t endPos;
+
         for (int i = 0; i < lines; i++)
         {
+            endPos = startPos + 60;
+            std::string temp;
+            if (endPos < question.length())
+            {
+                temp = question.substr(endPos);
+                endPos += temp.find(" ");
+                temp = question.substr(startPos, endPos - startPos);
+                startPos = endPos;
+            }
+            else
+                temp = question.substr(startPos);
             Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
-            std::string temp = question.substr((question.length() * i) / lines, question.length() / lines);
-            renderBox(&qns, 0xF0, temp);
+            renderBox(&qns, 0x0F, temp);
         }
-
-
     }
     else
     {
@@ -2242,7 +2256,6 @@ int checkButtonClicks(Object** buttons, int arrayLength)
     return arrayLength;
 }
 
-
 void limitprojectile()
 {
     for (int p = 0; p < particle_limit; p++)
@@ -2304,7 +2317,6 @@ void check_collision()
         }
     }
 }
-
 
 void renderPoints()
 {
@@ -2625,6 +2637,7 @@ void updateScore(std::string fileName, int score, int* sessionBest)
         *sessionBest = score;
     }
 }
+
 void updateScore(std::string fileName, double score, double* sessionBest)
 {
     std::string prevScore;
@@ -2670,6 +2683,7 @@ void initStoredData(std::string fileName, double* data)
         file.close();
     }
 }
+
 void initStoredData(std::string fileName, int* data)
 {
     std::ifstream file(fileName);
@@ -2691,7 +2705,6 @@ void initStoredData(std::string fileName, int* data)
         file.close();
     }
 }
-
 
 //void playSound(std::string filename, std::string filetype, bool loop)
 //{

@@ -18,9 +18,9 @@ private:
 	QNSTYPE type;
 	int answer;
 	int choices[3];
-	int var1;
-	int var2; //the bigger no.
-	int var3;
+	unsigned int var1;
+	unsigned int var2; //the bigger no.
+	unsigned int var3;
 	std::string name1;
 	std::string name2;
 

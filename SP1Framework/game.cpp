@@ -539,7 +539,6 @@ void update(double dt)
     }
 }
 
-
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_dElapsedTime > splashScreenTime) // wait for set time to switch to game mode, else do nothing
@@ -580,6 +579,7 @@ void testStates()
         break;
     }
 }
+
 //Initialise variables and objects for test area here
 void initTest()
 {
@@ -932,6 +932,7 @@ void enterEndless()
             }
         }
     }
+
     //end game condition
     if (player->get_HP() <= 0)
     {
@@ -986,7 +987,7 @@ void rendersafezone()
 
 void moveCharacter()
 {
-    if(!horror)
+    if (!horror)
     {
         // Updating the location of the character based on the key being held
         if (getButtonHold() == K_W && g_sChar.m_cLocation.Y > 1)
@@ -2277,7 +2278,6 @@ int checkButtonClicks(Object** buttons, int arrayLength)
     return arrayLength;
 }
 
-
 void limitprojectile()
 {
     for (int p = 0; p < particle_limit; p++)
@@ -2339,7 +2339,6 @@ void check_collision()
         }
     }
 }
-
 
 void renderPoints()
 {
@@ -2660,6 +2659,7 @@ void updateScore(std::string fileName, int score, int* sessionBest)
         *sessionBest = score;
     }
 }
+
 void updateScore(std::string fileName, double score, double* sessionBest)
 {
     std::string prevScore;
@@ -2705,6 +2705,7 @@ void initStoredData(std::string fileName, double* data)
         file.close();
     }
 }
+
 void initStoredData(std::string fileName, int* data)
 {
     std::ifstream file(fileName);
@@ -2726,7 +2727,6 @@ void initStoredData(std::string fileName, int* data)
         file.close();
     }
 }
-
 
 //void playSound(std::string filename, std::string filetype, bool loop)
 //{

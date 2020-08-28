@@ -145,7 +145,7 @@ SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 bool isMousePressed = false;
-bool heldKey[6] = { false, false, false, false, false, false };
+bool heldKey[7] = { false, false, false, false, false, false , false};
 int playerVelocityX = 0;
 int playerVelocityY = 0;
 bool liftedW = true;

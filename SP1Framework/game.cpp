@@ -2190,7 +2190,9 @@ void renderHorror()
 
 void waitMathHorror()
 {
-    updateGame();
+    //updateGame();
+    processUserInput();
+    check_collision();
     //end game condition
     if (player->get_HP() <= 0)
     {
@@ -2595,7 +2597,13 @@ void renderCCTV()
                     g_Console.writeToBuffer(radarpos, (char)177, colour);
                 }
             }
+        }
+    }
 
+    for (int c = 0; c < CCTVLimit; c++)
+    {
+        if (CCTVs[c] != nullptr)
+        {
             //rendering of CCTV
             colour = 0x7A;
             cctvpos.X = CCTVs[c]->getrposx();

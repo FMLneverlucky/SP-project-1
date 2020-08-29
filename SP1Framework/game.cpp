@@ -835,13 +835,15 @@ void playEndless()
 void InitEndless()
 {
     //resetting variables etc to prepare for Endless
-    player->resetKills();
+    
     lose = false;
-    totalhostile = 0;
+    player->resetKills();
     player->resetHP();
+    totalhostile = 0;
     NPC::resetnoHostile();
     tempcounter = 0;
     e_dElapsedTime = 0;
+    resetSpawns();
 
     player->set_pos(40, 12);
     g_sChar.m_cLocation.X = 40;

@@ -78,7 +78,8 @@ enum EndlessMode
 {
     E_INIT,
     E_PLAY,
-    E_LOSE
+    E_LOSE,
+    E_HORROR
 };
 
 enum Test

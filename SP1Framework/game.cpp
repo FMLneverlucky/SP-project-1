@@ -830,6 +830,8 @@ void playEndless()
         winLoseMenuWait();
         engine->stopAllSounds();
         break;
+    case E_HORROR:
+        waitMathHorror();
     }
 }
 
@@ -883,46 +885,40 @@ void enterEndless()
         horrorFreeze(true);
         initMathHorror();
         horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
+        EGameState = E_HORROR;
         //Audio for when jumpscare
     }
     else
     {
-        horrorChanceCount --;
+        horrorChanceCount--;
+    }
+    //spawns NPCs every 3 seconds if there are < 20 already on the Map
+    if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
+    {
+        spawnNPC(false, 1, 0.6, 1);
+        tempcounter = 0;
     }
 
-    if (horror)
+    //despawning Hostile NPCs once their lifespan runs out (lifespan is set once they turn hostile)
+    for (int i = 0; i < NPCLimit; i++)
     {
-
-    }
-    else
-    {
-        //spawns NPCs every 3 seconds if there are < 20 already on the Map
-        if (tempcounter > (3 / g_dDeltaTime) && NPC::gettotal() != 20)
+        if (NPCs[i] != nullptr)
         {
-            spawnNPC(false, 1, 0.6, 1);
-            tempcounter = 0;
-        }
-
-        //despawning Hostile NPCs once their lifespan runs out (lifespan is set once they turn hostile)
-        for (int i = 0; i < NPCLimit; i++)
-        {
-            if (NPCs[i] != nullptr)
+            if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
             {
-                if (NPCs[i]->isHostile() && NPCs[i]->type() == 'C')
+                if (NPCs[i]->get_lifespan() <= 0)
                 {
-                    if (NPCs[i]->get_lifespan() <= 0)
-                    {
-                        delete NPCs[i];
-                        NPCs[i] = nullptr;
-                    }
-                    else
-                    {
-                        NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
-                    }
+                    delete NPCs[i];
+                    NPCs[i] = nullptr;
+                }
+                else
+                {
+                    NPCs[i]->set_lifespan(NPCs[i]->get_lifespan() - 1);
                 }
             }
         }
     }
+
 
     //end game condition
     if (player->get_HP() <= 0)
@@ -1250,7 +1246,7 @@ void renderGame()
     setallrpos();       //sets relative position for all entities for camera lock
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
-    if (horror)
+    if (EGameState == E_HORROR && !paused)
     {
         renderHorror();
     }
@@ -2187,23 +2183,26 @@ void renderHorror()
 
 void waitMathHorror()
 {
+    updateGame();
+    //end game condition
+    if (player->get_HP() <= 0)
+    {
+        lose = true;
+        EGameState = E_PLAY;
+    }
+    
     switch (checkButtonClicks(MAButtons, MAButtonCount))
     {
     case 0:
-        g_bQuitGame = true;
+        horrorFreeze(false);
+        EGameState = E_PLAY;
         break;
     case 1:
-        g_eGameState = S_MAINMENU;
-        NGameState = N_INIT;
-        EGameState = E_INIT;
-        showHUD = true;
-        break;
     case 2:
-        NGameState = N_INIT;
-        EGameState = E_INIT;
-        showHUD = true;
-        break;
     case 3:
+        horrorFreeze(false);
+        EGameState = E_PLAY;
+        player->loseHP(1);
     default:
         break;
     }

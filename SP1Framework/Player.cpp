@@ -1,5 +1,5 @@
 #include "Player.h"
-Player::Player() : maxHP(5), flash(false), lethal(false), lethality_duration(0), kills(0)
+Player::Player() : maxHP(5), flash(false), lethal(false), lethality_duration(0), coughed(0)
 {
 	HP = maxHP;
 }
@@ -122,17 +122,17 @@ char Player::getPrevDamaged()
 	return prevDamage;
 }
 
-void Player::addKills(int no)
+void Player::addCoughed(int no)
 {
-	kills += no;
+	coughed += no;
 }
 
-int Player::getKills()
+int Player::getCoughed()
 {
-	return kills;
+	return coughed;
 }
 
-void Player::resetKills()
+void Player::resetCoughed()
 {
-	kills = 0;
+	coughed = 0;
 }

@@ -56,7 +56,7 @@ void Question::SetNewQns()
 		{
 			var3 = (rand() % 10) + 2;
 			var1 = (rand() % 50) + 1;
-			var2 = ((rand() % 300) + 1) * var3 - var1;
+			var2 = ((rand() % 100) + 50) * var3 - var1;
 		} while (var2 < 0);
 		break;
 	}

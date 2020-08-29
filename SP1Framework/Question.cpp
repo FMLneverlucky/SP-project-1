@@ -143,7 +143,7 @@ void Question::setQuestion()
 			question = std::to_string(var1) + " people died from the corona virus in Singapore. " + std::to_string(var2) + " people died from the corona virus in Malaysia. How many people did the corona virus take the lives of in both countries?";
 			break;
 		case 3:
-			question = name1 + " has " + std::to_string(var2) + " rolls of toilet paper. If " + name2 + " gives " + name1 + std::to_string(var1) + " rolls of toilet paper, How many rolls of toilet paper will " + name1 + " have in total?";
+			question = name1 + " has " + std::to_string(var2) + " rolls of toilet paper. If " + name2 + " gives " + name1 + " " + std::to_string(var1) + " rolls of toilet paper, How many rolls of toilet paper will " + name1 + " have in total?";
 			break;
 		}
 		break;
@@ -235,7 +235,7 @@ void Question::setAnswer()
 		answer = var2 / var1;
 		break;
 	case AVERAGE:
-		answer + (var1 + var2) / var3;
+		answer = (var1 + var2) / var3;
 		break;
 	}
 }

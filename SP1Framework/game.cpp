@@ -88,10 +88,10 @@ bool showHUD = true;
 Question QNS;
 Object* MAButtons[4];
 const int MAButtonCount = 4;
-Object correctAnswer(9, 3);
-Object wrongAnswer1(9, 3);
-Object wrongAnswer2(9, 3);
-Object wrongAnswer3(9, 3);
+Object correctAnswer(6, 3);
+Object wrongAnswer1(6, 3);
+Object wrongAnswer2(6, 3);
+Object wrongAnswer3(6, 3);
 double showCooldown = 0;
 double hideCooldown = 0;
 std::string question;
@@ -121,13 +121,13 @@ bool horror = false;
 
 //stored data
 int highestLVL = 0;
-double highestKPM = 0;
-double bestTime = 0;
-int highestKill = 0;
+//double highestKPM = 0;
+//double bestTime = 0;
+int highestCoughed = 0;
 std::string highestLevelFile = "highestLevel.txt";
-std::string highestKPMFile = "highestKPM.txt";
-std::string bestTimeFile = "bestTime.txt";
-std::string highestKillFile = "highestKill.txt";
+//std::string highestKPMFile = "highestKPM.txt";
+//std::string bestTimeFile = "bestTime.txt";
+std::string highestCoughedFile = "highestCoughed.txt";
 
 int totalhostile = 0;
 
@@ -249,9 +249,9 @@ void init( void )
         file.close();
     }*/
     initStoredData(highestLevelFile, &highestLVL);
-    initStoredData(highestKillFile, &highestKill);
-    initStoredData(bestTimeFile, &bestTime);
-    initStoredData(highestKPMFile, &highestKPM);
+    initStoredData(highestCoughedFile, &highestCoughed);
+    /*initStoredData(bestTimeFile, &bestTime);
+    initStoredData(highestKPMFile, &highestKPM);*/
 }
 
 //--------------------------------------------------------------
@@ -837,7 +837,7 @@ void InitEndless()
     //resetting variables etc to prepare for Endless
     
     lose = false;
-    player->resetKills();
+    player->resetCoughed();
     player->resetHP();
     totalhostile = 0;
     NPC::resetnoHostile();
@@ -871,7 +871,7 @@ void enterEndless()
 {
     e_dElapsedTime += g_dDeltaTime;
     tempcounter++;
-    kpm = player->getKills() / (e_dElapsedTime / 60);
+    kpm = player->getCoughed() / (e_dElapsedTime / 60);
     spawnPowerUp();
     deletePowerUp();
     updateGame();
@@ -931,9 +931,9 @@ void enterEndless()
     //tabulating and resetting of variables once player loses
     if (lose)
     {
-        updateScore(bestTimeFile, e_dElapsedTime, &bestTime);
-        updateScore(highestKillFile, player->getKills(), &highestKill);
-        updateScore(highestKPMFile, highestKPM, &highestKPM);
+        //updateScore(bestTimeFile, e_dElapsedTime, &bestTime);
+        updateScore(highestCoughedFile, player->getCoughed(), &highestCoughed);
+        //updateScore(highestKPMFile, highestKPM, &highestKPM);
         totalhostile = NPC::getnoHostile();
         resetSpawns();
         EGameState = E_LOSE;
@@ -970,7 +970,6 @@ void rendersafezone()
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
-
 }
 
 void moveCharacter()
@@ -1126,6 +1125,7 @@ void checkAll()
                     {
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && NPCs[i]->isHostile() == false)
                         {
+                            player->addCoughed(1);
                             NPCs[i]->anger();
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
@@ -1135,7 +1135,6 @@ void checkAll()
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
                         {
-                            player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
                             
@@ -2088,11 +2087,29 @@ void renderWinLoseMenu(bool win)
         {
             message = &loseMessage;
         }
-    }    
+    }
     renderBox(&title, 0x0F, *message);
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
+    
+    std::string score = "score: ";
+    std::string prevScore = "Previous Best: ";
+    if (g_eGameState == S_GAMEMODE1)
+    {
+        score = "Died at: ";
+        score.append(std::to_string(level));
+        prevScore.append(std::to_string(highestLVL));
+    }
+    else if (g_eGameState == S_GAMEMODE2)
+    {
+        score.append(std::to_string(player->getCoughed()));
+        prevScore.append(std::to_string(highestCoughed));
+    }
+    Object Score(20, 1, Position(consoleSize.X / 2, title.position()->get_y() - 2));
+    Object PrevScore(20, 1, Position(consoleSize.X / 2, Score.position()->get_y() - 1));
+    renderBox(&Score, 0x0F, score);
+    renderBox(&PrevScore, 0x0F, prevScore);
 }
 
 void winLoseMenuWait()
@@ -2203,10 +2220,10 @@ void renderHorror()
     MAButtons[2] = &wrongAnswer2;
     MAButtons[3] = &wrongAnswer3;
 
-    renderBox(&correctAnswer, 0x0F, std::to_string(QNS.get_answer()));
-    renderBox(&wrongAnswer1, 0x0F, std::to_string(QNS.get_choice(0)));
-    renderBox(&wrongAnswer2, 0x0F, std::to_string(QNS.get_choice(1)));
-    renderBox(&wrongAnswer3, 0x0F, std::to_string(QNS.get_choice(2)));
+    renderBox(&correctAnswer, 0xF0, std::to_string(QNS.get_answer()));
+    renderBox(&wrongAnswer1, 0xF0, std::to_string(QNS.get_choice(0)));
+    renderBox(&wrongAnswer2, 0xF0, std::to_string(QNS.get_choice(1)));
+    renderBox(&wrongAnswer3, 0xF0, std::to_string(QNS.get_choice(2)));
 }
 
 void waitMathHorror()
@@ -2295,14 +2312,14 @@ void renderHUD()
         }
         if (g_eGameState == S_GAMEMODE2)
         {
-            objective = "Kills: ";
-            objective.append(std::to_string(player->getKills()));
-            objective.append(" Time: ");
-            objective.append(std::to_string(e_dElapsedTime));
-            scoreboard = "KPM: ";
-            scoreboard.append(std::to_string(kpm));
-            highscore = "Best KPM: ";
-            highscore.append(std::to_string(highestKPM));
+            objective = "Cough at people";
+            //objective.append(std::to_string(player->getCoughed()));
+            //objective.append(" Time: ");
+            //objective.append(std::to_string(e_dElapsedTime));
+            scoreboard = "Score: ";
+            scoreboard.append(std::to_string(player->getCoughed()));
+            highscore = "Best Score: ";
+            highscore.append(std::to_string(highestCoughed));
         }
         renderBox(&HealthText, 0x04, "Health");
         renderBox(&HealthBorder, 0x00);
@@ -2721,7 +2738,7 @@ void updateScore(std::string fileName, int score, int* sessionBest)
     {
         std::getline(file, prevScore);//get the previous highscore and store in this temp string
         file.close();
-        if (level > std::stoi(prevScore))
+        if (score > std::stoi(prevScore))
         {
             std::ofstream file(fileName);
             if (file.is_open())
@@ -2745,7 +2762,7 @@ void updateScore(std::string fileName, double score, double* sessionBest)
     {
         std::getline(file, prevScore);//get the previous highscore and store in this temp string
         file.close();
-        if (level > std::stod(prevScore))
+        if (score > std::stod(prevScore))
         {
             std::ofstream file(fileName);
             if (file.is_open())

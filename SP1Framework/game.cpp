@@ -805,6 +805,7 @@ void playEndless()
         winLoseMenuWait();
         break;
     case E_HORROR:
+        processUserInput();
         if (paused) pauseMenuWait();
         else waitMathHorror();     
     }
@@ -2161,26 +2162,33 @@ void renderHorror()
     renderBox(&boarderTop, 0x00);
     renderBox(&boarderBottom, 0x00);
 
-    int lines = 0;
-    lines = (question.length() + 70) / 70;
+    //lines = (question.length() + 70) / 70;
     std::size_t startPos = 0;
     std::size_t endPos;
 
-    for (int i = 0; i < lines; i++)
+    //for (int i = 0; i < lines; i++)
+    int lines = 0;
+    while (true)
     {
-        endPos = startPos + 70;
+        bool end = false;
+        endPos = startPos + 60;
         std::string temp;
         if (endPos < question.length())
         {
             temp = question.substr(endPos);
             endPos += temp.find(" ");
-            temp = question.substr(startPos, endPos - startPos);
+            temp = question.substr(startPos, endPos - startPos + 1);
             startPos = endPos;
         }
         else
+        {
             temp = question.substr(startPos);
-        Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + i));
+            end = true;
+        }
+        Object qns(78, 1, Position(consoleSize.X / 2, (consoleSize.Y / 5) + lines));
         renderBox(&qns, 0x0F, temp);
+        lines++;
+        if (end) break;
     }
 
     MAButtons[0] = &correctAnswer;
@@ -2197,7 +2205,7 @@ void renderHorror()
 void waitMathHorror()
 {
     //updateGame();
-    processUserInput();
+    //processUserInput();
     check_collision();
     //end game condition
     if (player->get_HP() <= 0)

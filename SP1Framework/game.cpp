@@ -32,9 +32,9 @@ std::string gameMode3 = "Empty Button";
 std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
-std::string deathByCCTV = "How'd they catch you in 4k?!";
-std::string deathByCivilian = "You got beaten up lol";
-std::string deathByPolice = "Get fined scrub";
+std::string deathByCCTV = "You were caught coughing with your mask off by the CCTV. You were sent to the detention centre for 12 years. Due to this you did not attend school and have no friends. No one wants to be friends with you either. You lived a miserable life.";
+std::string deathByCivilian = "The people were very angry at your actions. You were beaten up so badly that it left a permanent scar on your face and gave you a weak lung condition and you lived a miserable life.";
+std::string deathByPolice = "The Police caught you coughing with your mask off. Because of you your parents had to pay the fine of $1000000000 and your family went broke. You lived a miserable life.";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Restart";
 std::string mainMenuMessage = "Main Menu";
@@ -726,6 +726,7 @@ void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
         {
             delete NPCs[i];
             NPCs[i] = nullptr;
+            entities[i + 1] = nullptr;
         }
     }
 
@@ -735,6 +736,7 @@ void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
         {
             delete Walls[w];
             Walls[w] = nullptr;
+            entities[w + 21] = nullptr;
         }
     }
 
@@ -753,6 +755,7 @@ void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
         {
             delete CCTVs[c];
             CCTVs[c] = nullptr;
+            entities[c + 61] = nullptr;
         }
     }
 

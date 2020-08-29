@@ -805,7 +805,8 @@ void playEndless()
         winLoseMenuWait();
         break;
     case E_HORROR:
-        waitMathHorror();
+        if (paused) pauseMenuWait();
+        else waitMathHorror();     
     }
 }
 
@@ -2167,7 +2168,7 @@ void renderHorror()
 
     for (int i = 0; i < lines; i++)
     {
-        endPos = startPos + 60;
+        endPos = startPos + 70;
         std::string temp;
         if (endPos < question.length())
         {

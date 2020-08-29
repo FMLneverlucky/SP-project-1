@@ -2134,6 +2134,10 @@ void initMathHorror()
     QNS.get_choice(1);
     QNS.get_choice(2);
 
+    //Audio
+    engine->setAllSoundsPaused();
+    engine->play2D("media/JumpscareSFX.mp3", true);
+
     //once player chooses an option set EGameState back to E_PLAY and call horrorFreeze(false);
     //EGameState = E_PLAY;
     //horrorFreeze(false);

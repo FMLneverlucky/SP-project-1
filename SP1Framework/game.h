@@ -60,12 +60,6 @@ struct SGameChar
     bool  m_bActive;
 };
 
-//enum MainMenu
-//{
-//    M_MAIN,
-//    M_GAMEMODES
-//};
-
 enum NormalMode
 {
     N_INIT,
@@ -78,7 +72,8 @@ enum EndlessMode
 {
     E_INIT,
     E_PLAY,
-    E_LOSE
+    E_LOSE,
+    E_HORROR
 };
 
 enum Test
@@ -180,6 +175,7 @@ void renderWinLoseMenu(bool);
 void winLoseMenuWait();
 void renderHorror();
 void initMathHorror();
+void waitMathHorror();
 void initHUD();//init ONCE
 void renderHUD();// renders HUD
 void renderBox(Object*, int, std::string); // draw box. can add text if you want
@@ -191,7 +187,6 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent);      // define this fun
 void buttonHoldPress(EKEYS key); // only WASD
 void buttonHoldRelease(EKEYS key); // only WASD
 int getButtonHold(); // the last button held only for WASD
-//int playerDirection();
 
 void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 

@@ -20,7 +20,7 @@ Tips to playing the game
 - Avoid coughing under CCTV range unless necessary. Being caught coughing in range will lead to a instant game over.
 - Watch your surroundings for nearby police officers. They are fast and will start chasing you immediately after you cough. Being caught by police will also lead to a game over.
 - Be prepared for the unexpected in Endless Mode.
-- Have fun playing the game.
+- Have fun
 
 SP1 Framework
 ============

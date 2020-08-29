@@ -210,6 +210,7 @@ Zone safeZone;
 
 //Audio
 ISoundEngine* engine = createIrrKlangDevice();
+ISoundEngine* spoopy = createIrrKlangDevice();
 float vol = 0.5; //for granula adjustments
 
 // Console object
@@ -2109,6 +2110,10 @@ void initMathHorror()
     QNS.get_choice(1);
     QNS.get_choice(2);
 
+    //Audio?
+    engine->setAllSoundsPaused();
+    spoopy->play2D("media/JumpscareSFX.mp3", true);
+
     bool takenNo[4] = { false, false, false, false };
     Object* tempButtons[4] = { &correctAnswer, &wrongAnswer1, &wrongAnswer2 , &wrongAnswer3 };
     for (int i = 0; i < MAButtonCount; i++)
@@ -2190,7 +2195,9 @@ void renderHorror()
 
 void waitMathHorror()
 {
-    updateGame();
+    //updateGame();
+    processUserInput();
+    check_collision();
     //end game condition
     if (player->get_HP() <= 0)
     {
@@ -2204,6 +2211,9 @@ void waitMathHorror()
     case 0:
         horrorFreeze(false);
         EGameState = E_PLAY;
+
+        //Audio
+        spoopy->stopAllSounds();
         break;
     case 1:
     case 2:
@@ -2214,6 +2224,9 @@ void waitMathHorror()
         flashcount = 1 / g_dDeltaTime;
         player->set_flash(true);
         player->prevDamaged('M');
+
+        //Audio
+        spoopy->stopAllSounds();
     default:
         break;
     }
@@ -2666,6 +2679,9 @@ void horrorFreeze(bool on)
     }
 
     invert = on;
+
+    //Audio
+    engine->setAllSoundsPaused(on);
 }
 
 bool is_empty(std::ifstream& pFile)
@@ -2764,12 +2780,3 @@ void initStoredData(std::string fileName, int* data)
         file.close();
     }
 }
-
-//void playSound(std::string filename, std::string filetype, bool loop)
-//{
-//    
-//    
-//    std::string songFile = "media/" + filename + '.' + filetype;
-//
-//    engine->play2D("songFile", loop);
-//}

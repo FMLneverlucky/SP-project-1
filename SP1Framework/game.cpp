@@ -1962,7 +1962,6 @@ void mainMenuWait()
             break;
         }
     }
-    
 }
 
 void renderPauseMenu()
@@ -2207,6 +2206,7 @@ void waitMathHorror()
     //updateGame();
     //processUserInput();
     check_collision();
+    moveall();
     //end game condition
     if (player->get_HP() <= 0)
     {

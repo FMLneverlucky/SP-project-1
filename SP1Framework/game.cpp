@@ -970,7 +970,6 @@ void rendersafezone()
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
-
 }
 
 void moveCharacter()
@@ -2088,11 +2087,29 @@ void renderWinLoseMenu(bool win)
         {
             message = &loseMessage;
         }
-    }    
+    }
     renderBox(&title, 0x0F, *message);
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
+    
+    std::string score = "score: ";
+    std::string prevScore = "Previous Best: ";
+    if (g_eGameState == S_GAMEMODE1)
+    {
+        score = "Died at: ";
+        score.append(std::to_string(level));
+        prevScore.append(std::to_string(highestLVL));
+    }
+    else if (g_eGameState == S_GAMEMODE2)
+    {
+        score.append(std::to_string(player->getCoughed()));
+        prevScore.append(std::to_string(highestCoughed));
+    }
+    Object Score(20, 1, Position(consoleSize.X / 2, title.position()->get_y() - 2));
+    Object PrevScore(20, 1, Position(consoleSize.X / 2, Score.position()->get_y() - 1));
+    renderBox(&Score, 0x0F, score);
+    renderBox(&PrevScore, 0x0F, prevScore);
 }
 
 void winLoseMenuWait()
@@ -2721,7 +2738,7 @@ void updateScore(std::string fileName, int score, int* sessionBest)
     {
         std::getline(file, prevScore);//get the previous highscore and store in this temp string
         file.close();
-        if (level > std::stoi(prevScore))
+        if (score > std::stoi(prevScore))
         {
             std::ofstream file(fileName);
             if (file.is_open())
@@ -2745,7 +2762,7 @@ void updateScore(std::string fileName, double score, double* sessionBest)
     {
         std::getline(file, prevScore);//get the previous highscore and store in this temp string
         file.close();
-        if (level > std::stod(prevScore))
+        if (score > std::stod(prevScore))
         {
             std::ofstream file(fileName);
             if (file.is_open())

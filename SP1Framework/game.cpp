@@ -795,14 +795,12 @@ void playLevel()
     {
         clear = true;
         NGameState = N_NEXTLEVEL;
-        //Audio for Win
+        engine->play2D("media/WinSFX.mp3");
     }
     //end game condition
     if (player->get_HP() <= 0)
     {
         lose = true;
-        engine->stopAllSounds();
-        //Audio for Lose
     }
     //tabulating of highest level cleared and deleting of remaining entities once player loses
     if (lose)
@@ -826,7 +824,6 @@ void playEndless()
         break;
     case E_LOSE:
         winLoseMenuWait();
-        engine->stopAllSounds();
         break;
     }
 }
@@ -925,6 +922,9 @@ void enterEndless()
     if (player->get_HP() <= 0)
     {
         lose = true;
+        engine->stopAllSounds();
+        engine->play2D("media/PlayerHurtSFX.mp3");
+        engine->play2D("media/LoseSFX.mp3");
     }
 
     //tabulating and resetting of variables once player loses
@@ -1034,7 +1034,7 @@ void checkAll()
                 projectile[p]->set_pcooldown(100);
 
                 //Audio
-                engine->play2D("media/CoughSFX.mp3", false);
+                engine->play2D("media/CoughSFX.mp3");
 
                 //checking if player is within cctv radar when coughing - lose game condition
                 for (int c = 0; c < CCTVLimit; c++)
@@ -1073,10 +1073,10 @@ void checkAll()
                 if (NPCs[n]->type() == 'B' && NPCs[n]->isHostile() == false)
                 {
                     NPCs[n]->anger();
+                    engine->play2D("media/PoliceAlertedSFX.mp3");
                 }
             }
         }
-        //engine->play2D(".mp3", false); Audio for police to turn angry
     }
 
     check_collision(); //checks for HostileNPC-Player Collision
@@ -1092,7 +1092,7 @@ void checkAll()
             {
                 CCTVs[c]->update_cctv();
                 CCTVs[c]->setCD(2 / g_dDeltaTime);
-                //Audio for cctv update
+                engine->play2D("media/CCTVUpdateSFX.mp3");
             }
             else
             {
@@ -1132,7 +1132,7 @@ void checkAll()
                             NPCs[i]->cooldownstart();
                             NPCs[i]->set_count(NPCs[i]->get_ftime() / g_dDeltaTime);
                             NPCs[i]->set_lifespan(20 / g_dDeltaTime);
-                            engine->play2D("media/NPCHostile.mp3", false);
+                            engine->play2D("media/NPCHostileSFX.mp3");
                         }
 
                         if (NPCs[i] == occupied(projectile[p]->getpos()) && player->get_lethalstatus() == 1) // if player is buffed, projectile will delete any npc
@@ -1140,7 +1140,36 @@ void checkAll()
                             player->addKills(1);
                             delete NPCs[i];
                             NPCs[i] = nullptr;
-                            //audio for killing NPC
+                            
+                            //Audio for killing NPC
+                            int dieSFX = rand() % 5;
+                            switch (dieSFX)
+                            {
+                                case 1:
+                                {
+                                    engine->play2D("media/FemDieSFX_1.mp3");
+                                }
+
+                                case 2:
+                                {
+                                    engine->play2D("media/FemDieSFX_2.mp3");
+                                }
+
+                                case 3:
+                                {
+                                    engine->play2D("media/MalDieSFX_1.mp3");
+                                }
+
+                                case 4:
+                                {
+                                    engine->play2D("media/MalDieSFX_2.mp3");
+                                }
+
+                                case 5:
+                                {
+                                    engine->play2D("media/MalDieSFX_3.mp3");
+                                }
+                            }
                         }
                     }
                 }
@@ -1553,7 +1582,7 @@ void deletePowerUp()
             player->set_lethal(); //set buff duration and buff is true
             delete powerup;
             powerup = nullptr;
-            //Audio for pickup
+            engine->play2D("media/PowerupSFX.mp3");
         }
 
         else if (powerup->get_detime() != 0)
@@ -2068,7 +2097,6 @@ void renderWinLoseMenu(bool win)
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
-    
 }
 
 void winLoseMenuWait()
@@ -2321,7 +2349,9 @@ void check_collision()
                 
                 g_sChar.m_cLocation.Y = player->getposy(); //moves player char to player's pos
                 g_sChar.m_cLocation.X = player->getposx(); 
+
                 //Audio for player hurt
+                engine->play2D("media/PlayerHurtSFX.mp3");
             }
         }
     }

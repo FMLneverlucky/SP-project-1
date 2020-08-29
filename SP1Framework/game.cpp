@@ -2171,6 +2171,8 @@ void waitMathHorror()
         horrorFreeze(false);
         EGameState = E_PLAY;
         player->loseHP(1);
+        flashcount = 1 / g_dDeltaTime;
+        player->set_flash(true);
         player->prevDamaged('M');
     default:
         break;

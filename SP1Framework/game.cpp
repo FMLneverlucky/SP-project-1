@@ -21,20 +21,33 @@ using namespace irrklang;
 //FOR TESTING
 bool checkInputs = false;
 bool checkTimeElapsed = false;
-bool checkFramerate = true;
+bool checkFramerate = false;
 float splashScreenTime = 0.5;
 
 //UI NAMES
-std::string gameName = "A Very Fun Game";
+std::string gameName = "Hit and Run Angry Edition";
 std::string gameMode1 = "Normal";
 std::string gameMode2 = "Endless Nightmare";
-std::string gameMode3 = "Empty Button";
-std::string gameMode4 = "Click This"; // for game test. not for final product
+//std::string gameMode3 = "Empty Button";
+//std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
-std::string deathByCCTV = "How'd they catch you in 4k?!";
-std::string deathByCivilian = "You got beaten up lol";
-std::string deathByPolice = "Get fined scrub";
+std::string deathByCCTV = "You were caught coughing with your mask off by the CCTV. You were sent to";
+std::string deathByCCTV2 = "the detention centre for 12 years. Due to this you did not attend school";
+std::string deathByCCTV3 = "and have no friends. No one wants to be friends with you either.";
+std::string deathByCCTV4 = "You lived a miserable life.";
+std::string deathByCivilian = "The people were very angry at your actions. You were beaten up so badly";
+std::string deathByCivilian2 = "that it left a permanent scar on your face";
+std::string deathByCivilian3 = "and it gave you a lung condition.";
+std::string deathByCivilian4 = "You lived a miserable life.";
+std::string deathByPolice = "The Police caught you coughing with your mask off."; 
+std::string deathByPolice2 = "Because of you your parents had to pay the fine of $1000000000";
+std::string deathByPolice3 = "and your family went broke.";
+std::string deathByPolice4 = "You lived a miserable life.";
+std::string deathByMath = "And thats why you should stay in school";
+std::string deathByMath2 = "...   ";
+std::string deathByMath3 = "   ...";
+std::string deathByMath4 = "or you will live a miserable life.";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Restart";
 std::string mainMenuMessage = "Main Menu";
@@ -49,16 +62,16 @@ std::string highscore = "";
 
 //MAINMENU
 Object title(71, 3);
-Object MMButton(gameMode1.length() + 2, 3);
+Object MMButton(gameMode2.length() + 2, 3);
 Object MMButton2(gameMode2.length() + 2, 3);
-Object MMButton3(gameMode3.length() + 2, 3);
-Object MMButton4(gameMode4.length() + 2, 3);
-Object backButton(back.length() + 2, 3);
+//Object MMButton3(gameMode3.length() + 2, 3);
+//Object MMButton4(gameMode4.length() + 2, 3);
+Object backButton(gameMode2.length() + 2, 3);
 Object gamemodeButton(gamemodes.length() + 2, 3);
 Object* MMButtons[2];
 const int MMButtonCount = 2; 
-Object* MGButtons[5];
-const int MGButtonCount = 5;
+Object* MGButtons[3];
+const int MGButtonCount = 3;
 std::string stage = "MAIN";
 
 
@@ -230,28 +243,8 @@ void init( void )
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
 
-    /*std::ifstream file("highestLevel.txt");
-    if (is_empty(file))
-    {
-        file.close();
-        std::ofstream file("highestLevel.txt");
-        if (file.is_open())
-        {
-            file << std::to_string(0);
-            file.close();
-        }
-    }
-    else
-    {
-        std::string temp;
-        std::getline(file, temp);
-        highestLVL = std::stoi(temp);
-        file.close();
-    }*/
     initStoredData(highestLevelFile, &highestLVL);
     initStoredData(highestCoughedFile, &highestCoughed);
-    /*initStoredData(bestTimeFile, &bestTime);
-    initStoredData(highestKPMFile, &highestKPM);*/
 }
 
 //--------------------------------------------------------------
@@ -468,27 +461,6 @@ int getButtonHold()
         return 3;
     return 7;
 }
-//int playerDirection()
-//{
-//    switch (getButtonHold())
-//    {
-//    case 0:
-//        playerVelocityX -= playerVelocityX < 1 ? 0 : 1;
-//        break;
-//    case 1:
-//        playerVelocityX -= playerVelocityX > -1 ? 0 : 1;
-//        break;
-//    case 2:
-//        playerVelocityY -= playerVelocityY > -1 ? 0 : 1;
-//        break;
-//    case 3:
-//        playerVelocityY += playerVelocityY < 1 ? 0 : 1;
-//        break;
-//    default:
-//        break;
-//
-//    }
-//}
 
 //--------------------------------------------------------------
 // Purpose  : This is the mouse handler in the game state. Whenever there is a mouse event in the game state, this function will be called.
@@ -960,10 +932,8 @@ void rendersafezone()
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
-
         }
     }
-
     //rendering of the middle of safezone
     colour = 0x7F;
     c.X = safeZone.getpos(4)->get_x() - static_cast<int>(player->getposx()) + 40;
@@ -999,8 +969,6 @@ void moveCharacter()
         {
             player->set_direction(0);
         }
-
-
         //conditions such that player cannot move; got wall etc
         if (occupied(entities[0]->new_pos(g_dDeltaTime)) != nullptr && occupied(entities[0]->new_pos(g_dDeltaTime)) != entities[0])
         {
@@ -1010,7 +978,6 @@ void moveCharacter()
         {
             player->set_direction(0);
         }
-
         player->update_pos(g_dDeltaTime); //sets pos of player
         g_sChar.m_cLocation.Y = player->getposy(); //moves player
         g_sChar.m_cLocation.X = player->getposx(); //moves player
@@ -1053,7 +1020,6 @@ void checkAll()
                                     lose = true;
                                     break;
                                 }
-
                             }
                         }
                     }
@@ -1061,8 +1027,6 @@ void checkAll()
                 break;
             }
         }
-
-        
 
         //for turning Police hostile
         for (int n = 0; n < NPCLimit; n++)
@@ -1586,19 +1550,17 @@ void deletePowerUp()
 
         else if (powerup->get_detime() != 0)
             powerup->set_detime(powerup->get_detime() - 1);//when despawn time hasnt run out, minus 1
-
         else
         {
             delete powerup; //deletes powerup when despawn time runs out
             powerup = nullptr;
         }
     }
-
 }
 
 void renderNPC()
 {//can probably change this function to show all the entites rather than just NPCs. If yall want then can use the entity pointer array and type() function to differentiate the derieved classes
-    
+
     //only separated them cos didnt see the need for player to be in entities pointer array since we using ascii but if we change it ye thatll be good
     //initially i changed Entities pointer array to NPCs bcos player was taken out and i could use NPC class functions only on NPC pointers unless virtual thingy
     COORD c;
@@ -1634,7 +1596,7 @@ void renderNPC()
             }
 
             if (invert)
-            { 
+            {
                 if (NPCs[i]->isHostile() && checkifinscreen(c))
                 {
                     g_Console.writeToBuffer(c, " ", colour);
@@ -1644,11 +1606,8 @@ void renderNPC()
             {
                 g_Console.writeToBuffer(c, " ", colour);
             }
-
-            
         }
     }
-    
 }
 
 void spawnNPC(bool isPolice, int no, float spd, float cooldowntime) 
@@ -1657,7 +1616,6 @@ void spawnNPC(bool isPolice, int no, float spd, float cooldowntime)
     {
         Position temppos;
         bool valid; 
-
         do
         {
             valid = true;
@@ -1717,8 +1675,6 @@ void spawnNPC(bool isPolice, int no, float spd, float cooldowntime)
                 break;
             }
         }
-
-
     }
 }
 
@@ -1743,7 +1699,6 @@ void moveall()
                 }
                 else 
                 {
-
                     NPCs[i]->set_count(0); //resets NPC's count
 
                     int aaa = (rand() % 7) + 1; //randomises direction 
@@ -1766,16 +1721,13 @@ void moveall()
                         break;
                     default: //(6 or 7) continue in same direction
                         break;
-                    }
-
-                    
+                    }     
                 }
 
                 //condition for NPCs to be unable to move in their chosen direction
                 //walls, other entities etc
                 if (occupied(NPCs[i]->new_pos(g_dDeltaTime)) != nullptr && occupied(NPCs[i]->new_pos(g_dDeltaTime)) != NPCs[i])
                 {
-
                     NPCs[i]->set_direction(0);
                 }
             }
@@ -1786,8 +1738,7 @@ void moveall()
                 if (NPCs[i]->get_count() == 0)
                 {
                     NPCs[i]->cooldownend(); //stops npcs from their cooldown
-                }
-                
+                }  
             }
             else //npc is hostile and not on cooldown
             {
@@ -1805,7 +1756,6 @@ void moveall()
                     {
                         NPCs[i]->set_direction(3);
                     }
-                 
                 }
                 else if (abs(diffinx) == abs(diffiny))
                 {
@@ -1856,8 +1806,7 @@ void moveall()
 
                         NPCs[i]->set_direction(0);
                     }
-                }
-                            
+                }    
             }
 
             //conditions where ALL NPCs cannot move forward
@@ -1876,10 +1825,8 @@ void moveall()
                 }
                 break;
             }
-
             NPCs[i]->update_pos(g_dDeltaTime); //sets pos of and moves all NPCs
         }
-      
     }
 }
 
@@ -1958,23 +1905,17 @@ void renderMainMenu()
     }
     if (stage == "SELECT")
     {
-        title.move(consoleSize.X / 2, consoleSize.Y / 7);
-        MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 7);
-        MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 7);
-        MMButton3.move(consoleSize.X / 2, consoleSize.Y * 4 / 7);
-        MMButton4.move(consoleSize.X / 2, consoleSize.Y * 5 / 7);
-        backButton.move(consoleSize.X / 2, consoleSize.Y * 6 / 7);
+        title.move(consoleSize.X / 2, consoleSize.Y / 5);
+        MMButton.move(consoleSize.X / 2, consoleSize.Y * 2 / 5);
+        MMButton2.move(consoleSize.X / 2, consoleSize.Y * 3 / 5);
+        backButton.move(consoleSize.X / 2, consoleSize.Y * 4 / 5);
 
         MGButtons[0] = &MMButton;
         MGButtons[1] = &MMButton2;
-        MGButtons[2] = &MMButton3;
-        MGButtons[3] = &MMButton4;
-        MGButtons[4] = &backButton;
+        MGButtons[2] = &backButton;
 
         renderBox(&MMButton, 0x78, gameMode1);
         renderBox(&MMButton2, 0x78, gameMode2);
-        renderBox(&MMButton3, 0x78, gameMode3);
-        renderBox(&MMButton4, 0x78, gameMode4);
         renderBox(&backButton, 0x78, back);
     }
     renderBox(&title, 0x0F, gameName);
@@ -2009,12 +1950,6 @@ void mainMenuWait()
             EGameState = E_INIT;
             break;
         case 2:
-            //nothing here
-            break;
-        case 3:
-            g_eGameState = S_TEST;
-            break;
-        case 4:
             stage = "MAIN";
             break;
         default:
@@ -2058,8 +1993,11 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
-
+    Object title(77, 2, Position(consoleSize.X / 2, consoleSize.Y / 3));
+    Object title2(77, 1, Position(consoleSize.X / 2, title.position()->get_y() + 2));
+    Object title3(77, 1, Position(consoleSize.X / 2, title2.position()->get_y() + 1));
+    Object title4(77, 1, Position(consoleSize.X / 2, title3.position()->get_y() + 1));
+    Object title5(77, 1, Position(consoleSize.X / 2, title4.position()->get_y() + 1));//the line at the bottom to make it a box
     continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
     restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
     mainMenuButton.move(consoleSize.X * 2 / 4, consoleSize.Y * 2 / 3);
@@ -2071,26 +2009,45 @@ void renderWinLoseMenu(bool win)
 
     char killedBy = player->getPrevDamaged();
     std::string* message = &winMessage;
+    std::string* message2;
+    std::string* message3;
+    std::string* message4;
     if (!win)
     {
         if (killedBy == 'R') // killed by cctv
         {
             message = &deathByCCTV;
+            message2 = &deathByCCTV2;
+            message3 = &deathByCCTV3;
+            message4 = &deathByCCTV4;
         }
         else if (killedBy == 'C') // killed by civilian
         {
             message = &deathByCivilian;
+            message2 = &deathByCivilian2;
+            message3 = &deathByCivilian3;
+            message4 = &deathByCivilian4;
         }
         else if (killedBy == 'B') // killed by police
         {
             message = &deathByPolice;
+            message2 = &deathByPolice2;
+            message3 = &deathByPolice3;
+            message4 = &deathByPolice4;
         }
-        else
+        else if (killedBy == 'M') // died from the math qns 
         {
-            message = &loseMessage;
+            message = &deathByMath;
+            message2 = &deathByMath2;
+            message3 = &deathByMath3;
+            message4 = &deathByMath4;
         }
     }
     renderBox(&title, 0x0F, *message);
+    renderBox(&title2, 0x0F, *message2);
+    renderBox(&title3, 0x0F, *message3);
+    renderBox(&title4, 0x0F, *message4);
+    renderBox(&title5, 0x0F);
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
@@ -2252,6 +2209,7 @@ void waitMathHorror()
         player->loseHP(1);
         flashcount = 1 / g_dDeltaTime;
         player->set_flash(true);
+        player->prevDamaged('M');
     default:
         break;
     }
@@ -2317,9 +2275,6 @@ void renderHUD()
         if (g_eGameState == S_GAMEMODE2)
         {
             objective = "Cough at people";
-            //objective.append(std::to_string(player->getCoughed()));
-            //objective.append(" Time: ");
-            //objective.append(std::to_string(e_dElapsedTime));
             scoreboard = "Score: ";
             scoreboard.append(std::to_string(player->getCoughed()));
             highscore = "Best Score: ";
@@ -2334,16 +2289,6 @@ void renderHUD()
         renderBox(&highScore, 0x07, highscore);
     }
 }
-
-//void updateHUD()
-//{
-//    
-//    if (showHUD)
-//    {
-//        renderBox(&healthBar, 0x04);
-//        renderBox(&coughBar, 0x02);
-//    }
-//}
 
 int checkButtonClicks(Object** buttons, int arrayLength)
 {
@@ -2499,7 +2444,6 @@ void renderPoints()
     {
         g_Console.writeToBuffer(c, (char)254, colour);
     }
-
 }
 
 void renderBG(int col)
@@ -2523,8 +2467,6 @@ void renderBG(int col)
         }
         else
         {
-   
-       
             for (int y = 1; y < 25; y++) //rendering of playarea background/map
             {
                 c.X = x - static_cast<int>(player->getposx()) + 40;
@@ -2550,11 +2492,8 @@ void renderBG(int col)
             {
                 g_Console.writeToBuffer(c, " ", Wallcol);
             }
-
         }
-
     }
-
 }
 
 void setallrpos()
@@ -2569,7 +2508,6 @@ void setallrpos()
 
         }
     }
-    
 }
 
 bool checkifinscreen(COORD c)
@@ -2625,8 +2563,7 @@ void deleteEntities()
                     CCTVs[c] = nullptr;
                     entities[i] = nullptr;
                 }
-            }
-            
+            } 
         }
     }
     delete entities[0];
@@ -2664,7 +2601,6 @@ void renderCCTV()
             {
                 g_Console.writeToBuffer(cctvpos, (char)233 , colour);
             }
-
         }
     }
 }
@@ -2701,7 +2637,6 @@ void spawnCCTV(int no)
                 break;
             }
         }
-
     }
 }
 

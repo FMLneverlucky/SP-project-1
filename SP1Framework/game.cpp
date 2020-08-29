@@ -273,6 +273,7 @@ void shutdown(void)
     if (powerup != nullptr)
     {
         delete powerup;
+        powerup = nullptr;
     }
 }
 
@@ -839,6 +840,7 @@ void InitEndless()
     lose = false;
     player->resetCoughed();
     player->resetHP();
+    player->resetlethality();
     totalhostile = 0;
     NPC::resetnoHostile();
     tempcounter = 0;

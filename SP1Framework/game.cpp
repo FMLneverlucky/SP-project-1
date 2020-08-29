@@ -2042,12 +2042,10 @@ void pauseMenuWait()
     {
     case 0:
         paused = false;
-        horrorFreeze(false);
         break;
     case 1:
         g_eGameState = S_MAINMENU;
         paused = false;
-        horrorFreeze(false);
         break;
     default:
         break;
@@ -2686,7 +2684,7 @@ void spawnCCTV(int no)
 
 void horrorFreeze(bool on)
 {
-    horror = on ? true : false;
+    horror = on;
     float changeinspd;
     if (on)
     {

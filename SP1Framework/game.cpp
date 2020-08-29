@@ -686,6 +686,7 @@ void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
         {
             delete NPCs[i];
             NPCs[i] = nullptr;
+            entities[i + 1] = nullptr;
         }
     }
 
@@ -695,6 +696,7 @@ void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
         {
             delete Walls[w];
             Walls[w] = nullptr;
+            entities[w + 21] = nullptr;
         }
     }
 
@@ -713,6 +715,7 @@ void resetSpawns() //deletes any existing entities, sets all ptrs to nullptr
         {
             delete CCTVs[c];
             CCTVs[c] = nullptr;
+            entities[c + 61] = nullptr;
         }
     }
 

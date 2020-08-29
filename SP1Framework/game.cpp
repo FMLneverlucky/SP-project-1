@@ -32,10 +32,22 @@ std::string gameMode2 = "Endless Nightmare";
 //std::string gameMode4 = "Click This"; // for game test. not for final product
 std::string winMessage = "HACKS REPORTED";
 std::string loseMessage = "GGEZ Uninstall";
-std::string deathByCCTV = "How'd they catch you in 4k?!";
-std::string deathByCivilian = "You got beaten up by Civilians";
-std::string deathByPolice = "You have been fined";
+std::string deathByCCTV = "You were caught coughing with your mask off by the CCTV. You were sent to";
+std::string deathByCCTV2 = "the detention centre for 12 years. Due to this you did not attend school";
+std::string deathByCCTV3 = "and have no friends. No one wants to be friends with you either.";
+std::string deathByCCTV4 = "You lived a miserable life.";
+std::string deathByCivilian = "The people were very angry at your actions. You were beaten up so badly";
+std::string deathByCivilian2 = "that it left a permanent scar on your face";
+std::string deathByCivilian3 = "and it gave you a lung condition.";
+std::string deathByCivilian4 = "You lived a miserable life.";
+std::string deathByPolice = "The Police caught you coughing with your mask off."; 
+std::string deathByPolice2 = "Because of you your parents had to pay the fine of $1000000000";
+std::string deathByPolice3 = "and your family went broke.";
+std::string deathByPolice4 = "You lived a miserable life.";
 std::string deathByMath = "And thats why you should stay in school";
+std::string deathByMath2 = "...   ";
+std::string deathByMath3 = "   ...";
+std::string deathByMath4 = "or you will live a miserable life.";
 std::string continueMessage = "Next Level";
 std::string restartMessage = "Restart";
 std::string mainMenuMessage = "Main Menu";
@@ -1979,8 +1991,11 @@ void pauseMenuWait()
 //set true for win screen, false for lose screen
 void renderWinLoseMenu(bool win)
 {
-    Object title(71, 3, Position(consoleSize.X / 2, consoleSize.Y / 3));
-
+    Object title(77, 2, Position(consoleSize.X / 2, consoleSize.Y / 3));
+    Object title2(77, 1, Position(consoleSize.X / 2, title.position()->get_y() + 2));
+    Object title3(77, 1, Position(consoleSize.X / 2, title2.position()->get_y() + 1));
+    Object title4(77, 1, Position(consoleSize.X / 2, title3.position()->get_y() + 1));
+    Object title5(77, 1, Position(consoleSize.X / 2, title4.position()->get_y() + 1));//the line at the bottom to make it a box
     continueButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
     restartButton.move(consoleSize.X * 3 / 4, consoleSize.Y * 2 / 3);
     mainMenuButton.move(consoleSize.X * 2 / 4, consoleSize.Y * 2 / 3);
@@ -1992,26 +2007,45 @@ void renderWinLoseMenu(bool win)
 
     char killedBy = player->getPrevDamaged();
     std::string* message = &winMessage;
+    std::string* message2;
+    std::string* message3;
+    std::string* message4;
     if (!win)
     {
         if (killedBy == 'R') // killed by cctv
         {
             message = &deathByCCTV;
+            message2 = &deathByCCTV2;
+            message3 = &deathByCCTV3;
+            message4 = &deathByCCTV4;
         }
         else if (killedBy == 'C') // killed by civilian
         {
             message = &deathByCivilian;
+            message2 = &deathByCivilian2;
+            message3 = &deathByCivilian3;
+            message4 = &deathByCivilian4;
         }
         else if (killedBy == 'B') // killed by police
         {
             message = &deathByPolice;
+            message2 = &deathByPolice2;
+            message3 = &deathByPolice3;
+            message4 = &deathByPolice4;
         }
         else if (killedBy == 'M') // died from the math qns 
         {
             message = &deathByMath;
+            message2 = &deathByMath2;
+            message3 = &deathByMath3;
+            message4 = &deathByMath4;
         }
     }
     renderBox(&title, 0x0F, *message);
+    renderBox(&title2, 0x0F, *message2);
+    renderBox(&title3, 0x0F, *message3);
+    renderBox(&title4, 0x0F, *message4);
+    renderBox(&title5, 0x0F);
     renderBox(WLButtons[0], 0x04, quit);
     renderBox(WLButtons[1], 0x0A, mainMenuMessage);
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);

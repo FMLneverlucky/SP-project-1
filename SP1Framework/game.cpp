@@ -2195,6 +2195,7 @@ void waitMathHorror()
     if (player->get_HP() <= 0)
     {
         lose = true;
+        horrorFreeze(false);
         EGameState = E_PLAY;
     }
     

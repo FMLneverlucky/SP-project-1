@@ -604,6 +604,7 @@ void InitNormal()
     NGameState = N_LEVEL;
 
     //Audio
+    engine->stopAllSounds();
     engine->play2D("media/NModeBGM.mp3", true);
 }
  
@@ -780,6 +781,8 @@ void playLevel()
     if (player->get_HP() <= 0)
     {
         lose = true;
+        engine->stopAllSounds();
+        engine->play2D("media/LoseSFX.mp3");
     }
     //tabulating of highest level cleared and deleting of remaining entities once player loses
     if (lose)
@@ -844,6 +847,7 @@ void InitEndless()
     EGameState = E_PLAY;
 
     //Audio
+    engine->stopAllSounds();
     engine->play2D("media/EModeBGM.mp3", true);
 }
 
@@ -865,7 +869,6 @@ void enterEndless()
         initMathHorror();
         horrorChanceCount = ((rand() % 20) + 20) / g_dDeltaTime;
         EGameState = E_HORROR;
-        //Audio for when jumpscare
     }
     else if (!paused)
     {
@@ -1024,6 +1027,10 @@ void checkAll()
                                 {
                                     player->prevDamaged(CCTVs[c]->type());
                                     lose = true;
+
+                                    //Audio
+                                    engine->stopAllSounds();
+                                    engine->play2D("media/LoseSFX.mp3");
                                     break;
                                 }
                             }

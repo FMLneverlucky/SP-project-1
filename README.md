@@ -31,7 +31,7 @@ Endless Mode:
 -------------
 - Survival Game Mode
 - NPCs will spawn every 3 seconds 
-- Hostile NPCs will depsawn 20 seconds after being turned hostile
+- Hostile NPCs will despawn 20 seconds after being turned hostile
 - How many NPCs can you anger before you run out of HP and face the consequences of your actions?
 - And are you prepared for the horror that awaits you in Endless Mode?
 
@@ -46,7 +46,7 @@ Do look out for the bright green and yellow!
 
 -Police 
 Police are a type of NPC that turn hostile once the player coughs, regardless of where you are!
-They cannot be killed by lethal projectiles and do no despawn in Endless mode.
+They cannot be killed by lethal projectiles and do not despawn in Endless mode.
 Do look out for their bright blue colour!
 
 -CCTV

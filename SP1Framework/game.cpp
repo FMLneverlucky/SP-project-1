@@ -867,7 +867,7 @@ void enterEndless()
         EGameState = E_HORROR;
         //Audio for when jumpscare
     }
-    else
+    else if (!paused)
     {
         horrorChanceCount--;
     }

@@ -12,6 +12,7 @@ Player Controls:
 - Use W, A, S, D to move the player
 - Use spacebar to shoot cough projectiles
 - Use mouse to aim which direction to shoot cough projectiles
+- Up and down arrow keys to adjust music volume
 
 Gameplay Overview:
 ---------------

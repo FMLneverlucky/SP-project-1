@@ -635,7 +635,7 @@ void set_spawn() //sets variables and npc stats based on level and spawns entiti
         if (level % 2)
         {
             noC++;
-            noP = level - 5;
+            noP++;
         }
         if (level == 7 || level == 10)
         {

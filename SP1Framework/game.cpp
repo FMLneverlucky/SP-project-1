@@ -2065,7 +2065,7 @@ void renderWinLoseMenu(bool win)
     renderBox(WLButtons[2], 0x0F, win ? continueMessage : restartMessage);
     
     std::string score = "score: ";
-    std::string prevScore = "Previous Best: ";
+    std::string prevScore = "Your Best: ";
     if (g_eGameState == S_GAMEMODE1)
     {
         score = "Died at: ";

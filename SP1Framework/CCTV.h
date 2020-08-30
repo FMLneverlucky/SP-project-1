@@ -4,7 +4,7 @@ class CCTV :
     public Entity
 {
 private:
-    Position radar[25];
+    Position radar[25]; //Positions of radar
     bool cw; //rotation direction (clockwise/anticlockwise)
     int rotateCD; //no. of frames before rotation
 
